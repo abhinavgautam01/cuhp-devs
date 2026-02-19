@@ -1,6 +1,6 @@
 "use client";
 
-import avatars from "../assets/assets";
+import avatars from "../../assets/page";
 import { SignUpForm } from "@repo/ui/sign-up/SignUpForm";
 import { RightPanel } from "@repo/ui/sign-up/RightPanel";
 import { AuthToggle } from "@repo/ui/toogle/AuthToggle";
