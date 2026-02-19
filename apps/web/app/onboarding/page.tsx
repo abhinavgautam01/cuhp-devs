@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import AcademicProfile from "@repo/ui/profile-setup/AcademicProfile";
+import OnboardingPage from "@repo/ui/profile-setup/OnbaordingPage";
 
 export const metadata: Metadata = {
   title: "Academic Profile | Onboarding",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AcademicProfilePage() {
-  return <AcademicProfile />;
+  return <OnboardingPage/>;
 }
