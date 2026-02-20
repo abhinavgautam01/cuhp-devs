@@ -23,7 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <style>@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap')</style>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+         @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Round')
+        </style>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
 
         {children}

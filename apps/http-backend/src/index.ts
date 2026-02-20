@@ -1,6 +1,6 @@
 import express, { Request, Response, Application } from 'express';
 import 'dotenv/config';
-import { connectDB } from "@repo/db/connection.js";
+import { connectDB } from "@repo/db/index.js";
 import cookieParser from 'cookie-parser';
 import router from './routes/auth.routes';
 

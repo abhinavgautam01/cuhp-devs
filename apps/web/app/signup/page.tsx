@@ -1,32 +1,70 @@
 "use client";
 
-import avatars from "../assets/assets";
+import { useRouter } from "next/navigation";
+import avatars from "../../assets/Avatar";
 import { SignUpForm } from "@repo/ui/sign-up/SignUpForm";
 import { RightPanel } from "@repo/ui/sign-up/RightPanel";
 import { AuthToggle } from "@repo/ui/toogle/AuthToggle";
 
 export default function SignUpPage() {
+  const router = useRouter();
+
   const handleSignUp = async (fields: any) => {
-    // TODO: Implement your registration logic here
-    // Example: await registerUser(fields);
-    console.log("Sign up submitted:", fields);
+    try {
+      // TODO:Implement registration logic here
+      console.log("Sign up submitted:", fields);
+
+      // Example:
+      // const res = await registerUser(fields);
+
+      // Simulate successful registration
+      const registrationSuccessful = true;
+
+      if (registrationSuccessful) {
+        //  Redirect to onboarding
+        router.push("/onboarding");
+      }
+
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   };
 
-  const handleOAuth = (provider: "google" | "github") => {
-    // TODO: Implement your OAuth logic here
-    // Example: await signIn(provider);
-    console.log("OAuth sign-up with:", provider);
+  const handleOAuth = async (provider: "google" | "github") => {
+    try {
+      console.log("OAuth sign-up with:", provider);
+      //TODO: OAuth Logic
+
+      // Example:
+      // await signIn(provider);
+
+      // After successful OAuth
+      router.push("/onboarding");
+
+    } catch (error) {
+      console.error("OAuth failed:", error);
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-[#0a1033]">
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16  bg-[#101322]">
-        <div className="">
+      {/* Left Side */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-[#101322]">
+        <div>
           <AuthToggle activeTab="signup" />
-          <SignUpForm className="bg-[#101322]" />
+
+          <SignUpForm
+            className="bg-[#101322]"
+            onSubmit={handleSignUp}     //  Pass handler
+            onOAuth={handleOAuth}       //  Optional OAuth support
+          />
         </div>
       </div>
-      <RightPanel avatars={avatars.map((src: string) => ({ src }))} />
+
+      {/* Right Side */}
+      <RightPanel
+        avatars={avatars.map((src: string) => ({ src }))}
+      />
     </div>
   );
 }

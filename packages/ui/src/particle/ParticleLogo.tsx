@@ -156,8 +156,8 @@ export default function ParticleLogo({
 
                 if (distance < mouseRef.current.radius) {
                     const force = (mouseRef.current.radius - distance) / mouseRef.current.radius;
-                    p.vx -= (dx / distance) * force * 0.3;
-                    p.vy -= (dy / distance) * force * 0.001;
+                    p.vx -= (dx / distance) * force * 2;
+                    p.vy -= (dy / distance) * force * 0.7;
                 }
 
                 // Return to origin
