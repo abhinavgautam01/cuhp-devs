@@ -20,13 +20,15 @@ export default function OnboardingPage() {
     "MCA",
   ];
 
-  // Program → Semester Mapping (Scalable)
-  const programSemesterMap = {
+  //TODO: Save to Database
+
+  
+  const programSemesterMap: Record<string, number> = {
     "B.Tech Computer Science": 8,
     MCA: 4,
   };
 
-  // Generate semesters dynamically
+  
   const getSemesters = () => {
     const count = programSemesterMap[formData.program];
     if (!count) return [];

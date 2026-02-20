@@ -5,6 +5,7 @@ import { LeftPanel } from "@repo/ui/sign-in/LeftPanel";
 import { SignInForm } from "@repo/ui/sign-in/SignInForm";
 import { AuthToggle } from "@repo/ui/toogle/AuthToggle";
 
+
 export default function SignInPage() {
   const handleSignIn = (e: any) => {
     e.preventDefault();
