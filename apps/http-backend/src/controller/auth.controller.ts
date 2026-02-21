@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { User } from "@repo/db/index.js";
 import { signToken } from "../utils";
-import { signupSchema } from "../validators/auth.schema"
+import { signinSchema, signupSchema } from "../validators/auth.schema"
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -48,7 +48,7 @@ export const signup = async (req: Request, res: Response) => {
     return res.status(201).json({
       message: "User registered successfully",
       user: {
-        id: user._id,
+        id: user._id.toString(),
        name: user.fullName,
         email: user.email,
         studentId: user.studentId,
@@ -62,11 +62,14 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+    const parsed = signinSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
+    const { email, password } = parsed.data;
 
     const user = await User.findOne({ email });
 
@@ -81,7 +84,7 @@ export const signin = async (req: Request, res: Response) => {
     }
 
     const token = signToken({
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
     })
 
@@ -95,7 +98,7 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Signin successful",
       user: {
-        id: user._id,
+        id: user._id.toString(),
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,

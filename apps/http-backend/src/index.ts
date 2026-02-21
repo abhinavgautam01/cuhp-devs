@@ -17,7 +17,13 @@ app.get("/", (req: Request, res: Response) => {
     res.send("Hello World!");
 });
 
-app.listen(3001, ()=>{
-    console.log("http://localhost:3001")
-})
+const start = async () => {
+  await connectDB();
+
+  app.listen(3001, () => {
+    console.log("http://localhost:3001");
+  });
+};
+
+start();
 export default app;
