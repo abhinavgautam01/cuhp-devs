@@ -35,14 +35,14 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // TODO: Hash password
-    // const hashedPassword = await bcrypt.hash(password, 10);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const user = await User.create({
       fullName,
       email,
       studentId,
-      password,
+      password: hashedPassword,
     });
 
     return res.status(201).json({
