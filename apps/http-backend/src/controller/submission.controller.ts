@@ -78,3 +78,31 @@ export const getUserSubmissionsForProblem = async (
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getSubmissionById = async (req: Request, res: Response) => {
+  try {
+    const token = req.cookies?.token;
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { id: userId } = verifyToken(token);
+    const { id } = req.params;
+
+    const submission = await Submission.findOne({
+      _id: id,
+      userId,
+    }).lean();
+
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    return res.status(200).json(submission);
+
+  } catch (err) {
+    console.error("Get submission error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
