@@ -8,6 +8,6 @@ import "./defaultCode.model";
 // export..!
 export { User } from "./user.model";
 export { Problem } from "./problem.model";
-export { SubmissionModel } from "./submission.model";
-export { LanguageModel } from "./language.model";
-export { DefaultCodeModel } from "./defaultCode.model";
+export { Submission } from "./submission.model";
+export { Language } from "./language.model";
+export { DefaultCode } from "./defaultCode.model";
