@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { User } from "@repo/db/index.js";
-import { signToken } from "../utils";
+import { User } from "@repo/db";
+import { signToken, verifyToken } from "../utils";
 import { signinSchema, signupSchema } from "../validators/auth.schema"
 
 export const signup = async (req: Request, res: Response) => {
@@ -16,12 +16,6 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const { fullName, email, studentId, password } = parsed.data;
-
-    if(password.length <8){
-        return res.status(400).json({
-            message: "Password must be at least 8 characters long"
-        })
-    }
 
     const query: any[] = [{ email }];
     if (studentId && studentId.trim() !== "") {
@@ -107,5 +101,44 @@ export const signin = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Signin error:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const logout = async (_: Request, res: Response) => {
+  res.clearCookie("token");
+
+  return res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
+
+export const me = async (req: Request, res: Response) => {
+  try {
+    const token = req.cookies["token"];
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { id } = verifyToken(token);
+
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User found",
+      user: {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        studentId: user.studentId,
+      },
+    });
+
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };

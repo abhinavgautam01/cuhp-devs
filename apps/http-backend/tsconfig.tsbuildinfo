@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/controller/auth.controller.ts","./src/routes/auth.routes.ts","./src/utils/index.ts","./src/validators/auth.schema.ts"],"version":"5.9.2"}
+{"root":["./src/index.ts","./src/controller/auth.controller.ts","./src/controller/language.controller.ts","./src/controller/problem.controller.ts","./src/controller/submission.controller.ts","./src/routes/auth.routes.ts","./src/routes/language.routes.ts","./src/routes/problem.routes.ts","./src/routes/submission.routes.ts","./src/utils/index.ts","./src/validators/auth.schema.ts"],"version":"5.9.2"}
