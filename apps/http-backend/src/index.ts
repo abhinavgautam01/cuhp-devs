@@ -2,8 +2,10 @@ import express, { Request, Response, Application } from "express";
 import "dotenv/config";
 import { connectDB } from "@repo/db/index.js";
 import cookieParser from "cookie-parser";
-import router from "./routes/auth.routes";
+import authRoutes from "./routes/auth.routes";
 import cors from "cors";
+import problemRoutes from "./routes/problem.routes";
+import submissionRoutes from "./routes/submission.routes";
 
 const app: Application = express();
 
@@ -20,8 +22,10 @@ app.use(cookieParser());
 const start = async () => {
   try {
     await connectDB();
-    app.use("/auth", router);
-
+    app.use("/auth", authRoutes);
+    app.use("/problems", problemRoutes);
+    app.use("/submissions", submissionRoutes);
+    
     app.get("/", (req: Request, res: Response) => {
       // res.send is now type-checked!
       res.send("Hello World!");
