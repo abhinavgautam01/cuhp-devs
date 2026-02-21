@@ -1,40 +1,13 @@
-import { Schema, model, models, Document } from "mongoose";
+// register (side effect)..!
+import "./user.model";
+import "./problem.model";
+import "./submission.model";
+import "./language.model";
+import "./defaultCode.model";
 
-
-export interface IUser extends Document {
-  fullName: string;
-  email: string;
-  studentId: string;
-  password: string;
-}
-
-const UserSchema = new Schema<IUser>(
-  {
-    fullName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true
-    },
-    studentId: {
-      type: String,
-      required: false,
-      unique: true,
-      sparse: true,
-    },
-    password: {
-      type: String,
-      required: true
-    }
-  },
-  {
-    timestamps: true
-  }
-);
-
-export const User = models.User || model<IUser>("User", UserSchema);
+// export..!
+export { User } from "./user.model";
+export { Problem } from "./problem.model";
+export { SubmissionModel } from "./submission.model";
+export { LanguageModel } from "./language.model";
+export { DefaultCodeModel } from "./defaultCode.model";
