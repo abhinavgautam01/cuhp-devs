@@ -5,6 +5,7 @@ export interface ISubmission extends Document {
   userId: Types.ObjectId;
   problemId: Types.ObjectId;
   code: string;
+  language: string;
   status: SubmissionResult;
   memory?: number;
   time?: number;

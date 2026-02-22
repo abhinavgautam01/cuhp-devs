@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Problem, Submission } from "@repo/db";
 import { verifyToken } from "../utils";
+import { Language } from "@repo/db";
 
 export const createSubmission = async (req: Request, res: Response) => {
   try {
@@ -24,10 +25,17 @@ export const createSubmission = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Problem not found" });
     }
 
+    const lang = await Language.findOne({ name: language });
+
+    if (!lang) {
+      return res.status(400).json({ message: "Invalid language" });
+    }
+
     const submission = await Submission.create({
       userId,
       problemId: problem._id,
       code,
+      language,
       status: "PENDING",
     });
 
@@ -35,7 +43,6 @@ export const createSubmission = async (req: Request, res: Response) => {
       message: "Submission created",
       submissionId: submission._id,
     });
-
   } catch (err) {
     console.error("Create submission error:", err);
     return res.status(500).json({ message: "Internal server error" });
@@ -44,7 +51,7 @@ export const createSubmission = async (req: Request, res: Response) => {
 
 export const getUserSubmissionsForProblem = async (
   req: Request,
-  res: Response
+  res: Response,
 ) => {
   try {
     const token = req.cookies?.token;
@@ -72,7 +79,6 @@ export const getUserSubmissionsForProblem = async (
       .lean();
 
     return res.status(200).json(submissions);
-
   } catch (err) {
     console.error("Get user submissions error:", err);
     return res.status(500).json({ message: "Internal server error" });
@@ -100,7 +106,6 @@ export const getSubmissionById = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(submission);
-
   } catch (err) {
     console.error("Get submission error:", err);
     return res.status(500).json({ message: "Internal server error" });
