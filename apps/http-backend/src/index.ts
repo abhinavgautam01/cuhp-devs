@@ -7,6 +7,8 @@ import cors from "cors";
 import problemRoutes from "./routes/problem.routes";
 import submissionRoutes from "./routes/submission.routes";
 import languageRoutes from "./routes/language.routes";
+import runCodeRoutes from "./routes/runCode.routes";
+import "./workers/result.worker";
 
 const app: Application = express();
 
@@ -27,6 +29,7 @@ const start = async () => {
     app.use("/problems", problemRoutes);
     app.use("/submissions", submissionRoutes);
     app.use("/languages", languageRoutes);
+    app.use("/runCode", runCodeRoutes);
     
     app.get("/", (req: Request, res: Response) => {
       // res.send is now type-checked!
