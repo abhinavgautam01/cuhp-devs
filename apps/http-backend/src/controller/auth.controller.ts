@@ -17,41 +17,54 @@ export const signup = async (req: Request, res: Response) => {
 
     const { fullName, email, studentId, password } = parsed.data;
 
-    if(password.length <8){
-        return res.status(400).json({
-            message: "Password must be at least 8 characters long"
-        })
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long"
+      })
     }
 
-    const query: any[] = [{ email }];
+    const query: any[] = [{ email: email.toLowerCase() }];
     if (studentId && studentId.trim() !== "") {
-        query.push({ studentId });
+      query.push({ studentId });
     }
     const existingUser = await User.findOne({
-        $or: query,
+      $or: query,
     });
 
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       fullName,
-      email,
-      studentId,
+      email: email.toLowerCase(),
+      studentId: studentId?.trim() || undefined,
       password: hashedPassword,
+    });
+
+    const token = signToken({
+      id: (user._id as any).toString(),
+      email: user.email,
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 4 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
       message: "User registered successfully",
       user: {
-        id: user._id,
-       name: user.fullName,
+        id: (user._id as any).toString(),
+        fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
   } catch (error) {
@@ -62,13 +75,19 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, email, password } = req.body;
+    const loginIdentifier = (identifier || email || "").trim();
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+    if (!loginIdentifier || !password) {
+      return res.status(400).json({ message: "Identifier and password required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [
+        { email: loginIdentifier.toLowerCase() },
+        { studentId: loginIdentifier },
+      ],
+    });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -81,28 +100,43 @@ export const signin = async (req: Request, res: Response) => {
     }
 
     const token = signToken({
-        id: user._id,
-        email: user.email,
+      id: (user._id as any).toString(),
+      email: user.email,
     })
 
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days 
     })
-    
+
     return res.status(200).json({
       message: "Signin successful",
       user: {
-        id: user._id,
+        id: (user._id as any).toString(),
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        program: user.program,
+        semester: user.semester,
+        interests: user.interests,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
   } catch (error) {
     console.error("Signin error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
+};
+
+export const logout = (_: Request, res: Response) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 0,
+  });
+
+  return res.status(200).json({ message: "Logged out successfully" });
 };

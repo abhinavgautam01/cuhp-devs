@@ -1,4 +1,3 @@
-"use client";
 
 import { useState, useCallback, ChangeEvent, FormEvent } from "react";
 import { MdEmail, MdPerson, MdBadge } from "react-icons/md";
