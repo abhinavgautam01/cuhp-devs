@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
-  "exports":{
+  "exports": {
     ".": "./dist/index.js",
     "./*": "./dist/*"
   },
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc -b",
+    "update:problem": "ts-node src/scripts/updateProblem.cli.ts",
+    "db:sync": "ts-node src/scripts/syncProblems.ts"
   },
   "dependencies": {
+    "@repo/common": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "mongoose": "^9.2.1"
   },
@@ -19,6 +22,7 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@types/node": "^22.15.3"
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2"
   }
 }
