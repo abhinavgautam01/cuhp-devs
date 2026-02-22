@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc -b",
     "update:problem": "ts-node src/scripts/updateProblem.cli.ts",
-    "db:sync": "ts-node src/scripts/syncProblems.ts"
+    "db:sync": "ts-node src/scripts/syncProblems.ts",
+    "push:testcases": "ts-node src/scripts/seedTestcases.ts"
   },
   "dependencies": {
     "@repo/common": "workspace:*",
