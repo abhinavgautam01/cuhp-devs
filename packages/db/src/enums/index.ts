@@ -14,3 +14,10 @@ export enum Difficulty {
   MEDIUM = "MEDIUM",
   HARD = "HARD",
 }
+
+export enum ChatRoomName {
+  ML = "Machine Learning",
+  DL = "Deep Learning",
+  DSA = "Data Structures & Algorithms",
+  BLOCKCHAIN = "Blockchain",
+}
