@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { User } from "@repo/db/index.js";
-import { signToken } from "../utils";
-import { signupSchema } from "../validators/auth.schema"
+import { User } from "@repo/db";
+import { signToken, verifyToken } from "../utils";
+import { signinSchema, signupSchema } from "../validators/auth.schema"
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -23,7 +23,7 @@ export const signup = async (req: Request, res: Response) => {
       })
     }
 
-    const query: any[] = [{ email: email.toLowerCase() }];
+    const query: any[] = [{ email }];
     if (studentId && studentId.trim() !== "") {
       query.push({ studentId });
     }
@@ -60,8 +60,8 @@ export const signup = async (req: Request, res: Response) => {
     return res.status(201).json({
       message: "User registered successfully",
       user: {
-        id: (user._id as any).toString(),
-        fullName: user.fullName,
+        id: user._id.toString(),
+       name: user.fullName,
         email: user.email,
         studentId: user.studentId,
         onboardingCompleted: user.onboardingCompleted,
@@ -75,12 +75,15 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try {
-    const { identifier, email, password } = req.body;
-    const loginIdentifier = (identifier || email || "").trim();
-
-    if (!loginIdentifier || !password) {
-      return res.status(400).json({ message: "Identifier and password required" });
+    const parsed = signinSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
+    const { identifier, password } = parsed.data;
+    const loginIdentifier = identifier.trim();
 
     const user = await User.findOne({
       $or: [
@@ -114,7 +117,7 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Signin successful",
       user: {
-        id: (user._id as any).toString(),
+        id: (user._id as any).toString().toString(),
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
@@ -130,13 +133,41 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = (_: Request, res: Response) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 0,
-  });
+export const logout = async (_: Request, res: Response) => {
+  res.clearCookie("token");
 
-  return res.status(200).json({ message: "Logged out successfully" });
+  return res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
+
+export const me = async (req: Request, res: Response) => {
+  try {
+    const token = req.cookies["token"];
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { id } = verifyToken(token);
+
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User found",
+      user: {
+        id: user._id.toString(),
+        fullName: user.fullName,
+        email: user.email,
+        studentId: user.studentId,
+      },
+    });
+
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 };

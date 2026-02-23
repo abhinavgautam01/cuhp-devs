@@ -2,6 +2,23 @@ import { Schema } from "mongoose";
 import { IUser } from "../interfaces/user.interface";
 
 
+// import { UserRole } from "../enums";
+
+// export const UserSchema = new Schema(
+//   {
+//     email: { type: String, required: true, unique: true },
+//     name: String,
+//     token: String,
+//     password: { type: String, required: true },
+//     role: {
+//       type: String,
+//       enum: Object.values(UserRole),
+//       default: UserRole.USER,
+//     },
+//   },
+//   { timestamps: true }
+// );
+
 export const UserSchema = new Schema<IUser>(
   {
     fullName: {
