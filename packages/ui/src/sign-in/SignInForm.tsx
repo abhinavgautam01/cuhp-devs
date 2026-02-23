@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useState, useCallback, ChangeEvent, FormEvent } from "react";
 import { MdEmail } from "react-icons/md";

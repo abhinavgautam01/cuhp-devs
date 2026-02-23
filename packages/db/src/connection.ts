@@ -29,6 +29,13 @@ export async function connectDB() {
     cached!.promise = mongoose.connect(MONGO_URI);
   }
 
-  cached!.conn = await cached!.promise;
-  return cached!.conn;
+  try {
+    cached!.conn = await cached!.promise;
+    console.log("MongoDB Connected successfully");
+    return cached!.conn;
+  } catch (error) {
+    console.error("MongoDB Connection Error:", error);
+    cached!.promise = null; // Reset promise so it can be retried
+    throw error;
+  }
 }

@@ -1,5 +1,14 @@
 import { Document } from "mongoose";
 
+export interface IUser extends Document {
+  fullName: string;
+  email: string;
+  studentId?: string;
+  password: string;
+  program?: string;
+  semester?: string;
+  interests: string[];
+  onboardingCompleted: boolean;
 // import { UserRole } from "../enums";
 
 // export interface IUser extends Document {
@@ -12,10 +21,6 @@ import { Document } from "mongoose";
 //   updatedAt: Date;
 // }
 
-export interface IUser extends Document {
-  fullName: string;
-  email: string;
-  studentId: string;
-  password: string;
+
 }
 

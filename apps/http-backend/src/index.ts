@@ -8,6 +8,7 @@ import problemRoutes from "./routes/problem.routes";
 import submissionRoutes from "./routes/submission.routes";
 import languageRoutes from "./routes/language.routes";
 import runCodeRoutes from "./routes/runCode.routes";
+import userRoutes from "./routes/user.routes";
 import "./workers/result.worker";
 
 const app: Application = express();
@@ -25,10 +26,11 @@ app.use(cookieParser());
 const start = async () => {
   try {
     await connectDB();
-    app.use("/auth", authRoutes);
-    app.use("/problems", problemRoutes);
-    app.use("/submissions", submissionRoutes);
-    app.use("/languages", languageRoutes);
+        app.use("/auth", authRoutes);
+        app.use("/user", userRoutes);
+        app.use("/problems", problemRoutes);
+        app.use("/submissions", submissionRoutes);
+        app.use("/languages", languageRoutes);
     app.use("/runCode", runCodeRoutes);
     
     app.get("/", (req: Request, res: Response) => {

@@ -41,6 +41,24 @@ export const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true
+    },
+    program: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    semester: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    interests: {
+      type: [String],
+      default: [],
+    },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
     }
   },
   {
