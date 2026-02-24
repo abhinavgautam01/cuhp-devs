@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/socket.ts","./src/modules/chat/chat.events.ts","./src/modules/chat/chat.service.ts","./src/utils/authsocket.ts"],"errors":true,"version":"5.9.3"}
+{"root":["./src/index.ts","./src/socket.ts","./src/modules/chat/chat.events.ts","./src/modules/chat/chat.service.ts","./src/utils/authsocket.ts"],"version":"5.9.3"}

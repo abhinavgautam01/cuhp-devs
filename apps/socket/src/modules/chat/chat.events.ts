@@ -38,7 +38,7 @@ export const registerChatEvents = (
 
     const populated = await message.populate(
       "senderId",
-      "name email"
+      "fullName email"
     );
 
     io.to(room._id.toString()).emit("new-message", populated);
