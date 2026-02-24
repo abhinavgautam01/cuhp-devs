@@ -5,6 +5,8 @@ import "./submission.model";
 import "./language.model";
 import "./defaultCode.model";
 import "./testcase.model";
+import "./chatroom.model";
+import "./message.model";
 
 // export..!
 export { User } from "./user.model";
@@ -13,3 +15,5 @@ export { Submission } from "./submission.model";
 export { Language } from "./language.model";
 export { DefaultCode } from "./defaultCode.model";
 export { TestCase } from "./testcase.model";
+export { ChatRoom } from "./chatroom.model";
+export { Message } from "./message.model";
