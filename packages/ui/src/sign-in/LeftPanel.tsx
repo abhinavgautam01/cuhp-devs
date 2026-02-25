@@ -1,4 +1,4 @@
-"use client";
+
 
 import { ReactNode } from "react";
 import { FaTerminal, FaDatabase, FaCode } from "react-icons/fa";

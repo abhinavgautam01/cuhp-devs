@@ -9,7 +9,8 @@
     "check-types": "turbo run check-types",
     "generate-boilerplate": "pnpm --filter boilerplate-generator generate all",
     "problem-update:db": "pnpm --filter @repo/db update:problem",
-    "problems-sync:db": "pnpm --filter @repo/db db:sync"
+    "problems-sync:db": "pnpm --filter @repo/db db:sync",
+    "testcases-push:db": "pnpm --filter @repo/db push:testcases"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

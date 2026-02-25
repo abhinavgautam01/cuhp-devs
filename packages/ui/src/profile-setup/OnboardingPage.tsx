@@ -1,17 +1,26 @@
-"use client";
 
-import React, { useState } from "react";
+
+import { useState } from "react";
 import { FaArrowRight, FaRegCalendar } from "react-icons/fa";
 import { GiGraduateCap } from "react-icons/gi";
 import { GoInfo } from "react-icons/go";
 import { MdOutlineExpandMore } from "react-icons/md";
-import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function OnboardingPage() {
+export interface OnboardingStepOneData {
+  program: string;
+  semester: string;
+}
+
+interface OnboardingPageProps {
+  initialData?: OnboardingStepOneData;
+  onNext?: (data: OnboardingStepOneData) => void | Promise<void>;
+}
+
+export default function OnboardingPage({ initialData, onNext }: OnboardingPageProps) {
   const [formData, setFormData] = useState({
-    program: "",
-    semester: "",
+    program: initialData?.program ?? "",
+    semester: initialData?.semester ?? "",
   });
 
   // Programs
@@ -36,6 +45,14 @@ export default function OnboardingPage() {
   };
 
   const isFormComplete = formData.program && formData.semester;
+
+  const handleNext = async () => {
+    if (!isFormComplete) return;
+
+    if (onNext) {
+      await onNext(formData);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#101322] text-slate-100 font-display relative overflow-hidden">
@@ -187,17 +204,19 @@ export default function OnboardingPage() {
       {/* Footer */}
       <footer className="sticky bottom-0 w-full bg-[#101322]/80 backdrop-blur-md border-t border-white/10 p-6 z-20">
         <div className="max-w-4xl mx-auto flex justify-end">
-          <Link
-            href={isFormComplete ? "/onboarding-page-2" : "#"}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!isFormComplete}
             className={`${
               isFormComplete
                 ? "bg-blue-600 hover:bg-blue-500"
                 : "bg-gray-600 cursor-not-allowed"
-            } text-white font-bold py-3 px-10 rounded-lg shadow-[0_4px_20px_rgba(37,99,235,0.3)] flex items-center gap-2 transition-all`}
+            } text-white font-bold py-3 px-10 rounded-lg shadow-[0_4px_20px_rgba(37,99,235,0.3)] flex items-center gap-2 transition-all disabled:opacity-60`}
           >
             Next: Tech Interests
             <FaArrowRight className="group-hover:translate-x-1 transition-transform"/>
-          </Link>
+          </button>
         </div>
       </footer>
 
