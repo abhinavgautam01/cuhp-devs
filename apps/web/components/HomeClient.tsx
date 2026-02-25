@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Navbar from "@repo/ui/components/Navbar";
-import ParticleBG from "@repo/ui/particle/ParticleBG";
+
 import ParticleLogo from "@repo/ui/particle/ParticleLogo";
 
 export default function HomeClient() {
@@ -11,7 +11,7 @@ export default function HomeClient() {
     return (
         <>
             {/* Cinematic Background */}
-            <ParticleBG isVisible={heroLoaded} />
+           
 
             {/* Sequential entry: Navbar appears after hero reassembly */}
             <div className={`fixed top-0 left-0 w-full transition-all duration-1000 ease-out z-50 ${heroLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10 pointer-events-none'}`}>

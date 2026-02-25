@@ -36,7 +36,7 @@ export default async function CommunityLayout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="bg-[#0B0B0C] text-slate-100 min-h-screen flex font-sans overflow-hidden">
+    <div className="bg-[#0B0B0C] text-slate-100 h-screen flex font-sans overflow-hidden">
       {/* Sidebar */}
       <SidebarWrapper user={sidebarUser} />
 
@@ -87,7 +87,7 @@ export default async function CommunityLayout({ children }: LayoutProps) {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   );

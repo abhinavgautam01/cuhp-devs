@@ -57,4 +57,22 @@ export const registerChatEvents = (
       messageId,
     });
   });
+
+  // Typing
+  socket.on("typing", async ({ roomName }) => {
+    const room = await getRoomByName(roomName);
+    if (!room) return;
+    socket.to(room._id.toString()).emit("user-typing", {
+      user: socket.data.user.fullName,
+    });
+  });
+
+  // Stop typing
+  socket.on("stop-typing", async ({ roomName }) => {
+    const room = await getRoomByName(roomName);
+    if (!room) return;
+    socket.to(room._id.toString()).emit("user-stop-typing", {
+      user: socket.data.user.fullName,
+    });
+  });
 };

@@ -3,9 +3,12 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Also try CWD-relative .env as fallback
 dotenv.config();
 
 const app = express();
