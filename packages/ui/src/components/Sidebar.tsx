@@ -1,10 +1,6 @@
-
-
-
 import { useState } from "react";
 import Link from "next/link";
 import { SquareTerminal } from "lucide-react";
-
 
 interface User {
     name: string;
@@ -13,17 +9,24 @@ interface User {
 }
 
 interface SidebarProps {
-    user: User;
+    user?: User;
     activeNav: string;
     setActiveNav: (id: string) => void;
 }
 
+const DEFAULT_USER: User = {
+    name: "Guest User",
+    role: "Student",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest-user",
+};
+
 export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const safeUser: User = user ?? DEFAULT_USER;
 
     return (
         <aside
-            className={`border-r border-[#1337ec]/10 bg-white dark:bg-[#101322] sticky top-0 h-screen flex flex-col py-6 px-4 transition-all duration-300 ${
+            className={`border-r  border-[#1337ec]/10 bg-white dark:bg-[#101322]  top-0 h-screen flex flex-col py-6 px-4 transition-all duration-300 ${
                 isCollapsed ? "w-20 items-center" : "w-64 items-start"
             }`}
         >
@@ -81,13 +84,13 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                 {/* User Profile */}
                 <div className="mt-4 flex items-center gap-3 px-3">
                     <img
-                        src={user.avatar}
-                        alt={user.name}
+                        src={safeUser.avatar}
+                        alt={safeUser.name}
                         className="w-10 h-10 rounded-full border-2 border-[#1337ec]/20"
                     />
                     <div className={`${isCollapsed ? "hidden" : "block"} overflow-hidden`}>
-                        <p className="text-sm font-bold truncate">{user.name}</p>
-                        <p className="text-xs text-slate-500 truncate">{user.role}</p>
+                        <p className="text-sm font-bold truncate">{safeUser.name}</p>
+                        <p className="text-xs text-slate-500 truncate">{safeUser.role}</p>
                     </div>
                 </div>
             </div>
