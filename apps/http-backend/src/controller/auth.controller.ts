@@ -17,35 +17,54 @@ export const signup = async (req: Request, res: Response) => {
 
     const { fullName, email, studentId, password } = parsed.data;
 
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long"
+      })
+    }
+
     const query: any[] = [{ email }];
     if (studentId && studentId.trim() !== "") {
-        query.push({ studentId });
+      query.push({ studentId });
     }
     const existingUser = await User.findOne({
-        $or: query,
+      $or: query,
     });
 
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       fullName,
-      email,
-      studentId,
+      email: email.toLowerCase(),
+      studentId: studentId?.trim() || undefined,
       password: hashedPassword,
+    });
+
+    const token = signToken({
+      id: (user._id as any).toString(),
+      email: user.email,
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 4 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user._id.toString(),
-       name: user.fullName,
+        name: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
   } catch (error) {
@@ -63,9 +82,15 @@ export const signin = async (req: Request, res: Response) => {
         errors: parsed.error.flatten().fieldErrors,
       });
     }
-    const { email, password } = parsed.data;
+    const { identifier, password } = parsed.data;
+    const loginIdentifier = identifier.trim();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [
+        { email: loginIdentifier.toLowerCase() },
+        { studentId: loginIdentifier },
+      ],
+    });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -78,24 +103,28 @@ export const signin = async (req: Request, res: Response) => {
     }
 
     const token = signToken({
-        id: user._id.toString(),
-        email: user.email,
+      id: (user._id as any).toString(),
+      email: user.email,
     })
 
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
     })
-    
+
     return res.status(200).json({
       message: "Signin successful",
       user: {
-        id: user._id.toString(),
+        id: (user._id as any).toString().toString(),
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        program: user.program,
+        semester: user.semester,
+        interests: user.interests,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
   } catch (error) {

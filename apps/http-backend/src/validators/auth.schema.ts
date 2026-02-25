@@ -5,7 +5,7 @@ export const signupSchema = z.object({
     .trim()
     .min(3, "Full name must be atleast 3 characters")
     .max(50, "Full name is too long")
-    .regex(/^[a-zA-Z\s]+$/, "Full name can only contain letters and spaces"),
+    .regex(/^[a-zA-Z][a-zA-Z\s.'-]*$/, "Full name contains invalid characters"),
 
     email: z.string()
     .trim()
@@ -24,6 +24,6 @@ export const signupSchema = z.object({
 }).strict();
 
 export const signinSchema = z.object({
-  email: z.string().trim().email("Invalid email address"),
+  identifier: z.string().trim().min(1, "Student ID or email is required"),
   password: z.string().trim().min(8, "Password must be at least 8 characters long"),
 }).strict();

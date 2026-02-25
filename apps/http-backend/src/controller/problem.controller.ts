@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import { Problem } from "@repo/db";
+import { Problem, DefaultCode, Language } from "@repo/db";
 
 export const getProblems = async (_: Request, res: Response) => {
   try {
-    const problems = await Problem.find({ hidden: false })
+    const problems = await Problem.find({
+      hidden: { $ne: true }, // ✅ include false + undefined
+    })
       .select("title slug difficulty solved")
       .lean();
 
@@ -20,14 +22,41 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
 
     const problem = await Problem.findOne({
       slug,
-      hidden: false,
     }).lean();
 
     if (!problem) {
       return res.status(404).json({ message: "Problem not found" });
     }
 
-    return res.status(200).json(problem);
+    // 🔥 load default code for this problem
+    const defaultCodes = await DefaultCode.find({
+      problemId: problem._id,
+    }).lean();
+
+    // 🌍 load languages
+    const languages = await Language.find().lean();
+
+    // 🧠 build map languageId → name
+    const langMap = new Map(
+      languages.map((l) => [l._id.toString(), l.name])
+    );
+
+    // 🎯 format for frontend
+    const formattedDefaultCode: Record<string, string> = {};
+
+    for (const dc of defaultCodes) {
+      const langName = langMap.get(dc.languageId.toString());
+
+      if (langName) {
+        formattedDefaultCode[langName.toLowerCase()] = dc.code;
+      }
+    }
+
+    return res.status(200).json({
+      problem,
+      defaultCode: formattedDefaultCode,
+    });
+
   } catch (err) {
     console.error("Get problem error:", err);
     return res.status(500).json({ message: "Internal server error" });

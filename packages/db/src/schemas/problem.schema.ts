@@ -39,6 +39,7 @@ export const ProblemSchema = new Schema<IProblem>(
 		difficulty: {
 			type: String,
 			enum: ["EASY", "MEDIUM", "HARD"],
+			default: "EASY",
 			required: true,
 		},
 		sampleTestCases: [
