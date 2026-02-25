@@ -26,9 +26,8 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
 
     return (
         <aside
-            className={`border-r  border-[#1337ec]/10 bg-white dark:bg-[#101322]  top-0 h-screen flex flex-col py-6 px-4 transition-all duration-300 ${
-                isCollapsed ? "w-20 items-center" : "w-64 items-start"
-            }`}
+            className={`border-r shrink-0 border-[#1337ec]/10 bg-white dark:bg-[#101322]  top-0 h-screen flex flex-col py-6 px-4 transition-all duration-300 ${isCollapsed ? "w-20 items-center" : "w-64 items-start"
+                }`}
         >
             {/* Logo */}
             <div className={`flex items-center px-2 mb-10 w-full ${isCollapsed ? "justify-center" : "gap-3"}`}>

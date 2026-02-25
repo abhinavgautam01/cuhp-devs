@@ -411,7 +411,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* Study Hubs Map */}
-                      
+
                     </section>
                 </main>
             </div>
