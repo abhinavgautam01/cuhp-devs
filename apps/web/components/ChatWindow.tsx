@@ -259,9 +259,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             <div className="px-6 pb-6 pt-2 bg-[#1A1B1E]">
                 <form onSubmit={handleSend} className="relative group">
                     <div className="flex items-center bg-[#2A2B2F] rounded-lg px-4 py-2.5 transition-shadow group-focus-within:shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
-                        <button type="button" className="p-1.5 text-white/30 hover:text-white transition-colors">
-                            <Plus size={20} />
-                        </button>
+                     
                         <input
                             type="text"
                             value={input}
@@ -270,9 +268,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                             className="flex-1 bg-transparent border-none outline-none px-4 text-[13.5px] text-white/90 placeholder:text-white/10"
                         />
                         <div className="flex items-center gap-3">
-                            <button type="button" className="p-1.5 text-white/30 hover:text-white transition-colors">
-                                <Smile size={20} />
-                            </button>
+                           
                             <button
                                 type="submit"
                                 disabled={!input.trim()}
