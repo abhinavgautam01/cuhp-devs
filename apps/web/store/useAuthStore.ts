@@ -8,6 +8,8 @@ interface User {
     program?: string;
     semester?: string;
     interests?: string[];
+    avatar?: string;
+    savedPosts?: string[];
 }
 
 interface AuthState {

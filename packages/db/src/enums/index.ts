@@ -26,3 +26,9 @@ export enum ChatRoomName {
   DSA = "Data Structures & Algorithms",
   BLOCKCHAIN = "Blockchain",
 }
+
+export enum PostType {
+  SNIPPET = "Snippet",
+  QUESTION = "Question",
+  WIN = "Win",
+}

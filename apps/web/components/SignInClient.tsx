@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SignInForm } from "@repo/ui/sign-in/SignInForm";
 import { AuthToggle } from "@repo/ui/toogle/AuthToggle";
@@ -15,7 +16,13 @@ interface SignInFields {
 
 export function SignInClient() {
     const router = useRouter();
-    const setUser = useAuthStore((state) => state.setUser);
+    const { setUser, isAuthenticated } = useAuthStore();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.push("/dashboard");
+        }
+    }, [isAuthenticated, router]);
 
     const handleSignIn = async (fields: SignInFields) => {
         try {

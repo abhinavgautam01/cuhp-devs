@@ -276,10 +276,10 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
         ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
 
         const communityRooms = [
-            { title: "Machine Learning", members: "0", icon: "smart_toy", contributor: "@zhao_dev" },
-            { title: "Blockchain", members: "0", icon: "hub", contributor: "@lena_s" },
-            { title: "Data Structures & Algorithms", members: "0", icon: "memory", contributor: "@jordan_s" },
-            { title: "Deep Learning", members: "0", icon: "javascript", contributor: "@sarah_j" }
+            { title: "Machine Learning", members: "0", icon: "smart_toy" },
+            { title: "Blockchain", members: "0", icon: "hub" },
+            { title: "Data Structures & Algorithms", members: "0", icon: "memory" },
+            { title: "Deep Learning", members: "0", icon: "javascript" }
         ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
 
         const roomsData = {
@@ -289,10 +289,7 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
                 { name: "Marcus Zhao", subtitle: "ML Expert • 42 streak", rank: "Top" },
                 { name: "Lena Schmidt", subtitle: "Web3 Guru • 28 streak", rank: "#2" }
             ],
-            liveActivity: [
-                { user: "Sarah Jenkins", action: "joined", room: "Data Structures & Algorithms", time: "2 mins ago" },
-                { user: "Emily Chen", action: "shared a paper in", room: "Deep Learning", time: "14 mins ago" }
-            ]
+            liveActivity: []
         };
         return res.status(200).json(roomsData);
     } catch (error) {
@@ -302,37 +299,45 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
 
 export const getCommunitySnippets = async (req: AuthRequest, res: Response) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const user = await User.findById(userId).populate({
+            path: "savedPosts",
+            populate: { path: "author", select: "fullName" }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Filter for Snippets only (though UI might show all saved posts in this section)
+        const savedSnippets = (user.savedPosts as any[] || [])
+            .filter(post => post.type === "Snippet")
+            .map(post => ({
+                id: post._id,
+                title: post.content.split("\n")[0].substring(0, 50) || "Code Snippet",
+                language: "Text", // Logic for language detection could be added later
+                code: post.code || post.content,
+                tags: [], // Tags logic can be added later
+                updated: `Saved ${new Date(post.createdAt).toLocaleDateString()}`,
+                collection: "Favorites"
+            }));
+
         const snippetsData = {
-            snippets: [
-                {
-                    id: 1,
-                    title: "Efficient QuickSort Impl",
-                    language: "Python",
-                    code: "def quick_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + middle + quick_sort(right)",
-                    tags: ["#Python", "#DSA", "#Algorithms"],
-                    updated: "Updated 2h ago",
-                    collection: "Interview Prep",
-                },
-                {
-                    id: 2,
-                    title: "Local Storage Custom Hook",
-                    language: "React",
-                    code: "const useLocalStorage = (key, initialValue) => {\n  const [storedValue, setStoredValue] = useState(() => {\n    try {\n      const item = window.localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      return initialValue;\n    }\n  });\n  return [storedValue, setStoredValue];\n};",
-                    tags: ["#React", "#Hooks", "#Utils"],
-                    updated: "Updated yesterday",
-                    collection: "Project X Utils",
-                }
-            ],
+            snippets: savedSnippets,
             collections: [
-                { label: "All Snippets", count: 42, active: true },
-                { label: "Interview Prep", count: 12, active: false },
-                { label: "Project X Utils", count: 8, active: false },
-                { label: "Favorites", count: 5, active: false },
+                { label: "All Snippets", count: savedSnippets.length, active: true },
+                { label: "Interview Prep", count: 0, active: false },
+                { label: "Favorites", count: savedSnippets.length, active: false },
             ],
-            recentTags: ["#Python", "#React", "#DSA", "#Typescript", "#Hooks", "#Algorithms"]
+            recentTags: []
         };
         return res.status(200).json(snippetsData);
     } catch (error) {
+        console.error("Get community snippets error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

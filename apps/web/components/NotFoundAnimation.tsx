@@ -128,9 +128,8 @@ export function NotFoundAnimation() {
                             originY: y - centerY,
                             originZ: 0,
                             size: 2,
-                            color: 'rgba(255, 100, 100, 0.9)', // Satellite red/orange color
-                            type: 'satellite',
-                            angle: 0 // Orbit angle
+                            color: 'rgba(255, 100, 100, 0.9)', // Red/orange color
+                            type: 'text'
                         });
                     }
                 }
@@ -280,19 +279,19 @@ export function NotFoundAnimation() {
                 }
 
                 ctx.beginPath();
+                ctx.globalAlpha = alpha;
+
                 if (p.type === 'text') {
                     // Make text glow slightly
                     ctx.fillStyle = p.color;
-                    ctx.shadowBlur = 5;
+                    ctx.shadowBlur = 15;
                     ctx.shadowColor = 'white';
                 } else if (p.type === 'star') {
                     ctx.fillStyle = p.color;
-                    ctx.globalAlpha = alpha; // Keep alpha normal for distant stars
                     ctx.shadowBlur = p.size > 1 ? 2 : 0; // Only bigger stars glow slightly
                     ctx.shadowColor = 'rgba(255,255,255,0.5)';
                 } else {
                     ctx.fillStyle = p.color;
-                    ctx.globalAlpha = alpha;
                     ctx.shadowBlur = 0;
                 }
 
