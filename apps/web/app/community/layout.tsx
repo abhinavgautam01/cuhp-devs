@@ -36,14 +36,14 @@ export default async function CommunityLayout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="bg-[#0B0B0C] text-slate-100 h-screen flex font-sans overflow-hidden">
+    <div className="bg-[#11141f] text-slate-100 h-screen flex font-sans overflow-hidden">
       {/* Sidebar */}
       <SidebarWrapper user={sidebarUser} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation */}
-        <nav className="sticky top-0 z-50 border-b border-[#1337ec]/10 bg-[#0B0B0C]/80 backdrop-blur-md">
+        <nav className="sticky top-0 z-50 border-b border-[#1337ec]/10 bg-[#101322]/80 backdrop-blur-md">
           <div className="px-8 h-16 flex items-center justify-between gap-8">
             {/* Nav Links */}
             <div className="flex items-center gap-8 text-sm font-medium">
@@ -87,7 +87,7 @@ export default async function CommunityLayout({ children }: LayoutProps) {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
       </div>
     </div>
   );

@@ -15,5 +15,9 @@ export default async function CommunityChatRoomsPage() {
         console.error("Failed to fetch community rooms:", error);
     }
 
-    return <ChatRooms data={roomsData} />;
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value || null;
+
+    return <ChatRooms data={roomsData} token={token} />;
 }

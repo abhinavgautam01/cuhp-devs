@@ -1,4 +1,4 @@
-import { ChatRoom, Message } from "@repo/db";
+import { ChatRoom, Message, User } from "@repo/db";
 
 const ROOM_NAME_ALIASES: Record<string, string> = {
   "machine learning": "Machine Learning",
@@ -44,3 +44,88 @@ export const deleteMessageByOwner = async (
   message.isDeleted = true;
   return message.save();
 };
+
+export const getUserById = async (userId: string) => {
+  return User.findById(userId).select("fullName email").lean();
+};
+
+export class RoomManager {
+  private static instance: RoomManager;
+  private roomUsers: Map<string, Map<string, any>> = new Map(); // roomId -> Map<userId, userData>
+  private activityLog: any[] = [];
+  private readonly MAX_LOG_SIZE = 20;
+
+  private constructor() { }
+
+  static getInstance(): RoomManager {
+    if (!RoomManager.instance) {
+      RoomManager.instance = new RoomManager();
+    }
+    return RoomManager.instance;
+  }
+
+  logActivity(user: string, action: string, room: string) {
+    const activity = {
+      user,
+      action,
+      room,
+      time: "Just now" // Simplified for now, could use relative timestamps on client
+    };
+    this.activityLog.unshift(activity);
+    if (this.activityLog.length > this.MAX_LOG_SIZE) {
+      this.activityLog.pop();
+    }
+    return activity;
+  }
+
+  getActivityLog() {
+    return this.activityLog;
+  }
+
+  addUser(roomId: string, userId: string, userData: any) {
+    if (!this.roomUsers.has(roomId)) {
+      this.roomUsers.set(roomId, new Map());
+    }
+    this.roomUsers.get(roomId)!.set(userId, userData);
+  }
+
+  removeUser(roomId: string, userId: string) {
+    if (this.roomUsers.has(roomId)) {
+      this.roomUsers.get(roomId)!.delete(userId);
+      if (this.roomUsers.get(roomId)!.size === 0) {
+        this.roomUsers.delete(roomId);
+      }
+    }
+  }
+
+  getOnlineUsers(roomId: string) {
+    const usersMap = this.roomUsers.get(roomId);
+    return usersMap ? Array.from(usersMap.values()) : [];
+  }
+
+  getAllRoomStats() {
+    const stats: Record<string, number> = {};
+    this.roomUsers.forEach((users, roomId) => {
+      // Map roomId back to roomName if needed, or just return counts by ID
+      // For the UI, we probably need canonical names.
+      // But let's just return a map of roomId to count first.
+      stats[roomId] = users.size;
+    });
+    return stats;
+  }
+
+  // Find all rooms a user is in and remove them
+  removeUserFromAllRooms(userId: string): string[] {
+    const roomsAffected: string[] = [];
+    this.roomUsers.forEach((users, roomId) => {
+      if (users.has(userId)) {
+        users.delete(userId);
+        roomsAffected.push(roomId);
+        if (users.size === 0) {
+          this.roomUsers.delete(roomId);
+        }
+      }
+    });
+    return roomsAffected;
+  }
+}

@@ -48,6 +48,7 @@ export const signup = async (req: Request, res: Response) => {
     const token = signToken({
       id: (user._id as any).toString(),
       email: user.email,
+      fullName: user.fullName,
     });
 
     res.cookie("token", token, {
@@ -105,6 +106,7 @@ export const signin = async (req: Request, res: Response) => {
     const token = signToken({
       id: (user._id as any).toString(),
       email: user.email,
+      fullName: user.fullName,
     })
 
     res.cookie("token", token, {
