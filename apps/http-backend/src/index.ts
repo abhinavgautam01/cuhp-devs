@@ -11,9 +11,10 @@ import runCodeRoutes from "./routes/runCode.routes";
 import userRoutes from "./routes/user.routes";
 import postRoutes from "./routes/post.routes";
 import path from "path";
-import "./workers/result.worker";
 
 const app: Application = express();
+const isProduction = process.env.NODE_ENV === "production";
+
 
 app.use(
   cors({
@@ -24,33 +25,38 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+app.use("/problems", problemRoutes);
+app.use("/submissions", submissionRoutes);
+app.use("/languages", languageRoutes);
+app.use("/runCode", runCodeRoutes);
+app.use("/posts", postRoutes);
+
+
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello World!");
+});
+
+
 
 const start = async () => {
   try {
     await connectDB();
-    app.use("/auth", authRoutes);
-    app.use("/user", userRoutes);
-    app.use("/problems", problemRoutes);
-    app.use("/submissions", submissionRoutes);
-    app.use("/languages", languageRoutes);
-    app.use("/runCode", runCodeRoutes);
-    app.use("/posts", postRoutes);
-
-    // Serve static files from public/uploads
-    app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
-
-    app.get("/", (req: Request, res: Response) => {
-      // res.send is now type-checked!
-      res.send("Hello World!");
-    });
-
-    app.listen(3001, () => {
-      console.log("http://localhost:3001");
-    });
+    // Worker depends on Mongo availability; start it only after DB is ready.
+    require("./workers/result.worker");
   } catch (error) {
-    console.error("Failed to start server", error);
-    process.exit(1);
+    if (isProduction) {
+      console.error("Failed to start server", error);
+      process.exit(1);
+    }
+
   }
+
+  app.listen(3001, () => {
+    console.log("http://localhost:3001");
+  });
 };
 
 start();

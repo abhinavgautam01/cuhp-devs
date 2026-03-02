@@ -40,3 +40,4 @@ yarn-error.log*
 
 
 judge0/
+packages/**/tsconfig.tsbuildinfo

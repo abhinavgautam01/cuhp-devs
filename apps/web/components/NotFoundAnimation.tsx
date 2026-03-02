@@ -118,7 +118,7 @@ export function NotFoundAnimation() {
             for (let y = 0; y < height; y += step) {
                 for (let x = 0; x < width; x += step) {
                     const index = (y * width + x) * 4;
-                    if (data1[index + 3] > 128) {
+                    if ((data1[index + 3] ?? 0) > 128) {
                         // Recenter coordinates around 0,0,0 so they can be rotated identically
                         particles.push({
                             x: x - centerX,
@@ -148,7 +148,7 @@ export function NotFoundAnimation() {
             for (let y = 0; y < height; y += step) {
                 for (let x = 0; x < width; x += step) {
                     const index = (y * width + x) * 4;
-                    if (data2[index + 3] > 128) {
+                    if ((data2[index + 3] ?? 0) > 128) {
                         particles.push({
                             x: x - centerX,
                             y: y - centerY,
