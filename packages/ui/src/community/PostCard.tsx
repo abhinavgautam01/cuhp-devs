@@ -35,7 +35,8 @@ function formatPostDate(createdAt: string): string {
 
 export function PostCard({ post, onLike, onBookmark, currentUserId, isSaved }: PostCardProps) {
     const postId = post.id || post._id || "";
-    const isLiked = currentUserId ? post.likes.includes(currentUserId) : false;
+    const likes = Array.isArray(post.likes) ? post.likes : [];
+    const isLiked = currentUserId ? likes.some(id => String(id) === String(currentUserId)) : false;
     const createdAtLabel = formatPostDate(post.createdAt);
 
     return (
@@ -71,14 +72,10 @@ export function PostCard({ post, onLike, onBookmark, currentUserId, isSaved }: P
                     <div className="flex items-center gap-6 border-t border-white/5 pt-4">
                         <button
                             onClick={() => onLike?.(postId)}
-                            className={`flex items-center gap-2 transition-colors group/btn ${isLiked ? "text-[#1337ec]" : "text-white/60 hover:text-[#1337ec]"}`}
+                            className={`flex items-center gap-2 transition-all group/btn ${isLiked ? "text-[#1337ec] drop-shadow-[0_0_10px_rgba(19,55,236,0.5)]" : "text-white/60 hover:text-[#1337ec]"}`}
                         >
                             <ThumbsUp className={`${isLiked ? "fill-[#1337ec]" : ""} group-active/btn:scale-125 transition-transform`} size={18} />
                             <span className="text-xs font-bold">{post.likes.length}</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-white/60 hover:text-[#8b5cf6] transition-colors">
-                            <MessageSquare size={18} />
-                            <span className="text-xs font-bold">{post.comments.length}</span>
                         </button>
                         <button
                             onClick={() => onBookmark?.(postId)}

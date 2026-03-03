@@ -1,6 +1,6 @@
 "use client";
 
-export type FeedTab = "Questions" | "Snippet" | "debugging";
+export type FeedTab = "Recent" |"Questions" | "Snippet" | "debugging";
 
 interface FeedTabsProps {
     activeTab: FeedTab;
@@ -8,7 +8,7 @@ interface FeedTabsProps {
 }
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
-    const tabs: FeedTab[] = ["Questions", "Snippet", "debugging"];
+    const tabs: FeedTab[] = ["Recent","Questions", "Snippet", "debugging"];
 
     return (
         <div className="flex gap-4 border-b border-white/5 pb-1 mb-2">

@@ -20,7 +20,8 @@ export const useSocket = (token: string | null): {
 
         const socket = io(SOCKET_URL, {
             auth: { token },
-            withCredentials: true,
+            transports: ["websocket"],
+            timeout: 10000,
         });
 
         socketRef.current = socket;

@@ -10,7 +10,7 @@ import languageRoutes from "./routes/language.routes";
 import runCodeRoutes from "./routes/runCode.routes";
 import userRoutes from "./routes/user.routes";
 import postRoutes from "./routes/post.routes";
-import path from "path";
+
 
 const app: Application = express();
 const isProduction = process.env.NODE_ENV === "production";
@@ -40,6 +40,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
+app.listen(3001, () => {
+  console.log("http://localhost:3001");
+});
 
 const start = async () => {
   try {
@@ -54,9 +57,6 @@ const start = async () => {
 
   }
 
-  app.listen(3001, () => {
-    console.log("http://localhost:3001");
-  });
 };
 
 start();

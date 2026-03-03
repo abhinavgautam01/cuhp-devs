@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Feed from "@repo/ui/community/Feed";
 import { FeedTab } from "@repo/ui/community/FeedTabs";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../store/useAuthStore";
 import { toast } from "../store/useToastStore";
+import { io, Socket } from "socket.io-client";
 
 interface FeedClientProps {
     initialData: {
@@ -19,14 +20,68 @@ interface FeedClientProps {
 export default function FeedClient({ initialData }: FeedClientProps) {
     const [posts, setPosts] = useState(initialData.posts);
     const [activeTab, setActiveTab] = useState<FeedTab>("Questions");
-    const { user } = useAuthStore();
+    const { user, setUser } = useAuthStore();
+    const socketRef = useRef<Socket | null>(null);
 
-    const handlePost = async (formData: FormData) => {
+    useEffect(() => {
+        // Connect to socket server
+        const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4001";
+        console.log(`[FeedClient] Connecting to socket at ${socketUrl}`);
+
+        const socket = io(socketUrl, {
+            auth: {
+                token: ""
+            },
+            transports: ["websocket"],
+            timeout: 10000
+        });
+
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+            console.log("[FeedClient] Connected to post socket");
+        });
+
+        socket.on("connect_error", (err) => {
+            console.error("[FeedClient] Socket connection error:", err.message);
+        });
+
+        socket.on("new-post", (newPost) => {
+            console.log("Received new post via socket:", newPost);
+            setPosts((prevPosts) => {
+                // Avoid duplicates
+                const exists = prevPosts.some(p => (p.id || p._id) === (newPost.id || newPost._id));
+                if (exists) return prevPosts;
+                return [newPost, ...prevPosts];
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        const initAuth = async () => {
+            if (!user) {
+                try {
+                    const profile = await apiFetch("/user/profile");
+                    if (profile) {
+                        setUser(profile);
+                    }
+                } catch (error) {
+                    // Silently fail if not logged in
+                }
+            }
+        };
+        initAuth();
+    }, [user, setUser]);
+
+    const handlePost = async (data: { content: string; type: string }) => {
         try {
             const response = await apiFetch("/posts", {
                 method: "POST",
-                body: formData,
-                // Do not set Content-Type, let the browser set it for FormData
+                body: JSON.stringify(data),
             });
 
             if (response.post) {
@@ -50,13 +105,15 @@ export default function FeedClient({ initialData }: FeedClientProps) {
                 setPosts(posts.map(post => {
                     const id = post.id || post._id;
                     if (id === postId) {
-                        // Toggle like in local state
                         const userId = user?.id;
                         if (!userId) return post;
 
-                        const newLikes = response.isLiked
-                            ? [...post.likes, userId]
-                            : post.likes.filter((uid: string) => uid !== userId);
+                        const currentLikes = Array.isArray(post.likes) ? post.likes : [];
+                        const isLikedNow = response.isLiked;
+
+                        const newLikes = isLikedNow
+                            ? [...currentLikes, userId]
+                            : currentLikes.filter((uid: string) => String(uid) !== String(userId));
 
                         return { ...post, likes: newLikes };
                     }

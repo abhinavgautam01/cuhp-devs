@@ -10,7 +10,7 @@ interface FeedProps {
     leaderboard: any[];
     events: any[];
   };
-  onPost?: (formData: FormData) => Promise<void>;
+  onPost?: (data: { content: string; type: string }) => Promise<void>;
   onLike?: (postId: string) => Promise<void>;
   onBookmark?: (postId: string) => Promise<void>;
   userAvatar?: string;

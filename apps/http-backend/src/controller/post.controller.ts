@@ -1,5 +1,6 @@
 import { Response } from "express";
-import { Post, PostType, User } from "@repo/db";
+import { Post } from "@repo/db/models/post.model.js";
+import { PostType, User } from "@repo/db";
 import { AuthRequest } from "../middleware/auth.middleware";
 
 export const createPost = async (req: AuthRequest, res: Response) => {

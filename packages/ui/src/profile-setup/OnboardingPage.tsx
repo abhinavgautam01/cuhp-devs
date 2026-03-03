@@ -1,4 +1,4 @@
-
+"use client"
 
 import { useState } from "react";
 import { FaArrowRight, FaRegCalendar } from "react-icons/fa";

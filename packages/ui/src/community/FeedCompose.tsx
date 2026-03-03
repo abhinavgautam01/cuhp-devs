@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Code, HelpCircle, Trophy } from "lucide-react";
 
 interface FeedComposeProps {
-    onPost?: (formData: FormData) => Promise<void>;
+    onPost?: (data: { content: string; type: string }) => Promise<void>;
     userAvatar?: string;
 }
 
@@ -18,12 +18,11 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
 
         setIsSubmitting(true);
         try {
-            const formData = new FormData();
-            formData.append("content", postText);
-            formData.append("type", selectedType);
-
             if (onPost) {
-                await onPost(formData);
+                await onPost({
+                    content: postText,
+                    type: selectedType
+                });
                 setPostText("");
             }
         } catch (error) {
