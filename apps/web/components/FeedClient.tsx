@@ -19,9 +19,10 @@ interface FeedClientProps {
 
 export default function FeedClient({ initialData }: FeedClientProps) {
     const [posts, setPosts] = useState(initialData.posts);
-    const [activeTab, setActiveTab] = useState<FeedTab>("Questions");
+    const [activeTab, setActiveTab] = useState<FeedTab>("Recent");
     const { user, setUser } = useAuthStore();
     const socketRef = useRef<Socket | null>(null);
+    const hasLoggedConnectErrorRef = useRef(false);
 
     useEffect(() => {
         // Connect to socket server
@@ -33,17 +34,23 @@ export default function FeedClient({ initialData }: FeedClientProps) {
                 token: ""
             },
             transports: ["websocket"],
-            timeout: 10000
+            timeout: 10000,
+            reconnectionAttempts: 3,
+            reconnectionDelay: 1000,
         });
 
         socketRef.current = socket;
 
         socket.on("connect", () => {
+            hasLoggedConnectErrorRef.current = false;
             console.log("[FeedClient] Connected to post socket");
         });
 
         socket.on("connect_error", (err) => {
-            console.error("[FeedClient] Socket connection error:", err.message);
+            if (!hasLoggedConnectErrorRef.current) {
+                console.warn("[FeedClient] Socket connection error:", err.message);
+                hasLoggedConnectErrorRef.current = true;
+            }
         });
 
         socket.on("new-post", (newPost) => {

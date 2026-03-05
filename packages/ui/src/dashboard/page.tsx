@@ -2,6 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { Sidebar } from "../components/Sidebar";
+import {
+    AlertCircle,
+    Bell,
+    Rocket,
+    Layers,
+    FileText,
+    Megaphone,
+    Flame,
+    Calendar,
+    MoreHorizontal
+} from "lucide-react";
+import { DynamicIcon } from "../components/Icon";
+
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -114,7 +127,7 @@ export default function Dashboard() {
             <div className="min-h-screen bg-[#101322] flex items-center justify-center">
                 <div className="text-center max-w-md p-8 bg-slate-900 rounded-2xl shadow-lg">
                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="material-icons-round text-red-600 text-3xl">error_outline</span>
+                        <AlertCircle className="text-red-600" size={32} />
                     </div>
                     <h2 className="text-xl font-bold mb-2">Failed to Load Dashboard</h2>
                     <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
@@ -169,10 +182,10 @@ export default function Dashboard() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <button className="p-2 bg-slate-800 rounded-xl border border-[#1337ec]/10 hover:border-[#1337ec] transition-colors">
-                                    <span className="material-icons-round text-slate-400">notifications</span>
+                                    <Bell className="text-slate-400" size={20} />
                                 </button>
                                 <button className="bg-[#1337ec] hover:bg-[#1337ec]/90 text-white px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2">
-                                    <span className="material-icons-round text-sm">rocket_launch</span>
+                                    <Rocket size={16} />
                                     Daily Challenge
                                 </button>
                             </div>
@@ -202,7 +215,7 @@ export default function Dashboard() {
                                                 key={tech.label}
                                                 className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg"
                                             >
-                                                <span className="material-icons-round text-sm text-[#1337ec]">{tech.icon}</span>
+                                                <DynamicIcon name={tech.icon} className="text-[#1337ec]" size={16} />
                                                 <span className="text-sm font-medium">{tech.label}</span>
                                             </div>
                                         ))}
@@ -213,7 +226,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="w-full md:w-48 aspect-square relative flex items-center justify-center">
                                     <div className="w-32 h-32 bg-[#1337ec]/10 rounded-full flex items-center justify-center animate-pulse">
-                                        <span className="material-icons-round text-6xl text-[#1337ec]">layers</span>
+                                        <Layers className="text-[#1337ec]" size={64} />
                                     </div>
                                 </div>
                             </div>
@@ -229,7 +242,7 @@ export default function Dashboard() {
                             <div className="space-y-4">
                                 {feedItems.length === 0 ? (
                                     <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                                        <span className="material-icons-round text-5xl mb-2 opacity-20">feed</span>
+                                        <FileText className="mx-auto mb-2 opacity-20" size={48} />
                                         <p>No recent activity</p>
                                     </div>
                                 ) : (
@@ -246,7 +259,7 @@ export default function Dashboard() {
                                                 />
                                             ) : (
                                                 <div className="w-10 h-10 bg-[#1337ec]/20 rounded-full flex items-center justify-center">
-                                                    <span className="material-icons-round text-[#1337ec]">campaign</span>
+                                                    <Megaphone className="text-[#1337ec]" size={20} />
                                                 </div>
                                             )}
 
@@ -301,8 +314,8 @@ export default function Dashboard() {
                         <div className="bg-slate-900 p-6 rounded-2xl border border-[#1337ec]/10 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-lg">Your Progress</h3>
-                                <div className="streak-gradient px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-orange-500/20">
-                                    <span className="material-icons-round text-white text-lg">local_fire_department</span>
+                                <div className="streak-gradient px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-gray-500/20">
+                                    <Flame className="text-white" size={18} />
                                     <span className="text-white font-bold text-sm">{user.streakDays} Days</span>
                                 </div>
                             </div>
@@ -340,7 +353,7 @@ export default function Dashboard() {
                                                 color: badge.color,
                                             }}
                                         >
-                                            <span className="material-icons-round">{badge.icon}</span>
+                                            <DynamicIcon name={badge.icon} size={20} />
                                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-24 p-2 bg-slate-800 text-[10px] rounded hidden group-hover:block text-center text-white z-10">
                                                 {badge.label}
                                             </div>
@@ -348,7 +361,7 @@ export default function Dashboard() {
                                     ))}
                                     {badges.length > 3 && (
                                         <div className="aspect-square rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
-                                            <span className="material-icons-round text-sm">more_horiz</span>
+                                            <MoreHorizontal size={14} />
                                         </div>
                                     )}
                                 </div>
@@ -359,7 +372,7 @@ export default function Dashboard() {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold">Upcoming</h3>
-                                <span className="material-icons-round text-slate-400 cursor-pointer">event</span>
+                                <Calendar className="text-slate-400 cursor-pointer" size={20} />
                             </div>
 
                             <div className="space-y-3">
@@ -405,9 +418,7 @@ export default function Dashboard() {
                                     Upgrade Now
                                 </button>
                             </div>
-                            <span className="material-icons-round absolute -bottom-4 -right-4 text-7xl text-white/10 group-hover:rotate-12 transition-transform duration-500">
-                                workspace_premium
-                            </span>
+                            <DynamicIcon name="workspace_premium" className="absolute -bottom-4 -right-4 text-white/10 group-hover:rotate-12 transition-transform duration-500" size={72} />
                         </div>
 
 

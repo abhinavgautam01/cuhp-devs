@@ -24,16 +24,21 @@ export async function updateProblem(slug: string) {
 
   if (!problemMd) throw new Error("Problem.md not found");
 
+  const titleMatch = problemMd.match(/^# (.*)/);
+  const title = titleMatch?.[1]?.trim() ?? slug;
+  // Clean up title from markdown if needed or use slug as fallback
+
   const problem = await Problem.findOneAndUpdate(
     { slug },
     {
-      title: slug,
+      title,
       slug,
       description: problemMd,
       hidden: false,
     },
     { upsert: true, returnDocument: "after" }
   );
+  if (!problem) throw new Error("Failed to sync problem to database");
 
   const languages = await Language.find();
 

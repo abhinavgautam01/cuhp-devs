@@ -1,3 +1,7 @@
+"use client";
+
+import { PlusCircle, Star, FolderOpen } from "lucide-react";
+
 interface SnippetsSidebarProps {
     collections: Array<{
         label: string;
@@ -15,7 +19,7 @@ export function SnippetsSidebar({ collections, recentTags }: SnippetsSidebarProp
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xs font-bold text-white/30 uppercase tracking-widest">Collections</h3>
                     <button className="text-white/20 hover:text-[#1337ec] transition-colors">
-                        <span className="material-icons-round text-sm">add_circle_outline</span>
+                        <PlusCircle size={14} />
                     </button>
                 </div>
                 <nav className="space-y-1">
@@ -23,14 +27,12 @@ export function SnippetsSidebar({ collections, recentTags }: SnippetsSidebarProp
                         <button
                             key={col.label}
                             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${col.active
-                                    ? "bg-[#1337ec]/10 text-[#1337ec] font-bold"
-                                    : "text-white/50 hover:bg-white/5 hover:text-white"
+                                ? "bg-[#1337ec]/10 text-[#1337ec] font-bold"
+                                : "text-white/50 hover:bg-white/5 hover:text-white"
                                 }`}
                         >
                             <div className="flex items-center gap-3">
-                                <span className="material-icons-round text-lg">
-                                    {col.label === 'Favorites' ? 'star_outline' : 'folder_open'}
-                                </span>
+                                {col.label === 'Favorites' ? <Star size={18} /> : <FolderOpen size={18} />}
                                 {col.label}
                             </div>
                             <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40">

@@ -13,6 +13,7 @@ export const useSocket = (token: string | null): {
     sendMessage: (roomName: string, content: string) => void;
 } => {
     const socketRef = useRef<Socket | null>(null);
+    const hasLoggedConnectErrorRef = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
@@ -22,12 +23,15 @@ export const useSocket = (token: string | null): {
             auth: { token },
             transports: ["websocket"],
             timeout: 10000,
+            reconnectionAttempts: 3,
+            reconnectionDelay: 1000,
         });
 
         socketRef.current = socket;
 
         socket.on("connect", () => {
             setIsConnected(true);
+            hasLoggedConnectErrorRef.current = false;
             console.log("Socket connected:", socket.id);
         });
 
@@ -37,7 +41,10 @@ export const useSocket = (token: string | null): {
         });
 
         socket.on("connect_error", (err) => {
-            console.error("Socket connection error:", err.message);
+            if (!hasLoggedConnectErrorRef.current) {
+                console.warn("Socket connection error:", err.message);
+                hasLoggedConnectErrorRef.current = true;
+            }
         });
 
         return () => {

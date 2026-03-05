@@ -146,8 +146,8 @@ int main() {
     cin.tie(NULL);
 
 ${parsed.inputs
-  .map((i: any) => `    ${mapCppType(i.type)} ${i.name}; cin >> ${i.name};`)
-  .join("\n")}
+      .map((i: any) => `    ${mapCppType(i.type)} ${i.name}; cin >> ${i.name};`)
+      .join("\n")}
 
     auto result = ${parsed.functionName}(${args});
     cout << result;
@@ -168,11 +168,11 @@ fn main() {
     let mut iter = input.split_whitespace();
 
 ${parsed.inputs
-  .map(
-    (i: any) =>
-      `    let ${i.name}: i32 = iter.next().unwrap().parse().unwrap();`,
-  )
-  .join("\n")}
+      .map(
+        (i: any) =>
+          `    let ${i.name}: i32 = iter.next().unwrap().parse().unwrap();`,
+      )
+      .join("\n")}
 
     let result = ${parsed.functionName}(${args});
     println!("{}", result);
@@ -188,8 +188,8 @@ import sys
 input_data = list(map(int, sys.stdin.read().strip().split()))
 
 ${parsed.inputs
-  .map((i: any, idx: number) => `${i.name} = input_data[${idx}]`)
-  .join("\n")}
+      .map((i: any, idx: number) => `${i.name} = input_data[${idx}]`)
+      .join("\n")}
 
 result = ${parsed.functionName}(${args})
 print(result)
@@ -205,8 +205,8 @@ const fs = require("fs");
 const input = fs.readFileSync(0, "utf-8").trim().split(/\\s+/);
 
 ${parsed.inputs
-  .map((i: any, idx: number) => `const ${i.name} = Number(input[${idx}]);`)
-  .join("\n")}
+      .map((i: any, idx: number) => `const ${i.name} = Number(input[${idx}]);`)
+      .join("\n")}
 
 const result = ${parsed.functionName}(${args});
 console.log(result);

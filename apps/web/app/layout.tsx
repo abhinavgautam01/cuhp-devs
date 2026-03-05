@@ -29,10 +29,6 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
         />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
-        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ToastProvider />

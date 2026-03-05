@@ -6,7 +6,7 @@ export const getProblems = async (_: Request, res: Response) => {
     const problems = await Problem.find({
       hidden: { $ne: true }, // ✅ include false + undefined
     })
-      .select("title slug difficulty solved")
+      .select("title slug difficulty solved description")
       .lean();
 
     return res.status(200).json(problems);

@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { Post } from "@repo/db";
+import { Post } from "@repo/db/models/post.model.js";
 
 export const registerPostEvents = (io: Server, socket: Socket) => {
     // Only one change stream listener is needed per server instance, 
@@ -36,6 +36,11 @@ export const initPostChangeStream = (io: Server) => {
                     console.error("Error in Post change stream:", error);
                 }
             }
+        });
+
+        changeStream.on("error", (error) => {
+            console.error("Post change stream error:", error);
+            changeStreamActive = false;
         });
 
         changeStreamActive = true;

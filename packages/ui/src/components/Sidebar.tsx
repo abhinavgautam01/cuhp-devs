@@ -1,6 +1,15 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
-import { SquareTerminal } from "lucide-react";
+import {
+    SquareTerminal,
+    LayoutDashboard,
+    Code2,
+    Users,
+    Library,
+    Settings
+} from "lucide-react";
 
 interface User {
     name: string;
@@ -24,6 +33,13 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const safeUser: User = user ?? DEFAULT_USER;
 
+    const navItems = [
+        { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
+        { id: "practice", icon: Code2, label: "Practice" },
+        { id: "community", icon: Users, label: "Community" },
+        { id: "resources", icon: Library, label: "Resources" },
+    ];
+
     return (
         <aside
             className={`border-r shrink-0 border-[#1337ec]/10 bg-[#101322] top-0 h-screen flex flex-col py-6 px-4 transition-all duration-300 ${isCollapsed ? "w-20 items-center" : "w-64 items-start"
@@ -46,12 +62,7 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
 
             {/* Navigation */}
             <nav className="flex-1 w-full space-y-2">
-                {[
-                    { id: "dashboard", icon: "dashboard", label: "Dashboard" },
-                    { id: "practice", icon: "code", label: "Practice" },
-                    { id: "community", icon: "groups", label: "Community" },
-                    { id: "resources", icon: "library_books", label: "Resources" },
-                ].map((item) => (
+                {navItems.map((item) => (
                     <Link
                         key={item.id}
                         href={`/${item.id}`}
@@ -64,7 +75,7 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                             }
             `}
                     >
-                        <span className="material-icons-round">{item.icon}</span>
+                        <item.icon size={20} />
                         <span className={`font-medium ${isCollapsed ? "hidden" : "block"}`}>{item.label}</span>
                     </Link>
                 ))}
@@ -76,7 +87,7 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                     href="/settings"
                     className="flex items-center gap-4 px-3 py-3 text-slate-400 hover:bg-[#1337ec]/5 hover:text-[#1337ec] rounded-xl transition-all"
                 >
-                    <span className="material-icons-round">settings</span>
+                    <Settings size={20} />
                     <span className={`font-medium ${isCollapsed ? "hidden" : "block"}`}>Settings</span>
                 </Link>
 

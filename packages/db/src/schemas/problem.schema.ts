@@ -50,16 +50,24 @@ export const ProblemSchema = new Schema<IProblem>(
 		],
 		tags: [
 			{
-				type: Schema.Types.ObjectId, 
+				type: Schema.Types.ObjectId,
 				ref: "User",
-			  reqired: true,	
+				reqired: true,
 			}
 		],
-		createdBy: { 
-			type: Schema.Types.ObjectId, 
-			ref: "User", 
-			required: true 
+		createdBy: {
+			type: Schema.Types.ObjectId,
+			ref: "User",
+			required: false
 		},
-  },
-  { timestamps: true }	
+		hidden: {
+			type: Boolean,
+			default: false,
+		},
+		solved: {
+			type: Number,
+			default: 0,
+		},
+	},
+	{ timestamps: true }
 );

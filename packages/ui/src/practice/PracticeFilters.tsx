@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from 'react';
+import { Search } from "lucide-react";
 
 interface PracticeFiltersProps {
     onSearch: (query: string) => void;
@@ -27,9 +28,7 @@ export function PracticeFilters({ onSearch, onCategoryChange, activeCategory }: 
                 </div>
 
                 <div className="relative w-full md:w-96 group">
-                    <span className="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-neon transition-colors">
-                        search
-                    </span>
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-neon transition-colors" size={20} />
                     <input
                         type="text"
                         placeholder="Search by problem name or tag..."
@@ -46,8 +45,8 @@ export function PracticeFilters({ onSearch, onCategoryChange, activeCategory }: 
                             key={cat}
                             onClick={() => onCategoryChange(cat)}
                             className={`px-6 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${activeCategory === cat
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                    : "bg-slate-900 border border-primary/10 text-slate-400 hover:border-primary/40"
+                                ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                : "bg-slate-900 border border-primary/10 text-slate-400 hover:border-primary/40"
                                 }`}
                         >
                             {cat}

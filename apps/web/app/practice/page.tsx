@@ -1,8 +1,10 @@
 import { serverApiFetch } from "../../lib/server-api";
 import { SidebarWrapper } from "../../components/SidebarWrapper";
-import { ProblemCard } from "@repo/ui";
+import { ProblemCard } from "@repo/ui/practice/ProblemCard";
 import { PracticeFiltersWrapper } from "../../components/practice/PracticeFiltersWrapper";
 import { Metadata } from "next";
+import { Flame, Bell, SearchX, ChevronDown } from "lucide-react";
+
 
 export const metadata: Metadata = {
     title: "Practice: Coding Challenges | NexusCS",
@@ -83,9 +85,9 @@ export default async function PracticePage({
                 {/* Header Section */}
                 <div className="bg-slate-900/80 backdrop-blur-md border-b border-[#1337ec]/10 px-8 py-3 flex items-center justify-between z-10">
                     <div className="flex items-center gap-4">
-                        <div className="bg-gradient-to-br from-orange-500 to-red-600 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-orange-500/20">
-                            <span className="material-icons-round text-white text-lg">local_fire_department</span>
-                            <span className="text-white font-bold text-sm">14-Day Streak</span>
+                        <div className=" px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-gray-500/20">
+                            <Flame className="text-white" size={18} />
+                            <span className="text-white font-bold text-sm">0-Day Streak</span>
                         </div>
                         <p className="text-sm text-slate-400 hidden sm:block">Solve your daily problem to maintain your ranking!</p>
                     </div>
@@ -95,10 +97,10 @@ export default async function PracticePage({
                             <div className="w-24 h-1.5 bg-slate-800 rounded-full">
                                 <div className="w-2/3 h-full bg-accent-neon rounded-full"></div>
                             </div>
-                            <span className="text-xs font-bold text-accent-neon">2/3</span>
+                            <span className="text-xs font-bold text-accent-neon">0/1</span>
                         </div>
                         <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                            <span className="material-icons-round">notifications</span>
+                            <Bell size={20} />
                         </button>
                     </div>
                 </div>
@@ -134,7 +136,7 @@ export default async function PracticePage({
                             ))}
                             {filteredProblems.length === 0 && (
                                 <div className="col-span-full py-20 text-center">
-                                    <span className="material-icons-round text-6xl text-slate-700 mb-4 block">search_off</span>
+                                    <SearchX className="mx-auto mb-4 text-slate-700" size={64} />
                                     <h2 className="text-xl font-bold text-slate-400">No challenges found matching your search.</h2>
                                     <p className="text-slate-500">Try a different keyword or category.</p>
                                 </div>
@@ -145,7 +147,7 @@ export default async function PracticePage({
                         <div className="flex items-center justify-center py-10">
                             <button className="px-8 py-3 border border-primary/20 bg-primary/5 text-primary rounded-xl font-bold hover:bg-primary/10 transition-all flex items-center gap-2">
                                 <span>Load More Challenges</span>
-                                <span className="material-icons-round">keyboard_arrow_down</span>
+                                <ChevronDown size={20} />
                             </button>
                         </div>
                     </div>

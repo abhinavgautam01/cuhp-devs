@@ -1,4 +1,7 @@
-import React from 'react';
+"use client";
+
+import { TrendingUp, Trophy } from "lucide-react";
+import { DynamicIcon } from "../components/Icon";
 
 interface ProblemCardProps {
     problem: {
@@ -29,19 +32,15 @@ export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
 
     return (
         <div className={`group relative bg-slate-900 border ${problem.isDaily ? 'border-accent-neon/30 hover:shadow-[0_0_20px_rgba(0,210,255,0.1)]' : 'border-primary/10 hover:border-primary/40'} rounded-2xl p-6 transition-all flex flex-col`}>
-            {problem.isDaily && (
-                <div className="absolute -top-3 left-6">
-                    <span className="bg-accent-neon text-slate-900 text-[10px] font-black uppercase tracking-tighter px-3 py-1 rounded-full shadow-lg">
-                        Daily Special
-                    </span>
-                </div>
-            )}
+
 
             <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-xl ${problem.isDaily ? 'bg-accent-neon/10' : 'bg-primary/10'}`}>
-                    <span className={`material-icons-round ${problem.isDaily ? 'text-accent-neon' : 'text-primary'}`}>
-                        {icon}
-                    </span>
+                    <DynamicIcon
+                        name={icon}
+                        className={problem.isDaily ? 'text-accent-neon' : 'text-primary'}
+                        size={24}
+                    />
                 </div>
                 <div className="text-right">
                     <span className={`text-[10px] font-bold px-2 py-1 rounded ${difficultyColor}`}>
@@ -61,11 +60,11 @@ export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
             <div className="space-y-4">
                 <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-500 flex items-center gap-1">
-                        <span className="material-icons-round text-[14px]">trending_up</span>
+                        <TrendingUp size={14} />
                         {problem.successRate || '75%'} Success
                     </span>
                     <span className="text-slate-300 font-bold flex items-center gap-1">
-                        <span className="material-icons-round text-yellow-500 text-sm">emoji_events</span>
+                        <Trophy className="text-yellow-500" size={14} />
                         Badge Available
                     </span>
                 </div>
@@ -73,11 +72,11 @@ export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
                 <button
                     onClick={() => onSolve?.(problem.slug)}
                     className={`w-full py-2.5 rounded-xl font-bold transition-all transform group-hover:scale-[1.02] ${problem.isDaily
-                            ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
-                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                        ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                         }`}
                 >
-                    {problem.isDaily ? 'Attempt Now' : 'Solve Problem'}
+                    {'Solve Problem'}
                 </button>
             </div>
         </div>
