@@ -53,7 +53,7 @@ export const signup = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 4 * 24 * 60 * 60 * 1000,
     });
 
@@ -61,7 +61,7 @@ export const signup = async (req: Request, res: Response) => {
       message: "User registered successfully",
       user: {
         id: user._id.toString(),
-       name: user.fullName,
+        name: user.fullName,
         email: user.email,
         studentId: user.studentId,
         onboardingCompleted: user.onboardingCompleted,
@@ -110,8 +110,8 @@ export const signin = async (req: Request, res: Response) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days 
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
     })
 
     return res.status(200).json({
