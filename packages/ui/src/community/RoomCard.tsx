@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, Zap, Star, Activity, ArrowRight } from "lucide-react";
+import { Users, Zap, Star, Activity, ArrowRight } from "../icons";
 
 interface RoomCardProps {
     room: {

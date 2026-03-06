@@ -3,8 +3,7 @@ import { SidebarWrapper } from "../../components/SidebarWrapper";
 import { ProblemCard } from "@repo/ui/practice/ProblemCard";
 import { PracticeFiltersWrapper } from "../../components/practice/PracticeFiltersWrapper";
 import { Metadata } from "next";
-import { Flame, Bell, SearchX, ChevronDown } from "lucide-react";
-
+import { Flame, Bell, SearchX, ChevronDown } from "../../lib/icons";
 
 export const metadata: Metadata = {
     title: "Practice: Coding Challenges | NexusCS",
@@ -123,6 +122,7 @@ export default async function PracticePage({
                                         isDaily: true,
                                         successRate: "72.4%"
                                     }}
+                                    href={`/problem/${dailyProblem.slug}`}
                                 />
                             )}
                             {otherProblems.map(p => (
@@ -132,6 +132,7 @@ export default async function PracticePage({
                                         ...(p as Problem),
                                         successRate: "85.2%"
                                     }}
+                                    href={`/problem/${p.slug}`}
                                 />
                             ))}
                             {filteredProblems.length === 0 && (

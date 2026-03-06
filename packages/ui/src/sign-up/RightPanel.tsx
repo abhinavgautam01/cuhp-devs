@@ -1,7 +1,5 @@
 
-import { BiTerminal } from "react-icons/bi";
-import { MdHub } from "react-icons/md";
-import { CgBolt } from "react-icons/cg";
+import { BiTerminal, MdHub, CgBolt } from "../icons";
 
 
 interface RightPanelProps {

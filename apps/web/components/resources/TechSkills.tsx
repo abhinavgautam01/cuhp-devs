@@ -10,7 +10,7 @@ import {
     MdTerminal,
     MdCategory,
     MdMoreHoriz
-} from "react-icons/md";
+} from "../../lib/icons";
 
 // Map string identifiers from mock data to actual React components
 const IconMap: Record<string, React.ElementType> = {

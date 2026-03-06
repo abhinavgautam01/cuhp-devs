@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Code, HelpCircle, Trophy } from "lucide-react";
+import { Code, HelpCircle, Trophy } from "../icons";
 
 interface FeedComposeProps {
     onPost?: (data: { content: string; type: string }) => Promise<void>;

@@ -19,7 +19,7 @@ export const initPostChangeStream = (io: Server) => {
         // Watch the Post collection
         const changeStream = Post.watch();
 
-        changeStream.on("change", async (change) => {
+        changeStream.on("change", async (change: any) => {
             if (change.operationType === "insert") {
                 try {
                     const postId = change.fullDocument._id;
@@ -38,8 +38,12 @@ export const initPostChangeStream = (io: Server) => {
             }
         });
 
-        changeStream.on("error", (error) => {
-            console.error("Post change stream error:", error);
+        changeStream.on("error", (error: any) => {
+            if (error.code === 40573 || error.codeName === "Location40573") {
+                console.warn("[Post Change Stream] Disabled: MongoDB is not running as a replica set. New post notifications will not be broadcasted automatically.");
+            } else {
+                console.error("Post change stream error:", error);
+            }
             changeStreamActive = false;
         });
 

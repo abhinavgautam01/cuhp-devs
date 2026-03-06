@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, LayoutGrid, List, Plus, MessageSquare } from "lucide-react";
+import { TrendingUp, LayoutGrid, List, Plus, MessageSquare } from "../icons";
 import { RoomCard } from "./RoomCard";
 import { RoomCategoryCard } from "./RoomCategoryCard";
 import { RoomsRightSidebar } from "./RoomsRightSidebar";

@@ -12,7 +12,7 @@ import {
     Flame,
     Calendar,
     MoreHorizontal
-} from "lucide-react";
+} from "../icons";
 import { DynamicIcon } from "../components/Icon";
 
 

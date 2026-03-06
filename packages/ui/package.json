@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./icons": "./src/icons.ts",
     "./*": "./src/*.tsx"
   },
   "scripts": {
@@ -27,8 +28,11 @@
     "typescript": "5.9.2"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.574.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   }
 }

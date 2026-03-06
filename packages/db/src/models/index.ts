@@ -6,6 +6,7 @@ import "./language.model";
 import "./defaultCode.model";
 import "./chatroom.model";
 import "./message.model";
+import "./post.model";
 import "./testcase.model";
 
 // export..!
@@ -16,4 +17,5 @@ export { Language } from "./language.model";
 export { DefaultCode } from "./defaultCode.model";
 export { ChatRoom } from "./chatroom.model";
 export { Message } from "./message.model";
+export { Post } from "./post.model";
 export { TestCase } from "./testcase.model";

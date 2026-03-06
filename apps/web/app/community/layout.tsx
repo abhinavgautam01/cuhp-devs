@@ -1,7 +1,7 @@
 import { SidebarWrapper } from "../../components/SidebarWrapper";
 import Link from "next/link";
 import { ReactNode } from "react";
-import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "react-icons/md";
+import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "../../lib/icons";
 import { serverApiFetch } from "../../lib/server-api";
 
 interface LayoutProps {
@@ -43,7 +43,7 @@ export default async function CommunityLayout({ children }: LayoutProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation */}
-        <nav className="sticky top-0 z-50 border-b border-[#1337ec]/10 bg-[#101322]/80 backdrop-blur-md">
+        <nav className="sticky top-0 z-50 border-b border-[#1337ec]/10 bg-[#101322]/80pnpm backdrop-blur-md">
           <div className="px-8 h-16 flex items-center justify-between gap-8">
             {/* Nav Links */}
             <div className="flex items-center gap-8 text-sm font-medium">

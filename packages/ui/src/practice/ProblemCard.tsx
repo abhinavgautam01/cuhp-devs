@@ -1,6 +1,7 @@
 "use client";
 
-import { TrendingUp, Trophy } from "lucide-react";
+import Link from "next/link";
+import { TrendingUp, Trophy } from "../icons";
 import { DynamicIcon } from "../components/Icon";
 
 interface ProblemCardProps {
@@ -15,9 +16,10 @@ interface ProblemCardProps {
         isDaily?: boolean;
     };
     onSolve?: (slug: string) => void;
+    href?: string;
 }
 
-export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
+export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
     const difficultyColor = {
         EASY: 'text-emerald-500 bg-emerald-500/10',
         MEDIUM: 'text-yellow-500 bg-yellow-500/10',
@@ -29,6 +31,18 @@ export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
         MEDIUM: 'psychology',
         HARD: 'dynamic_form',
     }[problem.difficulty];
+
+    const ActionButton = () => (
+        <button
+            onClick={() => !href && onSolve?.(problem.slug)}
+            className={`w-full py-2.5 rounded-xl font-bold transition-all transform group-hover:scale-[1.02] ${problem.isDaily
+                ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                }`}
+        >
+            {problem.isDaily ? 'Attempt Now' : 'Solve Problem'}
+        </button>
+    );
 
     return (
         <div className={`group relative bg-slate-900 border ${problem.isDaily ? 'border-accent-neon/30 hover:shadow-[0_0_20px_rgba(0,210,255,0.1)]' : 'border-primary/10 hover:border-primary/40'} rounded-2xl p-6 transition-all flex flex-col`}>
@@ -69,15 +83,13 @@ export function ProblemCard({ problem, onSolve }: ProblemCardProps) {
                     </span>
                 </div>
 
-                <button
-                    onClick={() => onSolve?.(problem.slug)}
-                    className={`w-full py-2.5 rounded-xl font-bold transition-all transform group-hover:scale-[1.02] ${problem.isDaily
-                        ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                        }`}
-                >
-                    {'Solve Problem'}
-                </button>
+                {href ? (
+                    <Link href={href}>
+                        <ActionButton />
+                    </Link>
+                ) : (
+                    <ActionButton />
+                )}
             </div>
         </div>
     );

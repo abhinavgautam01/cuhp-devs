@@ -1,6 +1,6 @@
 import { SidebarWrapper } from "../../components/SidebarWrapper";
 import { ReactNode } from "react";
-import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "react-icons/md";
+import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "../../lib/icons";
 import { serverApiFetch } from "../../lib/server-api";
 import Link from "next/link";
 

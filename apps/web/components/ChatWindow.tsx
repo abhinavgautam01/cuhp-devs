@@ -9,7 +9,7 @@ import {
     Shield,
     Plus,
     Smile,
-    Image as ImageIcon,
+    ImageIcon,
     Bell,
     ChevronDown,
     Brain,
@@ -23,8 +23,8 @@ import {
     Settings,
     User,
     FileText,
-    Link as LinkIcon
-} from "lucide-react";
+    LinkIcon
+} from "../lib/icons";
 
 interface Message {
     _id: string;
@@ -488,7 +488,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                                 <p className="text-sm font-bold truncate text-white/80 group-hover:text-white transition-colors">
                                                     {displayName} {isSelf && "(You)"}
                                                 </p>
-                                                <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">{isOnline ? "Online": 'Offline'}</p>
+                                                <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">{isOnline ? "Online" : 'Offline'}</p>
                                             </div>
                                         </div>
                                     );

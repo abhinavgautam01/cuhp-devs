@@ -1,4 +1,4 @@
-import { BarChart2, Zap, Calendar, Star, ChevronRight } from "lucide-react";
+import { BarChart2, Zap, Calendar, Star, ChevronRight } from "../icons";
 
 interface CommunityRightSidebarProps {
     leaderboard: Array<{

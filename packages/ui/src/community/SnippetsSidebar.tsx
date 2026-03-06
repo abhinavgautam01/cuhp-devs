@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircle, Star, FolderOpen } from "lucide-react";
+import { PlusCircle, Star, FolderOpen } from "../icons";
 
 interface SnippetsSidebarProps {
     collections: Array<{

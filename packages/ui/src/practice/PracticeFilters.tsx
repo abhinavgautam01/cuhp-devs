@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Search } from "lucide-react";
+import { Search } from "../icons";
 
 interface PracticeFiltersProps {
     onSearch: (query: string) => void;

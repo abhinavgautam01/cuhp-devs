@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { Share2, PencilLine, Trash2, Copy, ArrowRight } from "lucide-react";
+import { Share2, PencilLine, Trash2, Copy, ArrowRight } from "../icons";
 
 interface SnippetCardProps {
     snippet: {

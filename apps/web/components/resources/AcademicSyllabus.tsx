@@ -5,6 +5,7 @@ import Image from "next/image";
 import { SemesterData } from "../../lib/mock-resources-data";
 import { MdSchool, MdDownload, MdStar, MdAutoStories } from "react-icons/md";
 
+
 interface AcademicSyllabusProps {
   initialData: SemesterData;
 }

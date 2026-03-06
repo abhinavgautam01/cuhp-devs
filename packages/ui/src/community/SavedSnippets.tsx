@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, List, Plus } from "lucide-react";
+import { LayoutGrid, List, Plus } from "../icons";
 import { SnippetCard } from "./SnippetCard";
 import { SnippetsSidebar } from "./SnippetsSidebar";
 

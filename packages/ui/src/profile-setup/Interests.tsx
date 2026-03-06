@@ -13,7 +13,7 @@ import {
     Cpu,
     Network,
     Infinity
-} from "lucide-react";
+} from "../icons";
 
 export interface Interest {
     id: string;

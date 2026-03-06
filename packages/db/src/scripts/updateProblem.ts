@@ -43,7 +43,7 @@ export async function updateProblem(slug: string) {
   const languages = await Language.find();
 
   const languageMap = new Map(
-    languages.map((l) => [l.name, l._id])
+    languages.map((l) => [l.name.toLowerCase(), l._id])
   );
 
   await Promise.all(
@@ -57,7 +57,7 @@ export async function updateProblem(slug: string) {
       const code = await readFileSafe(filePath);
       if (!code) return;
 
-      const languageId = languageMap.get(langName);
+      const languageId = languageMap.get(langName.toLowerCase());
       if (!languageId) return;
 
       await DefaultCode.findOneAndUpdate(

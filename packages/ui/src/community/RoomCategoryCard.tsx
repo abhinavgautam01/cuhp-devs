@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, Users, ChevronRight, Cpu, Layers, Code, Shield, Globe, Terminal } from "lucide-react";
+import { User, Users, ChevronRight, Cpu, Layers, Code, Shield, Globe, Terminal } from "../icons";
 
 interface RoomCategoryCardProps {
     room: {

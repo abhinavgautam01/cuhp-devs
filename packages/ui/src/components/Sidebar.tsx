@@ -9,7 +9,7 @@ import {
     Users,
     Library,
     Settings
-} from "lucide-react";
+} from "../icons";
 
 interface User {
     name: string;

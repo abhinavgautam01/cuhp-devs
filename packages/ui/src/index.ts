@@ -15,6 +15,8 @@ export { default as SavedSnippets } from "./community/SavedSnippets";
 export * from "./button";
 export * from "./practice/ProblemCard";
 export * from "./practice/PracticeFilters";
+export * from "./practice/ProblemInterface";
 export * from "./components/Icon";
+export * from "./icons";
 
 

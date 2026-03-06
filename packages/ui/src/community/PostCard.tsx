@@ -1,4 +1,4 @@
-import { ThumbsUp, MessageSquare, Bug, MoreHorizontal, Bookmark } from "lucide-react";
+import { ThumbsUp, MessageSquare, Bug, MoreHorizontal, Bookmark } from "../icons";
 
 interface PostCardProps {
     post: {

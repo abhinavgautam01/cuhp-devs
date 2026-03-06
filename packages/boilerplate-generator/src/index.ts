@@ -3,7 +3,7 @@ import path from "path";
 
 /* ----------------------------- PARSER ----------------------------- */
 
-function parseStructure(data: string) {
+export function parseStructure(data: string) {
   const lines = data.split("\n").map((l) => l.trim());
 
   const result = {
@@ -215,7 +215,27 @@ console.log(result);
 
 /* ----------------------------- GENERATOR CORE ----------------------------- */
 
-function generateForSlug(slug: string) {
+export function generateBoilerplates(structureData: string) {
+  const parsed = parseStructure(structureData);
+  return {
+    cpp: generateCppBoilerplate(parsed),
+    rust: generateRustBoilerplate(parsed),
+    python: generatePythonBoilerplate(parsed),
+    javascript: generateJsBoilerplate(parsed),
+    cppFull: generateCppFullBoilerplate(parsed),
+    rustFull: generateRustFullFullBoilerplate(parsed),
+    pythonFull: generatePythonFullBoilerplate(parsed),
+    javascriptFull: generateJsFullBoilerplate(parsed),
+  };
+}
+
+// Keep the old function helper for CLI/compatibility if needed, 
+// but refactor to use generateBoilerplates
+function generateRustFullFullBoilerplate(parsed: any) {
+  return generateRustFullBoilerplate(parsed);
+}
+
+export function generateForSlug(slug: string) {
   const basePath = path.join(process.cwd(), "..", "problems", slug);
   const structurePath = path.join(basePath, "Structure.md");
 
@@ -224,7 +244,8 @@ function generateForSlug(slug: string) {
     return;
   }
 
-  const parsed = parseStructure(fs.readFileSync(structurePath, "utf-8"));
+  const structureData = fs.readFileSync(structurePath, "utf-8");
+  const codes = generateBoilerplates(structureData);
 
   const boilerplateDir = path.join(basePath, "boilerplate");
   const boilerplateFullDir = path.join(basePath, "boilerplate-full");
@@ -232,63 +253,41 @@ function generateForSlug(slug: string) {
   fs.mkdirSync(boilerplateDir, { recursive: true });
   fs.mkdirSync(boilerplateFullDir, { recursive: true });
 
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.cpp"),
-    generateCppBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.rs"),
-    generateRustBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.py"),
-    generatePythonBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.js"),
-    generateJsBoilerplate(parsed),
-  );
+  fs.writeFileSync(path.join(boilerplateDir, "function.cpp"), codes.cpp);
+  fs.writeFileSync(path.join(boilerplateDir, "function.rs"), codes.rust);
+  fs.writeFileSync(path.join(boilerplateDir, "function.py"), codes.python);
+  fs.writeFileSync(path.join(boilerplateDir, "function.js"), codes.javascript);
 
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.cpp"),
-    generateCppFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.rs"),
-    generateRustFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.py"),
-    generatePythonFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.js"),
-    generateJsFullBoilerplate(parsed),
-  );
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.cpp"), codes.cppFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.rs"), codes.rustFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.py"), codes.pythonFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.js"), codes.javascriptFull);
 
   console.log(`✅ Generated for ${slug}`);
 }
 
 /* ----------------------------- ENTRY ----------------------------- */
 
-const arg = process.argv[2];
-const problemsRoot = path.join(process.cwd(), "..", "problems");
+if (require.main === module) {
+  const arg = process.argv[2];
+  const problemsRoot = path.join(process.cwd(), "..", "problems");
 
-if (!arg) {
-  console.log("Provide problem slug or 'all'");
-  process.exit(1);
-}
-
-if (arg === "all") {
-  const slugs = fs
-    .readdirSync(problemsRoot)
-    .filter((f) => fs.statSync(path.join(problemsRoot, f)).isDirectory());
-
-  for (const slug of slugs) {
-    generateForSlug(slug);
+  if (!arg) {
+    console.log("Provide problem slug or 'all'");
+    process.exit(1);
   }
 
-  console.log("🔥 All problems generated");
-} else {
-  generateForSlug(arg);
+  if (arg === "all") {
+    const slugs = fs
+      .readdirSync(problemsRoot)
+      .filter((f) => fs.statSync(path.join(problemsRoot, f)).isDirectory());
+
+    for (const slug of slugs) {
+      generateForSlug(slug);
+    }
+
+    console.log("🔥 All problems generated");
+  } else {
+    generateForSlug(arg);
+  }
 }

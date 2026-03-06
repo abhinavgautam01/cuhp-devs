@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Activity, Zap, Users } from "lucide-react";
+import { Trophy, Activity, Zap, Users } from "../icons";
 
 interface RoomsRightSidebarProps {
     masters: Array<{

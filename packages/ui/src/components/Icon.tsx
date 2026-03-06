@@ -1,5 +1,5 @@
 import React from "react";
-import * as LucideIcons from "lucide-react";
+import * as LucideIcons from "../icons";
 import { LucideProps } from "lucide-react";
 
 /**
