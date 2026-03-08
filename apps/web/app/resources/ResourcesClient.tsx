@@ -1,0 +1,59 @@
+"use client";
+
+import { useState } from "react";
+import { AcademicSyllabus } from "../../components/resources/AcademicSyllabus";
+import { TechSkills } from "../../components/resources/TechSkills";
+import { TelegramLinks } from "../../components/resources/TelegramLinks";
+import { DirectCourses } from "../../components/resources/DirectCourses";
+import { MdSchool, MdSend, MdFolderZip } from "react-icons/md";
+
+// Define the type based on your mock data structure
+interface ResourcesClientProps {
+    data: any; // Replace 'any' with your actual ResourcesDataResponse type
+}
+
+export function ResourcesClient({ data }: ResourcesClientProps) {
+    const [activeTab, setActiveTab] = useState("academic");
+
+    const tabs = [
+        { id: "academic", label: "Academic", icon: MdSchool },
+
+        // TODO: will see later...if want to add this...!
+        // { id: "tech", label: "Tech Skills", icon: MdTerminal },
+        { id: "telegram", label: "Groups", icon: MdSend },
+        { id: "vault", label: "The Vault", icon: MdFolderZip },
+    ];
+
+    return (
+        <>
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap justify-center gap-2 mb-10 p-1 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-sm">
+                {tabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                            activeTab === tab.id
+                                ? "bg-[#1337ec] text-white shadow-[0_0_20px_rgba(19,55,236,0.3)]"
+                                : "text-slate-400 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                        <tab.icon size={20} />
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="animate-slide-up">
+                {/* TODO: add syllabus, previous question papers..! */}
+                {activeTab === "academic" && <AcademicSyllabus initialData={data.academicSyllabus} />}
+
+                {/* TODO: will see later...if want to add this...! */}
+                {/* {activeTab === "tech" && <TechSkills categories={data.techSkills} />} */}
+                {activeTab === "telegram" && <TelegramLinks />}
+                {activeTab === "vault" && <DirectCourses />}
+            </div>
+        </>
+    );
+}

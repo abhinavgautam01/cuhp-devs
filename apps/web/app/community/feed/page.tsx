@@ -1,20 +1,21 @@
-import Feed from "@repo/ui/community/Feed";
+import FeedClient from "../../../components/FeedClient";
 import { serverApiFetch } from "../../../lib/server-api";
 
 export default async function CommunityFeedPage() {
-    let feedData = {
-        trendingTags: [],
+    let initialData = {
+        trendingTags: ["react", "nodejs", "webdev"],
         posts: [],
         leaderboard: [],
         events: [],
     };
 
     try {
-        feedData = await serverApiFetch("/user/community/feed");
+        // Fetch real posts from our new endpoint
+        const posts = await serverApiFetch("/posts");
+        initialData.posts = posts || [];
     } catch (error) {
         console.error("Failed to fetch community feed:", error);
-        // Fallback to empty data or show error - in a real app would use error.tsx
     }
 
-    return <Feed data={feedData} />;
+    return <FeedClient initialData={initialData} />;
 }

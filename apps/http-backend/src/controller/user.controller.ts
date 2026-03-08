@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { User, ChatRoom, Message, ChatRoomName } from "@repo/db/index.js";
+import { User, ChatRoom, Message, ChatRoomName, IUser } from "@repo/db/index.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -247,47 +247,49 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
             roomsSeeded = true;
         }
 
+        const allRooms = await ChatRoom.find({}).lean();
+        const roomMap = new Map(allRooms.map(r => [r.name, r]));
+
+        const trendingRooms = [
+            {
+                title: "Deep Learning",
+                description: "Discussing PyTorch, TensorFlow and Neural Network architectures.",
+                badge: "Hot Room",
+                members: "0", // Will be updated by socket
+                icon: "neurology",
+                avatars: [
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuD_MRocfAc3G7cAcAopZxpRTMMkXNFumYLVw-XomndRyV5EcHVrdD65-55rfGYIg9iKQQutDwr02e3qB7zJ9OzKXwQupZ5tFbqDUnYYubfQ4T-T2FIrp9YJehyWAr-3jJa7sbeGZLm54o6NJ1kDiI6bx7ji575hLuMPxdcC2Z6qUj2gEqH50i5Org4eFRMTWk1yUi6iI0bRhR7pUdJEd7x1RRkuVu5wrK5eWw_cCaf5vvoRzSSRupJ-qD87iz1dVtL0uKo5B85b2dmr",
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuAes5h4fmh72X8ydxiowrLL-ybzOL38IODt3PqyfCRPSo-ARtBXANbfbKzMb-bN7y3CFm5AxwBoPDb-R7_UJFcDB1Z_mh4iADbuaLxu1R7QfXupK-do-lkCAvWnI2h6LCQ_0kHPFRm-ybbZiBJ2who5yOndYpLqUkFm4xBNOsZc5ZW0XhNw_t2DXhtQ2_e7VdFEvsrI2kplh3Kgp5GkNs3xDPfIKOGP2zPKGo0qtltg8J-4YM3WUDqkJujrv748MIRE6mCRuI_qD5G4",
+                ]
+            },
+            {
+                title: "Data Structures & Algorithms",
+                description: "Memory safety, ownership, and low-level optimization in Rust.",
+                badge: "Featured",
+                members: "0",
+                icon: "data_object",
+                avatars: [
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuBiHXl0P06fpJnbhQctvcP96mrHRjEHG_v5CCxmj1EesAwjaLDW7psQM_Qs9fuwyz59btEc9Avof9pJuR0ZXeBznXEQsE4sWcCMcd5mWt7C_HTvvQcGT_wqQkFD1Vq58M_SRSbFWUuSTuM-7Gs8DrYf5FlHS5f4--8cY6WgUVy2gLF2LplRYIppQloKsxbArJ6NE3FKC3nf0vUibSHrJUR5lh7ZlcWXF4IQXYS1KxNpXecFAycr3WcuPWjuGQ5MrQjK4aHHHBRZKLoi",
+                    "https://lh3.googleusercontent.com/aida-public/AB6AXuCfpcVKWjO4AEFrvRQbTlN2oFj7Cg9JZIGigtJzhKAjVEVG4qtYijisaj3cfaD0tJ23nms7jQi3WiRtD-WrjQZp8Cb9oRV1f7TOWJoXypeK5IFQL6HgIcoflooNNfDvsjFRiLCMNTQ8ftdkBYmoznaZQizRJGzXc9gsvfnW_X7OziwtMw6_WlfcaiDyHLWTrZXkDUwWiz_BWN5femIxz4bnoGrtD9e5qdcAsJ3XZek9lMAh2GE7wSCJ6SLaJG6iqFopyOsBtPfmp4Yy",
+                ]
+            }
+        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
+
+        const communityRooms = [
+            { title: "Machine Learning", members: "0", icon: "smart_toy" },
+            { title: "Blockchain", members: "0", icon: "hub" },
+            { title: "Data Structures & Algorithms", members: "0", icon: "memory" },
+            { title: "Deep Learning", members: "0", icon: "javascript" }
+        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
+
         const roomsData = {
-            trendingRooms: [
-                {
-                    id: 1,
-                    title: "Deep Learning",
-                    description: "Discussing PyTorch, TensorFlow and Neural Network architectures.",
-                    badge: "Hot Room",
-                    members: "2.1k",
-                    icon: "neurology",
-                    avatars: [
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuD_MRocfAc3G7cAcAopZxpRTMMkXNFumYLVw-XomndRyV5EcHVrdD65-55rfGYIg9iKQQutDwr02e3qB7zJ9OzKXwQupZ5tFbqDUnYYubfQ4T-T2FIrp9YJehyWAr-3jJa7sbeGZLm54o6NJ1kDiI6bx7ji575hLuMPxdcC2Z6qUj2gEqH50i5Org4eFRMTWk1yUi6iI0bRhR7pUdJEd7x1RRkuVu5wrK5eWw_cCaf5vvoRzSSRupJ-qD87iz1dVtL0uKo5B85b2dmr",
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuAes5h4fmh72X8ydxiowrLL-ybzOL38IODt3PqyfCRPSo-ARtBXANbfbKzMb-bN7y3CFm5AxwBoPDb-R7_UJFcDB1Z_mh4iADbuaLxu1R7QfXupK-do-lkCAvWnI2h6LCQ_0kHPFRm-ybbZiBJ2who5yOndYpLqUkFm4xBNOsZc5ZW0XhNw_t2DXhtQ2_e7VdFEvsrI2kplh3Kgp5GkNs3xDPfIKOGP2zPKGo0qtltg8J-4YM3WUDqkJujrv748MIRE6mCRuI_qD5G4",
-                    ]
-                },
-                {
-                    id: 2,
-                    title: "Data Structures & Algorithms",
-                    description: "Memory safety, ownership, and low-level optimization in Rust.",
-                    badge: "Featured",
-                    members: "890",
-                    icon: "data_object",
-                    avatars: [
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuBiHXl0P06fpJnbhQctvcP96mrHRjEHG_v5CCxmj1EesAwjaLDW7psQM_Qs9fuwyz59btEc9Avof9pJuR0ZXeBznXEQsE4sWcCMcd5mWt7C_HTvvQcGT_wqQkFD1Vq58M_SRSbFWUuSTuM-7Gs8DrYf5FlHS5f4--8cY6WgUVy2gLF2LplRYIppQloKsxbArJ6NE3FKC3nf0vUibSHrJUR5lh7ZlcWXF4IQXYS1KxNpXecFAycr3WcuPWjuGQ5MrQjK4aHHHBRZKLoi",
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuCfpcVKWjO4AEFrvRQbTlN2oFj7Cg9JZIGigtJzhKAjVEVG4qtYijisaj3cfaD0tJ23nms7jQi3WiRtD-WrjQZp8Cb9oRV1f7TOWJoXypeK5IFQL6HgIcoflooNNfDvsjFRiLCMNTQ8ftdkBYmoznaZQizRJGzXc9gsvfnW_X7OziwtMw6_WlfcaiDyHLWTrZXkDUwWiz_BWN5femIxz4bnoGrtD9e5qdcAsJ3XZek9lMAh2GE7wSCJ6SLaJG6iqFopyOsBtPfmp4Yy",
-                    ]
-                }
-            ],
-            communityRooms: [
-                { id: 1, title: "Machine Learning", members: "1.2k", icon: "smart_toy", contributor: "@zhao_dev" },
-                { id: 2, title: "Blockchain", members: "450", icon: "hub", contributor: "@lena_s" },
-                { id: 3, title: "Data Structures & Algorithms", members: "3.4k", icon: "memory", contributor: "@jordan_s" },
-                { id: 4, title: "Deep Learning", members: "5.1k", icon: "javascript", contributor: "@sarah_j" }
-            ],
+            trendingRooms,
+            communityRooms,
             masters: [
                 { name: "Marcus Zhao", subtitle: "ML Expert • 42 streak", rank: "Top" },
                 { name: "Lena Schmidt", subtitle: "Web3 Guru • 28 streak", rank: "#2" }
             ],
-            liveActivity: [
-                { user: "Sarah Jenkins", action: "joined", room: "Data Structures & Algorithms", time: "2 mins ago" },
-                { user: "Emily Chen", action: "shared a paper in", room: "Deep Learning", time: "14 mins ago" }
-            ]
+            liveActivity: []
         };
         return res.status(200).json(roomsData);
     } catch (error) {
@@ -297,37 +299,45 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
 
 export const getCommunitySnippets = async (req: AuthRequest, res: Response) => {
     try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const user = await User.findById(userId).populate({
+            path: "savedPosts",
+            populate: { path: "author", select: "fullName" }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Filter for Snippets only (though UI might show all saved posts in this section)
+        const savedSnippets = (user.savedPosts as any[] || [])
+            .filter(post => post.type === "Snippet")
+            .map(post => ({
+                id: post._id,
+                title: post.content.split("\n")[0].substring(0, 50) || "Code Snippet",
+                language: "Text", // Logic for language detection could be added later
+                code: post.code || post.content,
+                tags: [], // Tags logic can be added later
+                updated: `Saved ${new Date(post.createdAt).toLocaleDateString()}`,
+                collection: "Favorites"
+            }));
+
         const snippetsData = {
-            snippets: [
-                {
-                    id: 1,
-                    title: "Efficient QuickSort Impl",
-                    language: "Python",
-                    code: "def quick_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + middle + quick_sort(right)",
-                    tags: ["#Python", "#DSA", "#Algorithms"],
-                    updated: "Updated 2h ago",
-                    collection: "Interview Prep",
-                },
-                {
-                    id: 2,
-                    title: "Local Storage Custom Hook",
-                    language: "React",
-                    code: "const useLocalStorage = (key, initialValue) => {\n  const [storedValue, setStoredValue] = useState(() => {\n    try {\n      const item = window.localStorage.getItem(key);\n      return item ? JSON.parse(item) : initialValue;\n    } catch (error) {\n      return initialValue;\n    }\n  });\n  return [storedValue, setStoredValue];\n};",
-                    tags: ["#React", "#Hooks", "#Utils"],
-                    updated: "Updated yesterday",
-                    collection: "Project X Utils",
-                }
-            ],
+            snippets: savedSnippets,
             collections: [
-                { label: "All Snippets", count: 42, active: true },
-                { label: "Interview Prep", count: 12, active: false },
-                { label: "Project X Utils", count: 8, active: false },
-                { label: "Favorites", count: 5, active: false },
+                { label: "All Snippets", count: savedSnippets.length, active: true },
+                { label: "Interview Prep", count: 0, active: false },
+                { label: "Favorites", count: savedSnippets.length, active: false },
             ],
-            recentTags: ["#Python", "#React", "#DSA", "#Typescript", "#Hooks", "#Algorithms"]
+            recentTags: []
         };
         return res.status(200).json(snippetsData);
     } catch (error) {
+        console.error("Get community snippets error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -364,6 +374,39 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         return res.status(200).json(messages.reverse());
     } catch (error) {
         console.error("Get chat messages error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getChatRoomMembers = async (req: AuthRequest, res: Response) => {
+    try {
+        const { roomName } = req.params;
+        if (typeof roomName !== "string") {
+            return res.status(400).json({ message: "Invalid chat room name" });
+        }
+
+        const normalizedRoomName = normalizeRoomName(roomName);
+        if (!normalizedRoomName) {
+            return res.status(404).json({ message: "Chat room not found" });
+        }
+
+        const room = await ChatRoom.findOne({ name: normalizedRoomName });
+        if (!room) {
+            return res.status(404).json({ message: "Chat room not found" });
+        }
+
+        // Find all unique senderIds in this room from messages
+        const memberIds = await Message.distinct("senderId", { roomId: room._id });
+
+        // Fetch user details for these IDs
+        const members = await User.find(
+            { _id: { $in: memberIds } },
+            "fullName email"
+        ).lean();
+
+        return res.status(200).json(members);
+    } catch (error) {
+        console.error("Get chat room members error:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

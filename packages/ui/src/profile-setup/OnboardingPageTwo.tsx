@@ -1,8 +1,8 @@
-
+"use client"
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "../icons";
 import { motion } from "framer-motion";
 import Interests from "./Interests";
 
@@ -124,10 +124,9 @@ export default function OnboardingTwo({ onFinish, onSkip }: OnboardingTwoProps) 
                 onClick={() => toggleInterest(interest.id)}
                 className={`
                   group relative p-5 rounded-xl transition-all duration-300 cursor-pointer border-2
-                  ${
-                    isSelected
-                      ? "bg-blue-600/10 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.15)]"
-                      : "bg-white/5 border-white/10 hover:border-blue-500/50 hover:bg-blue-600/5"
+                  ${isSelected
+                    ? "bg-blue-600/10 border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.15)]"
+                    : "bg-white/5 border-white/10 hover:border-blue-500/50 hover:bg-blue-600/5"
                   }
                 `}
               >
@@ -135,10 +134,9 @@ export default function OnboardingTwo({ onFinish, onSkip }: OnboardingTwoProps) 
                   <div
                     className={`
                       p-3 rounded-lg transition-colors
-                      ${
-                        isSelected
-                          ? "bg-blue-600 text-white"
-                          : "bg-white/5 text-slate-400 group-hover:text-blue-500"
+                      ${isSelected
+                        ? "bg-blue-600 text-white"
+                        : "bg-white/5 text-slate-400 group-hover:text-blue-500"
                       }
                     `}
                   >
@@ -176,10 +174,9 @@ export default function OnboardingTwo({ onFinish, onSkip }: OnboardingTwoProps) 
             onClick={handleNext}
             disabled={!isFormComplete || isSubmitting}
             className={`
-              ${
-                isFormComplete
-                  ? "bg-blue-600 hover:bg-blue-500 shadow-[0_4px_20px_rgba(37,99,235,0.3)]"
-                  : "bg-gray-600 cursor-not-allowed opacity-50"
+              ${isFormComplete
+                ? "bg-blue-600 hover:bg-blue-500 shadow-[0_4px_20px_rgba(37,99,235,0.3)]"
+                : "bg-gray-600 cursor-not-allowed opacity-50"
               }
               text-white font-bold py-3 px-10 rounded-lg flex items-center gap-2 group transition-all disabled:opacity-60
             `}

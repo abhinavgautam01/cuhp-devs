@@ -1,9 +1,6 @@
-
+"use client"
 import { useState, useCallback, ChangeEvent, FormEvent } from "react";
-import { MdEmail, MdPerson, MdBadge } from "react-icons/md";
-import { RiLockPasswordLine } from "react-icons/ri";
-import { FaUserPlus, FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, MdPerson, MdBadge, RiLockPasswordLine, FaUserPlus, FaGithub, FaEye, FaEyeSlash, FcGoogle } from "../icons";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -34,7 +31,7 @@ interface SignUpFormProps {
 
 function validateForm(fields: FormFields): FormErrors {
   const errors: FormErrors = {};
-  
+
   if (!fields.fullName.trim()) {
     errors.fullName = "Full name is required.";
   } else if (fields.fullName.trim().length < 2) {
@@ -151,17 +148,16 @@ export function SignUpForm({
     w-full pl-10 pr-4 py-3 border bg-[#0a1233] text-slate-100 
     placeholder:text-slate-500 rounded-lg outline-none transition-all
     disabled:opacity-50 disabled:cursor-not-allowed
-    ${
-      hasError
-        ? "border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
-        : "border-blue-700/30 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+    ${hasError
+      ? "border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500"
+      : "border-blue-700/30 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
     }
   `;
 
   return (
     <div className={`w-full text-slate-100 ${className}`}>
       {/* Tab Toggle */}
-      
+
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight text-white">

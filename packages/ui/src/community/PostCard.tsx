@@ -1,43 +1,64 @@
-import { Share2, ThumbsUp, MessageSquare, Bug, MoreHorizontal } from "lucide-react";
+import { ThumbsUp, MessageSquare, Bug, MoreHorizontal, Bookmark } from "../icons";
 
 interface PostCardProps {
     post: {
-        id: string;
+        id?: string;
+        _id?: string;
         author: {
-            name: string;
-            avatar: string;
+            fullName: string;
+            avatar?: string;
         };
-        time: string;
+        createdAt: string;
         type: string;
         content: string;
         code?: string;
-        image?: string;
-        likes: number;
-        comments: number;
+        likes: string[];
+        comments: any[];
     };
+    onLike?: (postId: string) => Promise<void>;
+    onBookmark?: (postId: string) => Promise<void>;
+    currentUserId?: string;
+    isSaved?: boolean;
 }
 
-export function PostCard({ post }: PostCardProps) {
+function formatPostDate(createdAt: string): string {
+    const date = new Date(createdAt);
+    if (Number.isNaN(date.getTime())) return "";
+
+    return new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        timeZone: "UTC",
+    }).format(date);
+}
+
+export function PostCard({ post, onLike, onBookmark, currentUserId, isSaved }: PostCardProps) {
+    const postId = post.id || post._id || "";
+    const likes = Array.isArray(post.likes) ? post.likes : [];
+    const isLiked = currentUserId ? likes.some(id => String(id) === String(currentUserId)) : false;
+    const createdAtLabel = formatPostDate(post.createdAt);
+
     return (
-        <article className="bg-[#161618] rounded-xl border border-[#1337ec]/10 overflow-hidden">
+        <article className="bg-[#1a1c2a] rounded-xl border border-[#1337ec]/10 overflow-hidden shadow-lg shadow-black/10 hover:border-[#1337ec]/30 transition-all group/card">
             <div className="p-4 flex gap-4">
                 <img
-                    alt={post.author.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                    src={post.author.avatar}
+                    alt={post.author.fullName}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-white/5"
+                    src={post.author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.fullName}`}
                 />
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-sm">{post.author.name}</h4>
-                        <span className="text-xs text-white/40">• {post.time}</span>
+                        <h4 className="font-bold text-sm text-white">{post.author.fullName}</h4>
+                        {createdAtLabel ? <span className="text-xs text-white/40">&bull; {createdAtLabel}</span> : null}
                         <span className={`ml-auto flex items-center gap-1 px-2 py-0.5 ${post.type === "Snippet" ? "bg-blue-500/10 text-blue-400" :
-                                post.type === "Win" ? "bg-yellow-500/10 text-yellow-500" :
-                                    "bg-purple-500/10 text-purple-400"
+                            post.type === "Win" ? "bg-yellow-500/10 text-yellow-500" :
+                                "bg-purple-500/10 text-purple-400"
                             } text-[10px] font-bold uppercase tracking-wider rounded`}>
                             {post.type}
                         </span>
                     </div>
-                    <p className="text-sm mb-4">{post.content}</p>
+                    <p className="text-sm mb-4 text-slate-300 leading-relaxed whitespace-pre-wrap">{post.content}</p>
 
                     {post.code && (
                         <div className="bg-black/40 rounded-lg p-4 mb-4 border border-white/5 relative group">
@@ -47,37 +68,28 @@ export function PostCard({ post }: PostCardProps) {
                         </div>
                     )}
 
-                    {post.image && (
-                        <div className="rounded-lg overflow-hidden border border-white/5 mb-4">
-                            <img
-                                alt="Post content"
-                                className="w-full aspect-video object-cover"
-                                src={post.image}
-                            />
-                        </div>
-                    )}
 
                     <div className="flex items-center gap-6 border-t border-white/5 pt-4">
-                        <button className="flex items-center gap-2 text-white/60 hover:text-[#1337ec] transition-colors group">
-                            <span className="material-icons-round text-[20px] group-active:scale-125 transition-transform">
-                                thumb_up
-                            </span>
-                            <span className="text-xs font-bold">{post.likes}</span>
+                        <button
+                            onClick={() => onLike?.(postId)}
+                            className={`flex items-center gap-2 transition-all group/btn ${isLiked ? "text-[#1337ec] drop-shadow-[0_0_10px_rgba(19,55,236,0.5)]" : "text-white/60 hover:text-[#1337ec]"}`}
+                        >
+                            <ThumbsUp className={`${isLiked ? "fill-[#1337ec]" : ""} group-active/btn:scale-125 transition-transform`} size={18} />
+                            <span className="text-xs font-bold">{post.likes.length}</span>
                         </button>
-                        <button className="flex items-center gap-2 text-white/60 hover:text-[#8b5cf6] transition-colors">
-                            <span className="material-icons-round text-[20px]">chat_bubble_outline</span>
-                            <span className="text-xs font-bold">{post.comments}</span>
+                        <button
+                            onClick={() => onBookmark?.(postId)}
+                            className={`flex items-center gap-2 transition-colors ${isSaved ? "text-yellow-500" : "text-white/60 hover:text-yellow-500"}`}
+                        >
+                            <Bookmark className={`${isSaved ? "fill-yellow-500" : ""}`} size={18} />
+                            <span className="text-xs font-bold">{isSaved ? "Saved" : "Save"}</span>
                         </button>
-                        <button className="flex items-center gap-2 text-white/60 hover:text-[#10b981] transition-colors group">
-                            <span className="material-icons-round text-[20px] group-hover:rotate-12 transition-transform">
-                                bug_report
-                            </span>
+                        <button className="flex items-center gap-2 text-white/60 hover:text-[#10b981] transition-colors group/btn">
+                            <Bug className="group-hover/btn:rotate-12 transition-transform" size={18} />
                             <span className="text-xs font-bold">Debug</span>
                         </button>
                         <div className="ml-auto">
-                            <span className="material-icons-round text-white/30 cursor-pointer hover:text-white">
-                                more_horiz
-                            </span>
+                            <MoreHorizontal className="text-white/30 cursor-pointer hover:text-white transition-colors" size={20} />
                         </div>
                     </div>
                 </div>

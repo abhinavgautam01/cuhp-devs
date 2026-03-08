@@ -8,10 +8,13 @@ import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
 dotenv.config();
 
 const app = express();
 app.use(cors());
+const isProduction = process.env.NODE_ENV === "production";
+
 
 const server = http.createServer(app);
 const allowedOrigins = (process.env.SOCKET_CORS_ORIGINS ?? "http://localhost:3000,http://localhost:3001")
@@ -28,7 +31,16 @@ const io = new Server(server, {
 
 setupSocket(io);
 
-connectDB();
+
+
+void connectDB().catch((error) => {
+  if (isProduction) {
+    console.error("Socket service failed to connect to MongoDB", error);
+    process.exit(1);
+  }
+
+
+});
 
 server.listen(4001, () => {
   console.log("Socket server running on port 4001");

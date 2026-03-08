@@ -1,7 +1,5 @@
 
-import { BiTerminal } from "react-icons/bi";
-import { MdHub } from "react-icons/md";
-import { CgBolt } from "react-icons/cg";
+import { BiTerminal, MdHub, CgBolt } from "../icons";
 
 
 interface RightPanelProps {
@@ -71,16 +69,16 @@ export function RightPanel({
                 {/* Action cards grid */}
                 <div className="grid grid-cols-3 gap-6 my-10">
                   {ACTION_CARDS.map(({ icon, label, color }) => (
-                    <div key = {color}
+                    <div key={color}
                       className="h-32 rounded-xl flex flex-col items-center justify-center gap-2"
                       style={{
                         backgroundColor: `${color}1a`,
                         border: `1px solid ${color}33`,
                       }}
                     >
-                      <span className="material-icons text-3xl" style={{ color }}>
+                      <div style={{ color }}>
                         {icon}
-                      </span>
+                      </div>
                       <span
                         className="text-[10px] font-bold uppercase tracking-widest"
                         style={{ color: `${color}99` }}
@@ -105,12 +103,12 @@ export function RightPanel({
         {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 bg-blue-600 rounded-lg flex items-center justify-center">
-            <svg 
-              viewBox="0 0 24 24" 
+            <svg
+              viewBox="0 0 24 24"
               className="w-6 h-6 text-white"
               fill="currentColor"
             >
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10H7V9h5v3zm5 0h-5V9h5v3z"/>
+              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10H7V9h5v3zm5 0h-5V9h5v3z" />
             </svg>
           </div>
           <span className="text-white text-2xl font-bold tracking-tight uppercase">CS Portal</span>

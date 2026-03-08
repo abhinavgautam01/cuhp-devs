@@ -14,14 +14,16 @@ import { Document, Types } from "mongoose";
 // }
 
 export interface IProblem extends Document {
-	title: string;
-	slug: string;
-	description: string;
-	difficulty: "EASY" | "MEDIUM" | "HARD";
-	sampleTestCases: {
+  title: string;
+  slug: string;
+  description: string;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  sampleTestCases: {
     input: string;
     output: string;
   }[];
   tags: Types.ObjectId[];
   createdBy: Types.ObjectId;
+  hidden: boolean;
+  solved: number;
 }

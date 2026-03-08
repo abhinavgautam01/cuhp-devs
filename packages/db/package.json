@@ -16,7 +16,7 @@
   "dependencies": {
     "@repo/common": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "mongoose": "^9.2.1"
+    "mongoose": "^8.23.0"
   },
   "keywords": [],
   "author": "",

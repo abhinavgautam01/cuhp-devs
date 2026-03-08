@@ -13,6 +13,8 @@
     "testcases-push:db": "pnpm --filter @repo/db push:testcases"
   },
   "devDependencies": {
+    "@repo/db": "workspace:*",
+    "ts-node": "^10.9.2",
     "prettier": "^3.7.4",
     "turbo": "^2.8.9",
     "typescript": "5.9.2"

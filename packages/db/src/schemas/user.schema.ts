@@ -59,7 +59,12 @@ export const UserSchema = new Schema<IUser>(
     onboardingCompleted: {
       type: Boolean,
       default: false,
-    }
+    },
+    savedPosts: [{
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+      default: []
+    }]
   },
   {
     timestamps: true

@@ -9,18 +9,6 @@ export interface IUser extends Document {
   semester?: string;
   interests: string[];
   onboardingCompleted: boolean;
-// import { UserRole } from "../enums";
-
-// export interface IUser extends Document {
-//   email: string;
-//   name?: string;
-//   token?: string;
-//   password: string;
-//   role: UserRole;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
-
-
+  savedPosts: string[];
 }
 
