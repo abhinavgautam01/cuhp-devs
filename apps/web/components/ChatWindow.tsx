@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { Send, Hash, Users, Shield, Plus, Smile, Image as ImageIcon, Bell, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Message {
     _id: string;
@@ -31,6 +32,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     const [mounted, setMounted] = useState(false);
     const [showNewMessageBanner, setShowNewMessageBanner] = useState(true);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
     const { isConnected, joinRoom, leaveRoom, sendMessage, socket } = useSocket(token);
 
     useEffect(() => {
@@ -108,14 +110,20 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             setTypingUsers(prev => prev.filter(u => u !== user));
         };
 
+        const handleMessageDeleted = ({ messageId }: { messageId: string }) => {
+            setMessages(prev => prev.filter(msg => msg._id !== messageId));
+        };
+
         socket.on("new-message", handleNewMessage);
         socket.on("user-typing", handleTyping);
         socket.on("user-stop-typing", handleStopTyping);
+        socket.on("message-deleted", handleMessageDeleted);
 
         return () => {
             socket.off("new-message", handleNewMessage);
             socket.off("user-typing", handleTyping);
             socket.off("user-stop-typing", handleStopTyping);
+            socket.off("message-deleted", handleMessageDeleted);
         };
     }, [socket, currentUser]);
 
@@ -143,7 +151,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             socket.emit("stop-typing", { roomName });
         }
     };
+    const handleDeleteMessage = (messageId: string) => {
+        if (!socket) return;
 
+        socket.emit("delete-message", { messageId });
+
+        // optimistic remove
+        setMessages(prev => prev.filter(msg => msg._id !== messageId));
+    };
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInput(e.target.value);
         if (socket && !isTyping && e.target.value.trim()) {
@@ -170,7 +185,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             return part;
         });
     };
+    const handleLeaveRoom = () => {
+    leaveRoom(roomName);
 
+    socket?.emit("leave-room", { roomName });
+    socket?.disconnect();
+
+    router.push("/community");
+};
     return (
         <div className="flex-1 flex flex-col bg-[#1A1B1E] h-14 overflow-hidden relative">
             {/* Header */}
@@ -184,6 +206,12 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                 <div className="flex items-center gap-4 text-white/60">
                     <Users size={20} className="cursor-pointer hover:text-white transition-colors" />
                     <Shield size={20} className="cursor-pointer hover:text-white transition-colors" />
+                    <button
+                     onClick={handleLeaveRoom}
+                     className="text-xs text-red-400 hover:text-red-500 transition-colors"
+                    >
+                        Leave
+                    </button>
                 </div>
             </div>
 
@@ -234,6 +262,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                             <div className="w-3 h-3 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
                                         </div>
                                     )}
+                                    {msg.senderId?._id === currentUser?.id && !msg.isOptimistic && (
+                                      <button
+                                         onClick={() => handleDeleteMessage(msg._id)}
+                                         className="absolute right-4 top-2 text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500"
+                                      >
+                                         Delete
+                                      </button>
+)}
                                 </div>
                             </div>
                         );
