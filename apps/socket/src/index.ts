@@ -8,7 +8,6 @@ import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-// Also try CWD-relative .env as fallback
 dotenv.config();
 
 const app = express();

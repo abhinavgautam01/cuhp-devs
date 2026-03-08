@@ -13,13 +13,17 @@ const ROOM_NAME_ALIASES: Record<string, string> = {
 };
 
 export const getRoomByName = async (roomName: string) => {
-  const normalized = decodeURIComponent(roomName).trim().toLowerCase();
-  const canonicalName = ROOM_NAME_ALIASES[normalized];
-  if (!canonicalName) return null;
 
-  return ChatRoom.findOne({ name: canonicalName });
+  const normalized = decodeURIComponent(roomName).trim();
+
+  // Check alias
+  const aliasKey = normalized.toLowerCase();
+  const canonicalName = ROOM_NAME_ALIASES[aliasKey];
+
+  const nameToSearch = canonicalName || normalized;
+
+  return ChatRoom.findOne({ name: nameToSearch });
 };
-
 export const createMessage = async (
   roomId: string,
   senderId: string,
@@ -43,4 +47,18 @@ export const deleteMessageByOwner = async (
 
   message.isDeleted = true;
   return message.save();
+};
+export const createRoom = async (roomName: string, userId: string) => {
+  const decoded = decodeURIComponent(roomName).trim();
+
+  // Check if already exists
+  const existing = await ChatRoom.findOne({ name: decoded });
+  if (existing) return existing;
+
+  const room = await ChatRoom.create({
+    name: decoded,
+    createdBy: userId,
+  });
+
+  return room;
 };
