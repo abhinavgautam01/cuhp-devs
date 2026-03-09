@@ -6,20 +6,20 @@ import { apiFetch } from "../lib/api";
 import { toast } from "../store/useToastStore";
 import { useAuthStore } from "../store/useAuthStore";
 import {
-    Zap,
-    ArrowRight,
     User,
     Shield,
-    Bell,
     Palette,
     Settings,
     FaGithub,
+    FcGoogle,
     CheckCircle2,
     HelpCircle,
     Activity,
     X,
-    Camera
-} from "../lib/icons";
+    Camera,
+    LogOut
+} from "../lib/icon";
+import { AVATAR_STYLES, CURATED_AVATARS } from "../assets/Avatar";
 import { Sidebar } from "@repo/ui/components/Sidebar";
 
 export function SettingsClient() {
@@ -28,7 +28,7 @@ export function SettingsClient() {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-    const [selectedStyle, setSelectedStyle] = useState("avataaars");
+    const [selectedStyle, setSelectedStyle] = useState("curated");
 
     // Form states
     const [fullName, setFullName] = useState(user?.fullName || "");
@@ -45,9 +45,13 @@ export function SettingsClient() {
 
             // Detect style from current avatar URL
             if (user.avatar) {
-                const styleMatch = user.avatar.match(/7\.x\/([^/]+)\/svg/);
-                if (styleMatch && styleMatch[1]) {
-                    setSelectedStyle(styleMatch[1]);
+                if (CURATED_AVATARS.includes(user.avatar)) {
+                    setSelectedStyle("curated");
+                } else {
+                    const styleMatch = user.avatar.match(/7\.x\/([^/]+)\/svg/);
+                    if (styleMatch && styleMatch[1]) {
+                        setSelectedStyle(styleMatch[1]);
+                    }
                 }
             }
         }
@@ -93,19 +97,7 @@ export function SettingsClient() {
         setTheme(newTheme);
     };
 
-    const AVATAR_SEEDS = [
-        "Felix", "Anita", "Aneka", "Tigger", "Milo", "Casper",
-        "Oliver", "Lucky", "Daisy", "Cookie", "Peanut", "Shadow",
-        "Max", "Bella", "Luna", "Charlie"
-    ];
 
-    const AVATAR_STYLES = [
-        { id: "avataaars", name: "Human" },
-        { id: "bottts", name: "Bots" },
-        { id: "big-smile", name: "Smiles" },
-        { id: "micah", name: "Micah" },
-        { id: "lorelei", name: "Lorelei" }
-    ];
 
     const AvatarSelectorModal = () => (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -125,6 +117,12 @@ export function SettingsClient() {
 
                 {/* Style Switcher */}
                 <div className="px-6 py-3 bg-foreground/[0.02] border-b border-card-border flex gap-2 overflow-x-auto scrollbar-hide">
+                    <button
+                        onClick={() => setSelectedStyle("curated")}
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === "curated" ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
+                    >
+                        Default
+                    </button>
                     {AVATAR_STYLES.map((style) => (
                         <button
                             key={style.id}
@@ -137,31 +135,61 @@ export function SettingsClient() {
                 </div>
 
                 <div className="p-6 grid grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto scrollbar-hide">
-                    {AVATAR_SEEDS.map((seed) => {
-                        const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
-                        const isSelected = avatar === url;
-                        return (
-                            <button
-                                key={seed}
-                                onClick={() => setAvatar(url)}
-                                className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
-                            >
-                                <Image
-                                    src={url}
-                                    alt={seed}
-                                    fill
-                                    className="object-cover"
-                                />
-                                {isSelected && (
-                                    <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
-                                        <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
-                                            <CheckCircle2 size={16} />
+                    {selectedStyle === "curated" ? (
+                        CURATED_AVATARS.map((url, idx) => {
+                            const isSelected = avatar === url;
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => setAvatar(url)}
+                                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
+                                >
+                                    <Image
+                                        src={url}
+                                        alt={`Curated ${idx}`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                    {isSelected && (
+                                        <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
+                                            <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
+                                                <CheckCircle2 size={16} />
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </button>
-                        );
-                    })}
+                                    )}
+                                </button>
+                            );
+                        })
+                    ) : (
+                        (() => {
+                            const currentStyle = AVATAR_STYLES.find(s => s.id === selectedStyle);
+                            return currentStyle?.seeds.map((seed) => {
+                                const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
+                                const isSelected = avatar === url;
+                                return (
+                                    <button
+                                        key={seed}
+                                        onClick={() => setAvatar(url)}
+                                        className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
+                                    >
+                                        <Image
+                                            src={url}
+                                            alt={`${selectedStyle} ${seed}`}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                        {isSelected && (
+                                            <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
+                                                <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
+                                                    <CheckCircle2 size={16} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            });
+                        })()
+                    )}
                 </div>
                 <div className="p-6 border-t border-card-border flex gap-3">
                     <button
@@ -377,12 +405,7 @@ export function SettingsClient() {
                             <div className="flex items-center justify-between p-3 bg-card-custom border border-card-border rounded-xl">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-slate-200">
-                                        <svg className="w-6 h-6" viewBox="0 0 24 24">
-                                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
-                                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-                                        </svg>
+                                        <FcGoogle size={24} />
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold">Google</p>
@@ -419,7 +442,7 @@ export function SettingsClient() {
                     >
                         {isLoggingOut ? "Signing Out..." : (
                             <>
-                                <ArrowRight className="rotate-180" size={20} />
+                                <LogOut size={20} />
                                 Sign Out
                             </>
                         )}

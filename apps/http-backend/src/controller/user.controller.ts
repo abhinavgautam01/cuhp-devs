@@ -4,7 +4,7 @@ import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const { program, semester, interests, bio, handle, avatar, theme } = req.body;
+        const { fullName, program, semester, interests, bio, handle, avatar, theme } = req.body;
         const userId = req.user?.id;
 
         if (!userId) {
@@ -12,6 +12,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         }
 
         const updateData: any = {
+            fullName,
             program,
             semester,
             interests: Array.isArray(interests) ? interests : [],
