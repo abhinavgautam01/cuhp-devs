@@ -28,6 +28,7 @@ export function SettingsClient() {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [selectedStyle, setSelectedStyle] = useState("avataaars");
 
     // Form states
     const [fullName, setFullName] = useState(user?.fullName || "");
@@ -41,6 +42,14 @@ export function SettingsClient() {
             setHandle(user.handle || "");
             setBio(user.bio || "");
             setAvatar(user.avatar || "");
+
+            // Detect style from current avatar URL
+            if (user.avatar) {
+                const styleMatch = user.avatar.match(/7\.x\/([^/]+)\/svg/);
+                if (styleMatch && styleMatch[1]) {
+                    setSelectedStyle(styleMatch[1]);
+                }
+            }
         }
     }, [user]);
 
@@ -90,6 +99,14 @@ export function SettingsClient() {
         "Max", "Bella", "Luna", "Charlie"
     ];
 
+    const AVATAR_STYLES = [
+        { id: "avataaars", name: "Human" },
+        { id: "bottts", name: "Bots" },
+        { id: "big-smile", name: "Smiles" },
+        { id: "micah", name: "Micah" },
+        { id: "lorelei", name: "Lorelei" }
+    ];
+
     const AvatarSelectorModal = () => (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-background border border-card-border w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
@@ -105,9 +122,23 @@ export function SettingsClient() {
                         <X size={20} />
                     </button>
                 </div>
-                <div className="p-6 grid grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
+
+                {/* Style Switcher */}
+                <div className="px-6 py-3 bg-foreground/[0.02] border-b border-card-border flex gap-2 overflow-x-auto scrollbar-hide">
+                    {AVATAR_STYLES.map((style) => (
+                        <button
+                            key={style.id}
+                            onClick={() => setSelectedStyle(style.id)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === style.id ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
+                        >
+                            {style.name}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="p-6 grid grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto scrollbar-hide">
                     {AVATAR_SEEDS.map((seed) => {
-                        const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+                        const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
                         const isSelected = avatar === url;
                         return (
                             <button
