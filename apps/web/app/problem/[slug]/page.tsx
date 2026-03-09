@@ -4,7 +4,7 @@ import { serverApiFetch } from "../../../lib/server-api";
 import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
-    title: "Solve Problem | NexusCS",
+    title: "Solve Problem",
     description: "Solve coding challenges and master algorithms.",
 };
 

@@ -30,17 +30,17 @@ const BADGE_ACCENT: Record<string, string> = {
 };
 
 export function RoomCard({ room }: RoomCardProps) {
-    const badgeClass = BADGE_STYLES[room.badge] ?? "from-[#1337ec]/30 to-blue-500/30 text-white border-white/10";
-    const accentClass = BADGE_ACCENT[room.badge] ?? "from-[#1337ec] via-blue-500 to-transparent";
+    const badgeClass = BADGE_STYLES[room.badge] ?? "from-primary-custom/30 to-blue-500/30 text-foreground border-primary-custom/10";
+    const accentClass = BADGE_ACCENT[room.badge] ?? "from-primary-custom via-blue-500 to-transparent";
 
     // Mapping some common icon names to Lucide icons
     const IconComponent = room.badge === "HOT" ? Zap : room.badge === "TOP" ? Star : room.badge === "LIVE" ? Activity : Users;
 
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-6 transition-all hover:border-[#1337ec]/40 hover:shadow-[0_20px_50px_rgba(19,55,236,0.15)] flex flex-col h-full">
+        <div className="group relative overflow-hidden rounded-2xl border border-card-border bg-card-custom backdrop-blur-xl p-6 transition-all hover:border-primary-custom/40 hover:shadow-[0_20px_50px_rgba(var(--primary),0.15)] flex flex-col h-full">
             {/* Top right badge */}
             <div className="absolute top-0 right-0 p-4">
-                <span className={`flex items-center gap-1 px-2 py-1 bg-gradient-to-r ${badgeClass} rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/10`}>
+                <span className={`flex items-center gap-1 px-2 py-1 bg-gradient-to-r ${badgeClass} rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-card-border`}>
                     <IconComponent size={10} className="shrink-0" />
                     {room.badge === "HOT" ? "Hot Room" : room.badge}
                 </span>
@@ -48,13 +48,13 @@ export function RoomCard({ room }: RoomCardProps) {
 
             <div className="flex gap-5 items-start mb-6">
                 {/* Icon Container */}
-                <div className="w-14 h-14 rounded-xl bg-[#1337ec]/10 border border-[#1337ec]/20 flex items-center justify-center text-[#1337ec] shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-500">
+                <div className="w-14 h-14 rounded-xl bg-primary-custom/10 border border-primary-custom/20 flex items-center justify-center text-primary-custom shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-500">
                     <Users size={28} />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-bold mb-1 truncate group-hover:text-[#1337ec] transition-colors">{room.title}</h3>
-                    <p className="text-sm text-white/40 line-clamp-2 leading-relaxed">{room.description}</p>
+                    <h3 className="text-xl font-bold mb-1 truncate group-hover:text-primary-custom transition-colors">{room.title}</h3>
+                    <p className="text-sm text-muted-custom line-clamp-2 leading-relaxed">{room.description}</p>
                 </div>
             </div>
 
@@ -67,25 +67,25 @@ export function RoomCard({ room }: RoomCardProps) {
                                 <img
                                     key={i}
                                     alt="Member"
-                                    className="w-6 h-6 rounded-full border-2 border-[#161618] object-cover"
+                                    className="w-6 h-6 rounded-full border-2 border-background object-cover"
                                     src={avatar}
                                 />
                             ))}
                             {Number(room.members.replace(/[^0-9]/g, '')) > 3 && (
-                                <div className="w-6 h-6 rounded-full bg-[#1337ec]/40 border-2 border-[#161618] flex items-center justify-center text-[8px] font-bold text-white">
+                                <div className="w-6 h-6 rounded-full bg-primary-custom/40 border-2 border-background flex items-center justify-center text-[8px] font-bold text-primary-foreground-custom">
                                     +{room.members}
                                 </div>
                             )}
                         </div>
                         <div className="flex items-center gap-1.5">
-                            <Users size={12} className="text-white/30" />
-                            <span className="text-xs font-medium text-white/40">{room.members} Members</span>
+                            <Users size={12} className="text-muted-custom/40" />
+                            <span className="text-xs font-medium text-muted-custom">{room.members} Members</span>
                         </div>
                     </div>
 
                     {/* Tag (Optional simple display) */}
                     <div className="hidden md:flex gap-1.5">
-                        <span className="text-[10px] text-[#1337ec]/60 bg-[#1337ec]/5 px-2 py-0.5 rounded-md font-medium">
+                        <span className="text-[10px] text-primary-custom/60 bg-primary-custom/5 px-2 py-0.5 rounded-md font-medium">
                             #study
                         </span>
                     </div>
@@ -94,7 +94,7 @@ export function RoomCard({ room }: RoomCardProps) {
                 {/* Enter Room Button */}
                 <Link
                     href={`/community/chat-rooms/${encodeURIComponent(room.title)}`}
-                    className="w-full py-2.5 bg-[#1337ec] rounded-lg font-bold text-sm text-center text-white shadow-lg shadow-[#1337ec]/20 transition-all hover:shadow-[#1337ec]/40 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group/btn"
+                    className="w-full py-2.5 bg-primary-custom rounded-lg font-bold text-sm text-center text-primary-foreground-custom shadow-lg shadow-primary-custom/20 transition-all hover:shadow-primary-custom/40 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group/btn"
                 >
                     Enter Room
                     <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
@@ -102,7 +102,7 @@ export function RoomCard({ room }: RoomCardProps) {
             </div>
 
             {/* Background decorative glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#1337ec]/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-[#1337ec]/10 transition-all" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-custom/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary-custom/10 transition-all" />
         </div>
     );
 }

@@ -30,17 +30,17 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Editor Header */}
-            <div className="h-12 border-b border-white/5 bg-[#1e1e1e] flex items-center justify-between px-4">
+            <div className="h-12 border-b border-primary-custom/10 bg-background/80 flex items-center justify-between px-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-1.5 rounded-lg border border-white/10 hover:bg-slate-700/80 transition-all cursor-pointer group">
-                        <Code2 className="text-blue-400 group-hover:text-blue-300" size={14} />
+                    <div className="flex items-center gap-2 bg-background border border-primary-custom/10 px-4 py-1.5 rounded-lg hover:border-primary-custom/30 transition-all cursor-pointer group">
+                        <Code2 className="text-primary-custom group-hover:brightness-110" size={14} />
                         <select
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-transparent border-none text-[11px] font-bold text-slate-100 focus:ring-0 cursor-pointer outline-none min-w-[100px] h-6 p-0"
+                            className="bg-transparent border-none text-[11px] font-bold text-foreground focus:ring-0 cursor-pointer outline-none min-w-[100px] h-6 p-0"
                         >
                             {availableLanguages.map((lang) => (
-                                <option key={lang} value={lang} className="bg-[#1e1e1e] text-white py-2 px-4 uppercase">{lang}</option>
+                                <option key={lang} value={lang} className="bg-background text-foreground py-2 px-4 uppercase">{lang}</option>
                             ))}
                         </select>
                     </div>
@@ -56,7 +56,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
             </div>
 
             {/* Editor Area */}
-            <div className="flex-1 overflow-hidden relative border-t border-white/5">
+            <div className="flex-1 overflow-hidden relative border-t border-primary-custom/10">
                 <Editor
                     height="100%"
                     language={getMonacoLang(language)}

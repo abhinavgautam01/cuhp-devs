@@ -31,14 +31,15 @@ export default async function ChatRoomPage({ params }: RoomPageProps) {
         const profile: any = await serverApiFetch("/user/profile");
         currentUser = {
             id: profile._id || profile.id,
-            name: profile.fullName || profile.name
+            name: profile.fullName || profile.name,
+            avatar: profile.avatar
         };
     } catch (error) {
         console.error("Failed to load chat room data:", error);
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-[#0B0B0C]">
+        <div className="flex-1 flex flex-col h-full bg-background">
             <ChatWindow
                 roomName={decodedRoomName}
                 initialMessages={initialMessages}

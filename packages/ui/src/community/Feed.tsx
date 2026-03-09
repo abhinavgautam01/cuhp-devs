@@ -56,12 +56,19 @@ export default function Feed({
                 onLike={onLike}
                 onBookmark={onBookmark}
                 currentUserId={currentUserId}
+                userAvatar={userAvatar}
                 isSaved={savedPosts?.includes(post.id || post._id)}
               />
             ))
           ) : (
-            <div className="text-center py-10 text-white/40 bg-white/2 rounded-xl border border-dashed border-white/10">
-              No {activeTab.toLowerCase()} found in the community.
+            <div className="flex flex-col items-center justify-center p-20 bg-background/40 backdrop-blur-md rounded-2xl border border-dashed border-primary-custom/10 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="w-16 h-16 rounded-full bg-primary-custom/10 flex items-center justify-center mb-4">
+                <span className="material-symbols-outlined text-primary-custom text-3xl">inbox</span>
+              </div>
+              <h3 className="text-foreground font-bold text-lg mb-1">Silence is golden</h3>
+              <p className="text-muted-custom text-sm max-w-[250px]">
+                No {activeTab.toLowerCase()} posts here yet. Be the first to start the conversation!
+              </p>
             </div>
           )}
         </div>

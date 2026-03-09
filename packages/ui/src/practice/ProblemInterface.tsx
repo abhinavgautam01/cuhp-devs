@@ -23,7 +23,7 @@ interface ProblemData {
 
 interface ProblemInterfaceProps {
     problem: ProblemData;
-    user: {
+    user?: {
         name: string;
         avatar: string;
         streak: number;
@@ -42,9 +42,9 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#090c10] text-slate-100 font-sans overflow-hidden">
+        <div className="flex flex-col h-screen bg-background text-foreground font-sans overflow-hidden transition-colors duration-300">
             {/* Top Header */}
-            <header className="h-14 bg-[#0d1117] border-b border-[#1337ec]/10 flex items-center justify-between px-6 shrink-0">
+            <header className="h-14 bg-background/80 backdrop-blur-md border-b border-primary-custom/10 flex items-center justify-between px-6 shrink-0">
                 <div className="flex items-center gap-6">
                     <div
                         onClick={() => router.push("/practice")}
@@ -53,22 +53,24 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                         <ArrowLeft size={16} />
                         <span className="text-sm font-semibold">Problems</span>
                         <span className="text-slate-600">/</span>
-                        <span className="text-sm font-bold text-slate-200">{problem.title}</span>
+                        <span className="text-sm font-bold text-foreground">{problem.title}</span>
                     </div>
-                    <div className="h-4 w-px bg-slate-800"></div>
-                    <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-amber-500 to-red-500 px-3 py-0.5 rounded-full flex items-center gap-1.5 shadow-md">
-                            <Flame className="text-white" size={14} />
-                            <span className="text-white font-bold text-[10px] uppercase tracking-wider">{user.streak} Days</span>
+                    <div className="h-4 w-px bg-slate-700/30"></div>
+                    {user && (
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gradient-to-br from-amber-500 to-red-500 px-3 py-0.5 rounded-full flex items-center gap-1.5 shadow-md">
+                                <Flame className="text-white" size={14} />
+                                <span className="text-white font-bold text-[10px] uppercase tracking-wider">{user.streak} Days</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-3">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progress: 2/3 Daily Goals</span>
-                        <div className="w-32 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div className="w-2/3 h-full bg-[#00d2ff] shadow-[0_0_8px_rgba(0,210,255,0.4)]"></div>
+                        <div className="w-32 h-1.5 bg-background border border-primary-custom/10 rounded-full overflow-hidden">
+                            <div className="w-2/3 h-full bg-primary-custom shadow-[0_0_8px_rgba(var(--primary),0.4)]"></div>
                         </div>
                     </div>
                     <button className="p-2 text-slate-400 hover:text-white transition-colors">
@@ -79,14 +81,14 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Side: Description */}
-                <div className="w-[450px] border-r border-[#1337ec]/10 bg-[#0d1117] flex flex-col overflow-hidden">
-                    <div className="flex border-b border-[#1337ec]/5 px-2 bg-slate-900/20">
+                <div className="w-[450px] border-r border-primary-custom/10 bg-background/60 backdrop-blur-sm flex flex-col overflow-hidden">
+                    <div className="flex border-b border-primary-custom/5 px-2 bg-background/20">
                         {["description", "solutions", "submissions"].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
                                 className={`px-4 py-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 ${activeTab === tab
-                                    ? "border-[#1337ec] text-[#1337ec]"
+                                    ? "border-primary-custom text-primary-custom"
                                     : "border-transparent text-slate-500 hover:text-slate-300"
                                     }`}
                             >
@@ -111,15 +113,15 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                     <ConsolePanel />
 
                     {/* Bottom Toolbar */}
-                    <div className="h-14 border-t border-white/5 bg-[#0d1117] flex items-center justify-between px-6 shrink-0">
+                    <div className="h-14 border-t border-primary-custom/10 bg-background/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0">
                         <button className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors">
                             <span className="text-[10px] font-bold uppercase tracking-widest">Console</span>
                         </button>
                         <div className="flex items-center gap-3">
-                            <button className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold transition-all border border-white/10">
+                            <button className="px-5 py-2 bg-background/60 hover:bg-background/80 text-slate-200 rounded-lg text-xs font-bold transition-all border border-primary-custom/10">
                                 Run Code
                             </button>
-                            <button className="px-8 py-2 bg-[#1337ec] hover:bg-[#1337ec]/90 text-white rounded-lg text-xs font-bold shadow-lg shadow-[#1337ec]/20 transition-all transform active:scale-95">
+                            <button className="px-8 py-2 bg-primary-custom hover:brightness-110 text-white rounded-lg text-xs font-bold shadow-lg shadow-primary-custom/20 transition-all transform active:scale-95">
                                 Submit
                             </button>
                         </div>

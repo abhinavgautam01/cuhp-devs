@@ -37,7 +37,9 @@ import {
     Globe,
     RefreshCcw,
     CheckCircle2,
-    Settings2
+    Settings2,
+    X,
+    Camera
 } from "lucide-react";
 
 import {
@@ -74,7 +76,7 @@ export {
     ArrowRight, Activity, Zap, ShieldCheck, Layout, Cloud,
     BarChart3, Bitcoin, Gamepad2, Smartphone, Infinity,
     BarChart2, FolderOpen, Share2, PencilLine, Trash2, Globe,
-    ArrowLeft, RefreshCcw, CheckCircle2, Settings2,
+    ArrowLeft, RefreshCcw, CheckCircle2, Settings2, X, Camera,
 
     // React Icons (MD)
     MdCode, MdPsychology, MdCloudDone, MdLanguage, MdSchool,

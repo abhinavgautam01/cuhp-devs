@@ -36,8 +36,8 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
         <button
             onClick={() => !href && onSolve?.(problem.slug)}
             className={`w-full py-2.5 rounded-xl font-bold transition-all transform group-hover:scale-[1.02] ${problem.isDaily
-                ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                ? 'bg-primary-custom hover:brightness-110 text-white shadow-lg shadow-primary-custom/20'
+                : 'bg-background/60 shadow-sm hover:shadow-md text-slate-400 hover:text-foreground'
                 }`}
         >
             {problem.isDaily ? 'Attempt Now' : 'Solve Problem'}
@@ -45,14 +45,14 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
     );
 
     return (
-        <div className={`group relative bg-slate-900 border ${problem.isDaily ? 'border-accent-neon/30 hover:shadow-[0_0_20px_rgba(0,210,255,0.1)]' : 'border-primary/10 hover:border-primary/40'} rounded-2xl p-6 transition-all flex flex-col`}>
+        <div className={`group relative bg-background/40 backdrop-blur-sm ${problem.isDaily ? 'hover:shadow-[0_0_20px_rgba(var(--primary),0.1)]' : ''} rounded-2xl p-6 transition-all flex flex-col`}>
 
 
             <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-xl ${problem.isDaily ? 'bg-accent-neon/10' : 'bg-primary/10'}`}>
+                <div className={`p-3 rounded-xl ${problem.isDaily ? 'bg-primary-custom/15' : 'bg-primary-custom/10'}`}>
                     <DynamicIcon
                         name={icon}
-                        className={problem.isDaily ? 'text-accent-neon' : 'text-primary'}
+                        className="text-primary-custom"
                         size={24}
                     />
                 </div>
@@ -63,7 +63,7 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
                 </div>
             </div>
 
-            <h3 className={`text-lg font-bold mb-2 transition-colors ${problem.isDaily ? 'group-hover:text-accent-neon' : 'group-hover:text-primary'}`}>
+            <h3 className={`text-lg font-bold mb-2 transition-colors group-hover:text-primary-custom`}>
                 {problem.title}
             </h3>
 

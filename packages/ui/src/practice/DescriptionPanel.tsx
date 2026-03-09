@@ -18,7 +18,7 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between mb-2">
-                <h1 className="text-xl font-bold text-white">{problem.title}</h1>
+                <h1 className="text-xl font-bold text-foreground">{problem.title}</h1>
                 <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${problem.difficulty === "EASY" ? "text-emerald-500 bg-emerald-500/10" :
                     problem.difficulty === "MEDIUM" ? "text-yellow-500 bg-yellow-500/10" :
                         "text-red-500 bg-red-500/10"
@@ -29,12 +29,12 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
 
             <div className="text-slate-300 text-sm leading-relaxed space-y-4">
                 <div className="prose prose-invert prose-sm max-w-none 
-                    prose-headings:text-slate-100 prose-headings:font-bold 
+                    prose-headings:text-foreground prose-headings:font-bold 
                     prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4
-                    prose-p:text-slate-300 prose-p:leading-7
-                    prose-strong:text-white prose-code:text-blue-400 
-                    prose-code:bg-slate-800/50 prose-code:px-1 prose-code:rounded
-                    prose-hr:border-white/5 prose-li:text-slate-300">
+                    prose-p:text-slate-400 prose-p:leading-7
+                    prose-strong:text-foreground prose-code:text-primary-custom 
+                    prose-code:bg-background border-primary-custom/10 prose-code:px-1 prose-code:rounded
+                    prose-hr:border-primary-custom/10 prose-li:text-slate-400">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {problem.description}
                     </ReactMarkdown>
@@ -43,11 +43,11 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
                 <div className="space-y-6 mt-8">
                     {problem.examples.map((example, index) => (
                         <div key={index} className="space-y-3">
-                            <h3 className="text-slate-100 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[#1337ec]"></span>
+                            <h3 className="text-foreground font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-custom shadow-[0_0_8px_rgba(var(--primary),0.4)]"></span>
                                 Example {index + 1}:
                             </h3>
-                            <div className="bg-black/30 rounded-xl p-4 border border-white/5 font-mono text-xs space-y-2">
+                            <div className="bg-background/40 backdrop-blur-sm rounded-xl p-4 border border-primary-custom/10 font-mono text-xs space-y-2">
                                 <div className="flex gap-2">
                                     <span className="text-slate-500">Input:</span>
                                     <span className="text-slate-300">{example.input}</span>
@@ -66,8 +66,8 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
                         </div>
                     ))}
 
-                    <div className="space-y-3 pt-4 border-t border-white/5">
-                        <h3 className="text-slate-100 font-bold text-xs uppercase tracking-widest">Constraints:</h3>
+                    <div className="space-y-3 pt-4 border-t border-primary-custom/10">
+                        <h3 className="text-foreground font-bold text-xs uppercase tracking-widest">Constraints:</h3>
                         <ul className="list-disc list-inside space-y-2 font-mono text-[11px] text-slate-500">
                             {problem.constraints.map((constraint, index) => (
                                 <li key={index}>

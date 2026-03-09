@@ -27,16 +27,15 @@ export function ResourcesClient({ data }: ResourcesClientProps) {
     return (
         <>
             {/* Tab Navigation */}
-            <div className="flex flex-wrap justify-center gap-2 mb-10 p-1 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-sm">
+            <div className="flex flex-wrap justify-center gap-2 mb-10 p-1 bg-background border border-primary-custom/10 rounded-2xl backdrop-blur-sm">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                            activeTab === tab.id
-                                ? "bg-[#1337ec] text-white shadow-[0_0_20px_rgba(19,55,236,0.3)]"
-                                : "text-slate-400 hover:text-white hover:bg-white/5"
-                        }`}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === tab.id
+                                ? "bg-primary-custom text-white shadow-[0_0_20px_rgba(var(--primary),0.3)]"
+                                : "text-slate-400 hover:text-foreground hover:bg-white/5"
+                            }`}
                     >
                         <tab.icon size={20} />
                         {tab.label}

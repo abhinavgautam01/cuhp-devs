@@ -23,7 +23,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
             code: code || ""
         });
 
-        const populatedPost = await Post.findById(post._id).populate("author", "fullName email studentId");
+        const populatedPost = await Post.findById(post._id).populate("author", "fullName email studentId avatar");
 
         return res.status(201).json({
             message: "Post created successfully",
@@ -39,7 +39,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
 export const getFeed = async (req: AuthRequest, res: Response) => {
     try {
         const posts = await Post.find()
-            .populate("author", "fullName email studentId")
+            .populate("author", "fullName email studentId avatar")
             .sort({ createdAt: -1 })
             .limit(50);
 

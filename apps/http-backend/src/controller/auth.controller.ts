@@ -126,6 +126,10 @@ export const signin = async (req: Request, res: Response) => {
         program: user.program,
         semester: user.semester,
         interests: user.interests,
+        handle: user.handle,
+        avatar: user.avatar,
+        bio: user.bio,
+        theme: user.theme,
         onboardingCompleted: user.onboardingCompleted,
       },
     });
@@ -166,6 +170,11 @@ export const me = async (req: Request, res: Response) => {
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        handle: user.handle,
+        avatar: user.avatar,
+        bio: user.bio,
+        theme: user.theme,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
 

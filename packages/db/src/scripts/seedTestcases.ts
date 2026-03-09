@@ -6,7 +6,8 @@ import mongoose from "mongoose";
 import { Problem, TestCase } from "../models";
 import { connectDB } from "../connection";
 
-const PROBLEMS_DIR = path.join(__dirname, "../../../../apps/problems");
+const PROBLEMS_DIR = path.resolve("D:/Projects/cuhp-devs/apps/problems");
+console.log(`[SeedTestcases] Using PROBLEMS_DIR: ${PROBLEMS_DIR}`);
 
 async function seed() {
   await connectDB();

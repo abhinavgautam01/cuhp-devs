@@ -33,7 +33,7 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
     };
 
     return (
-        <div className="bg-[#1a1c2a] rounded-xl border border-[#1337ec]/10 overflow-hidden shadow-xl shadow-black/20">
+        <div className="bg-card-custom backdrop-blur-md rounded-xl overflow-hidden border border-card-border shadow-xl shadow-black/20">
             <div className="p-4">
                 <div className="flex gap-4">
                     <img
@@ -45,13 +45,18 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
                         <textarea
                             value={postText}
                             onChange={(e) => setPostText(e.target.value)}
-                            className="w-full bg-transparent border-none focus:ring-0 text-lg placeholder:text-white/20 resize-none h-20 font-sans outline-none text-white"
+                            className="w-full bg-transparent border-none focus:ring-0 text-lg placeholder:text-muted-custom/60 resize-none h-20 font-sans outline-none text-foreground transition-all duration-300 focus:placeholder:text-muted-custom/80"
                             placeholder="Share a snippet, ask a question, or celebrate a win..."
                         />
+                        <div className="flex justify-end pr-2">
+                            <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors duration-300 ${postText.length > 450 ? 'text-rose-500' : 'text-muted-custom'}`}>
+                                {postText.length} / 500
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="px-4 py-3 bg-white/2 flex items-center justify-between border-t border-white/5">
+            <div className="px-4 py-3 bg-background/40 backdrop-blur-sm flex items-center justify-between">
                 <div className="flex gap-2">
                     {[
                         { icon: Code, color: "text-blue-400", label: "Snippet" },
@@ -62,8 +67,8 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
                             key={label}
                             onClick={() => setSelectedType(label)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium ${selectedType === label
-                                ? "bg-[#1337ec]/20 text-white shadow-inner shadow-white/5"
-                                : "text-white/60 hover:bg-white/5 hover:text-white"
+                                ? "bg-primary-custom/20 text-primary-custom"
+                                : "text-muted-custom hover:text-foreground hover:bg-foreground/[0.03]"
                                 }`}
                         >
                             <Icon className={`${selectedType === label ? color : 'text-gray-500'}`} size={18} />
@@ -73,7 +78,7 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
                 </div>
                 <button
                     onClick={handleSubmit}
-                    className="bg-[#1337ec] hover:bg-[#1337ec]/90 text-white px-6 py-1.5 rounded-lg font-bold text-sm shadow-lg shadow-[#1337ec]/20 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 min-w-[80px]"
+                    className="bg-primary-custom hover:brightness-110 text-primary-foreground-custom px-6 py-1.5 rounded-lg font-bold text-sm shadow-lg shadow-primary-custom/20 transition-all active:scale-95 disabled:opacity-30 disabled:active:scale-100 min-w-[80px]"
                     disabled={!postText.trim() || isSubmitting}
                 >
                     {isSubmitting ? "..." : "Post"}

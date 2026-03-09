@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import { Flame, Bell, SearchX, ChevronDown } from "../../lib/icons";
 
 export const metadata: Metadata = {
-    title: "Practice: Coding Challenges | NexusCS",
+    title: "Practice: Coding Challenges",
     description: "Master algorithms and data structures with curated problems.",
 };
 
@@ -77,12 +77,12 @@ export default async function PracticePage({
     const otherProblems = filteredProblems.slice(1);
 
     return (
-        <div className="bg-[#11141f] text-slate-100 h-screen flex font-sans overflow-hidden">
+        <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
             <SidebarWrapper user={sidebarUser} />
 
             <main className="flex-1 flex flex-col min-w-0">
                 {/* Header Section */}
-                <div className="bg-slate-900/80 backdrop-blur-md border-b border-[#1337ec]/10 px-8 py-3 flex items-center justify-between z-10">
+                <div className="bg-background/80 backdrop-blur-md border-b border-primary-custom/10 px-8 py-3 flex items-center justify-between z-10">
                     <div className="flex items-center gap-4">
                         <div className=" px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-gray-500/20">
                             <Flame className="text-white" size={18} />
@@ -93,10 +93,10 @@ export default async function PracticePage({
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Goal</span>
-                            <div className="w-24 h-1.5 bg-slate-800 rounded-full">
-                                <div className="w-2/3 h-full bg-accent-neon rounded-full"></div>
+                            <div className="w-24 h-1.5 bg-background border border-primary-custom/5 rounded-full overflow-hidden">
+                                <div className="w-2/3 h-full bg-primary-custom rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]"></div>
                             </div>
-                            <span className="text-xs font-bold text-accent-neon">0/1</span>
+                            <span className="text-xs font-bold text-primary-custom">0/1</span>
                         </div>
                         <button className="p-2 text-slate-400 hover:text-white transition-colors">
                             <Bell size={20} />
@@ -105,7 +105,7 @@ export default async function PracticePage({
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-12">
+                <div className="flex-1 overflow-y-auto p-8 space-y-12 scrollbar-hide">
                     <div className="max-w-7xl mx-auto space-y-12">
                         {/* Search & Tabs (Client-Side Wrapper) */}
                         <PracticeFiltersWrapper
@@ -146,7 +146,7 @@ export default async function PracticePage({
 
                         {/* Load More */}
                         <div className="flex items-center justify-center py-10">
-                            <button className="px-8 py-3 border border-primary/20 bg-primary/5 text-primary rounded-xl font-bold hover:bg-primary/10 transition-all flex items-center gap-2">
+                            <button className="px-8 py-3 border border-primary-custom/20 bg-primary-custom/5 text-primary-custom rounded-xl font-bold hover:bg-primary-custom/10 transition-all flex items-center gap-2 shadow-lg shadow-primary-custom/5">
                                 <span>Load More Challenges</span>
                                 <ChevronDown size={20} />
                             </button>

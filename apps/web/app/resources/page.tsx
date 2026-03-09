@@ -6,11 +6,11 @@ export default async function ResourcesPage() {
     const data = await getMockResourcesData();
 
     return (
-        <main className="flex-1 overflow-y-auto bg-black min-h-screen">
+        <main className="flex-1 overflow-y-auto bg-background min-h-screen transition-colors duration-300">
             <div className="max-w-5xl mx-auto p-6 lg:p-10">
                 <header className="mb-10 animate-fade-in text-center">
-                    <h1 className="text-4xl font-bold mb-2 font-display text-white tracking-tight">
-                        Resources<span className="text-[#1337ec]">.</span>
+                    <h1 className="text-4xl font-bold mb-2 font-display text-foreground tracking-tight">
+                        Resources<span className="text-primary-custom">.</span>
                     </h1>
                     <p className="text-slate-400">
                         Direct access to the best study materials and communities.

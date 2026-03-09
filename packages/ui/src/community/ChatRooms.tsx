@@ -19,27 +19,27 @@ interface ChatRoomsProps {
 
 function EmptyRoomsPlaceholder({ message }: { message: string }) {
   return (
-    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/[0.01]">
-      <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/10">
-        <MessageSquare size={40} className="text-white/20" />
+    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-card-border rounded-3xl bg-background/20">
+      <div className="w-20 h-20 bg-background/40 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-card-border">
+        <MessageSquare size={40} className="text-muted-custom/40" />
       </div>
-      <p className="text-white/60 text-lg font-bold">{message}</p>
-      <p className="text-white/20 text-sm mt-2 max-w-[200px]">Check back soon or be the first to start a conversation!</p>
+      <p className="text-foreground/60 text-lg font-bold">{message}</p>
+      <p className="text-muted-custom/40 text-sm mt-2 max-w-[200px]">Check back soon or be the first to start a conversation!</p>
     </div>
   );
 }
 
 function CreateRoomCard() {
   return (
-    <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-dashed border-white/10 p-5 flex flex-col items-center justify-center text-center hover:bg-white/[0.05] hover:border-[#1337ec]/50 transition-all cursor-pointer group h-full min-h-[220px] relative overflow-hidden">
-      <div className="w-14 h-14 rounded-full border border-dashed border-white/20 flex items-center justify-center text-white/30 mb-4 group-hover:scale-110 group-hover:bg-[#1337ec] group-hover:text-white group-hover:border-[#1337ec] transition-all duration-500 shadow-xl group-hover:shadow-[#1337ec]/40">
+    <div className="bg-card-custom/50 backdrop-blur-xl rounded-2xl border border-dashed border-card-border p-5 flex flex-col items-center justify-center text-center hover:bg-primary-custom/5 hover:border-primary-custom/50 transition-all cursor-pointer group h-full min-h-[220px] relative overflow-hidden">
+      <div className="w-14 h-14 rounded-full border border-dashed border-card-border flex items-center justify-center text-muted-custom/30 mb-4 group-hover:scale-110 group-hover:bg-primary-custom group-hover:text-primary-foreground-custom group-hover:border-primary-custom transition-all duration-500 shadow-xl group-hover:shadow-primary-custom/40">
         <Plus size={28} />
       </div>
-      <h4 className="font-bold text-white/80 group-hover:text-white transition-colors text-lg">Start a New Room</h4>
-      <p className="text-xs text-white/30 max-w-[160px] mt-2 leading-relaxed">Can't find a topic? Create your own study group and invite friends.</p>
+      <h4 className="font-bold text-foreground/80 group-hover:text-primary-custom transition-colors text-lg">Start a New Room</h4>
+      <p className="text-xs text-muted-custom max-w-[160px] mt-2 leading-relaxed">Can't find a topic? Create your own study group and invite friends.</p>
 
       {/* Decorative background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1337ec]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-custom/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 }
@@ -116,9 +116,9 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
                 </span>
                 Trending Rooms
               </h2>
-              <p className="text-white/40 text-sm mt-2 ml-14 font-medium uppercase tracking-widest leading-none">Most active study groups right now</p>
+              <p className="text-muted-custom text-sm mt-2 ml-14 font-medium uppercase tracking-widest leading-none">Most active study groups right now</p>
             </div>
-            <button className="text-xs font-black text-[#1337ec] uppercase tracking-widest px-4 py-2 bg-[#1337ec]/5 rounded-full border border-[#1337ec]/20 hover:bg-[#1337ec] hover:text-white transition-all">
+            <button className="text-xs font-black text-primary-custom uppercase tracking-widest px-4 py-2 bg-primary-custom/5 rounded-full border border-primary-custom/20 hover:bg-primary-custom hover:text-primary-foreground-custom transition-all">
               View All
             </button>
           </div>
@@ -142,11 +142,11 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
 
         {/* Section divider */}
         <div className="flex items-center gap-6 py-6 overflow-hidden">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <span className="text-[10px] text-[#1337ec] font-black uppercase tracking-[0.5em] px-6 py-2.5 bg-[#1337ec]/5 rounded-full border border-[#1337ec]/10 backdrop-blur-xl shrink-0">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-card-border to-transparent" />
+          <span className="text-[10px] text-primary-custom font-black uppercase tracking-[0.5em] px-6 py-2.5 bg-primary-custom/5 rounded-full border border-primary-custom/10 backdrop-blur-xl shrink-0">
             Community Explorer
           </span>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-card-border to-transparent" />
         </div>
 
         {/* Categories Section */}
@@ -155,11 +155,11 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
             <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
               Explore Categories
             </h2>
-            <div className="flex bg-white/[0.03] rounded-xl p-1 border border-white/5 backdrop-blur-md">
-              <button className="p-2 rounded-lg bg-[#1337ec] text-white shadow-lg shadow-[#1337ec]/20 transition-all">
+            <div className="flex bg-card-custom rounded-xl p-1 border border-card-border backdrop-blur-md">
+              <button className="p-2 rounded-lg bg-primary-custom text-primary-foreground-custom shadow-lg shadow-primary-custom/20 transition-all">
                 <LayoutGrid size={18} />
               </button>
-              <button className="p-2 rounded-lg text-white/30 hover:text-white/60 transition-all">
+              <button className="p-2 rounded-lg text-muted-custom hover:text-foreground transition-all">
                 <List size={18} />
               </button>
             </div>

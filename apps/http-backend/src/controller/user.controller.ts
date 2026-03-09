@@ -4,21 +4,30 @@ import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const { program, semester, interests } = req.body;
+        const { program, semester, interests, bio, handle, avatar, theme } = req.body;
         const userId = req.user?.id;
 
         if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
+        const updateData: any = {
+            program,
+            semester,
+            interests: Array.isArray(interests) ? interests : [],
+            bio,
+            handle,
+            avatar,
+            theme,
+            onboardingCompleted: Boolean(program && semester),
+        };
+
+        // Remove undefined fields to avoid overwriting with null/undefined
+        Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
         const user = await User.findByIdAndUpdate(
             userId,
-            {
-                program,
-                semester,
-                interests: Array.isArray(interests) ? interests : [],
-                onboardingCompleted: Boolean(program && semester),
-            },
+            updateData,
             { new: true, runValidators: true }
         ).select("-password");
 
@@ -306,7 +315,7 @@ export const getCommunitySnippets = async (req: AuthRequest, res: Response) => {
 
         const user = await User.findById(userId).populate({
             path: "savedPosts",
-            populate: { path: "author", select: "fullName" }
+            populate: { path: "author", select: "fullName avatar" }
         });
 
         if (!user) {
@@ -368,7 +377,7 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         const messages = await Message.find({ roomId: room._id, isDeleted: false })
             .sort({ createdAt: -1 })
             .limit(50)
-            .populate("senderId", "fullName email");
+            .populate("senderId", "fullName email avatar");
 
         // Reverse to get chronological order for the client
         return res.status(200).json(messages.reverse());

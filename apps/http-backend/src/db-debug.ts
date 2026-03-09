@@ -9,9 +9,18 @@ async function debug() {
         const languages = await Language.find().lean();
         console.log("LANGUAGES IN DB:", languages.map((l: any) => ({ id: l._id, name: l.name })));
 
+        const allProblems = await Problem.find().lean();
+        console.log("ALL PROBLEMS IN DB:", allProblems.map((p: any) => ({
+            id: p._id,
+            title: p.title,
+            slug: p.slug,
+            hidden: p.hidden,
+            tags: p.tags
+        })));
+
         const problem = await Problem.findOne({ slug: "two-sum" }).lean();
         if (problem) {
-            console.log("PROBLEM FOUND:", { id: problem._id, title: problem.title });
+            console.log("PROBLEM FOUND:", problem);
             const codes = await DefaultCode.find({ problemId: problem._id }).lean();
             console.log("DEFAULT CODES FOR PROBLEM:", codes.map((c: any) => ({
                 id: c._id,
@@ -19,7 +28,7 @@ async function debug() {
                 hasCode: !!c.code
             })));
         } else {
-            console.log("PROBLEM NOT FOUND: valid-parentheses");
+            console.log("PROBLEM NOT FOUND: two-sum");
         }
 
         console.log("--- DB DEBUG END ---");

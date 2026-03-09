@@ -33,6 +33,7 @@ interface Message {
         _id: string;
         fullName: string;
         email: string;
+        avatar?: string;
     };
     createdAt: string;
     isOptimistic?: boolean;
@@ -42,6 +43,7 @@ interface Member {
     _id: string;
     fullName?: string;
     email?: string;
+    avatar?: string;
     isOnline?: boolean;
 }
 
@@ -261,14 +263,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
         // Detect code blocks (multiline content starting with def/class or indent)
         if (content.includes("def ") || content.includes("class ") || content.includes("import ")) {
             return (
-                <div className="mt-3 bg-[#1e1e20] rounded-xl border border-white/5 overflow-hidden max-w-2xl shadow-2xl">
-                    <div className="px-4 py-2 bg-black/40 border-b border-white/5 flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">code_snippet.py</span>
-                        <button className="text-white/20 hover:text-white transition-colors">
+                <div className="mt-3 bg-card-custom rounded-xl border border-card-border overflow-hidden max-w-2xl shadow-2xl">
+                    <div className="px-4 py-2 bg-foreground/5 border-b border-card-border flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-muted-custom uppercase tracking-widest">code_snippet.py</span>
+                        <button className="text-muted-custom/40 hover:text-foreground transition-colors">
                             <Copy size={14} />
                         </button>
                     </div>
-                    <div className="p-4 font-mono text-[13px] leading-relaxed text-slate-300">
+                    <div className="p-4 font-mono text-[13px] leading-relaxed text-foreground/80">
                         <pre className="whitespace-pre-wrap">{content}</pre>
                     </div>
                 </div>
@@ -280,7 +282,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
         return parts.map((part, i) => {
             if (part.startsWith("@")) {
                 return (
-                    <span key={i} className="text-[#1337ec] font-bold cursor-pointer hover:underline">
+                    <span key={i} className="text-primary-custom font-bold cursor-pointer hover:underline">
                         {part}
                     </span>
                 );
@@ -290,19 +292,19 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     };
 
     return (
-        <div className="flex-1 flex overflow-hidden bg-background-dark relative border-x border-primary/10">
+        <div className="flex-1 flex overflow-hidden bg-background relative border-x border-primary-custom/10">
             {/* Main Chat Area */}
             <div className="flex-1 flex flex-col min-w-0 h-full">
                 {/* Header */}
-                <header className="h-16 shrink-0 border-b border-white/5 px-6 flex items-center justify-between bg-background-dark/80 backdrop-blur-md z-30">
+                <header className="h-16 shrink-0 border-b border-card-border px-6 flex items-center justify-between bg-background/80 backdrop-blur-md z-30">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(19,55,236,0.1)]">
+                        <div className="w-10 h-10 rounded-xl bg-primary-custom/10 flex items-center justify-center text-primary-custom shadow-[0_0_20px_rgba(var(--primary),0.1)]">
                             <Brain size={24} />
                         </div>
                         <div>
-                            <h2 className="font-bold text-lg leading-tight text-white/90">{roomName}</h2>
-                            <p className="text-[11px] text-white/40 flex items-center gap-1.5 font-medium uppercase tracking-wider">
-                                <span className={`w-1.5 h-1.5 rounded-full ${onlineMemberIds.length > 0 ? "bg-green-500 animate-pulse" : "bg-white/20"}`} />
+                            <h2 className="font-bold text-lg leading-tight text-foreground/90">{roomName}</h2>
+                            <p className="text-[11px] text-muted-custom flex items-center gap-1.5 font-medium uppercase tracking-wider">
+                                <span className={`w-1.5 h-1.5 rounded-full ${onlineMemberIds.length > 0 ? "bg-green-500 animate-pulse" : "bg-muted-custom/20"}`} />
                                 {onlineMemberIds.length} members active now
                             </p>
                         </div>
@@ -311,7 +313,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
 
                         <button
                             onClick={() => setShowSidebar(!showSidebar)}
-                            className={`p-2 rounded-lg transition-all ${showSidebar ? 'text-primary bg-primary/10' : 'text-white/40 hover:text-white hover:bg-white/5'}`}
+                            className={`p-2 rounded-lg transition-all ${showSidebar ? 'text-primary-custom bg-primary-custom/10' : 'text-muted-custom hover:text-foreground hover:bg-foreground/5'}`}
                         >
                             <Info size={18} />
                         </button>
@@ -328,33 +330,34 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                             <div key={msg._id} className="w-full">
                                 {showDateDivider && (
                                     <div className="flex items-center gap-6 my-10">
-                                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                                        <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
+                                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-card-border to-transparent" />
+                                        <span className="text-[10px] font-black text-muted-custom uppercase tracking-[0.3em]">
                                             {formatDateDivider(msg.createdAt)}
                                         </span>
-                                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-card-border to-transparent" />
                                     </div>
                                 )}
 
                                 <div className="flex gap-4 group animate-[fadeSlideUp_0.3s_ease_forwards]">
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative shadow-lg">
+                                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-card-border flex items-center justify-center shrink-0 overflow-hidden relative shadow-lg">
                                         {msg.senderId?.email ? (
-                                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId.fullName}`} className="w-full h-full object-cover" alt="User" />
+                                            <img
+                                                src={((currentUser && (msg.senderId as any)._id === currentUser.id) ? currentUser.avatar : msg.senderId.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId.fullName}`}
+                                                className="w-full h-full object-cover"
+                                                alt="User"
+                                            />
                                         ) : (
-                                            <span className="text-sm font-bold text-primary">{msg.senderId?.fullName?.charAt(0)}</span>
+                                            <span className="text-sm font-bold text-primary-custom">{msg.senderId?.fullName?.charAt(0)}</span>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-baseline gap-3 mb-1">
-                                            <span className="font-bold text-sm text-[#00f3ff] hover:underline cursor-pointer">{msg.senderId?.fullName}</span>
-                                            <span className="text-[10px] text-white/20 uppercase tracking-tighter font-medium">{formatTime(msg.createdAt)}</span>
+                                            <span className="font-bold text-sm text-primary-custom hover:underline cursor-pointer">{msg.senderId?.fullName}</span>
+                                            <span className="text-[10px] text-muted-custom uppercase tracking-tighter font-medium">{formatTime(msg.createdAt)}</span>
                                         </div>
-                                        <div className="text-[13.5px] text-white/70 leading-relaxed max-w-3xl">
+                                        <div className="text-[13.5px] text-foreground/70 leading-relaxed max-w-3xl">
                                             {renderMessageContent(msg.content)}
                                         </div>
-
-
-
                                     </div>
 
                                     {msg.isOptimistic && (
@@ -370,11 +373,11 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                     {typingUsers.length > 0 && (
                         <div className="flex items-center gap-3 px-2">
                             <div className="flex gap-1">
-                                <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                <span className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                <span className="w-1 h-1 bg-primary rounded-full animate-bounce" />
+                                <span className="w-1 h-1 bg-primary-custom rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                <span className="w-1 h-1 bg-primary-custom rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                <span className="w-1 h-1 bg-primary-custom rounded-full animate-bounce" />
                             </div>
-                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest italic">
+                            <p className="text-[10px] text-muted-custom/30 font-bold uppercase tracking-widest italic">
                                 {typingUsers.join(", ")} is typing...
                             </p>
                         </div>
@@ -382,14 +385,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                 </div>
 
                 {/* Footer Input */}
-                <footer className="p-4 bg-background-dark/50 border-none backdrop-blur-xl">
+                <footer className="p-4 bg-background/50 border-none backdrop-blur-xl">
                     <div className="max-w-4xl mx-auto relative">
                         <form
                             onSubmit={(e) => {
                                 handleSend(e);
                                 if (textareaRef.current) textareaRef.current.focus();
                             }}
-                            className="flex items-end gap-3 bg-white/[0.03] rounded-2xl p-3 focus-within:bg-white/[0.06] transition-all duration-300 shadow-2xl"
+                            className="flex items-end gap-3 bg-foreground/[0.03] rounded-2xl p-3 focus-within:bg-foreground/[0.06] transition-all duration-300 shadow-2xl"
                         >
 
                             <textarea
@@ -403,19 +406,19 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                     }
                                 }}
                                 rows={1}
-                                className="flex-1 bg-transparent border-0 outline-none focus:ring-0 resize-none py-2.5 text-[13.5px] text-white/90 placeholder:text-white/20 custom-scrollbar max-h-[200px]"
+                                className="flex-1 bg-transparent border-0 outline-none focus:ring-0 resize-none py-2.5 text-[13.5px] text-foreground/90 placeholder:text-muted-custom/20 custom-scrollbar max-h-[200px]"
                                 placeholder={`Message # ${roomName}...`}
                             />
                             <div className="flex items-center gap-1.5 px-1.5 pb-1">
-                                <button type="button" className="p-2 text-white/30 hover:text-white transition-colors hover:bg-white/5 rounded-xl">
+                                <button type="button" className="p-2 text-muted-custom/30 hover:text-foreground transition-colors hover:bg-foreground/5 rounded-xl">
                                     <Smile size={20} />
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={!input.trim()}
                                     className={`p-2.5 rounded-xl transition-all duration-500 shadow-lg ${input.trim()
-                                        ? 'bg-primary text-white shadow-primary/20 hover:scale-105 hover:bg-primary/90'
-                                        : 'bg-white/5 text-white/10'
+                                        ? 'bg-primary-custom text-primary-foreground-custom shadow-primary-custom/20 hover:scale-105 hover:bg-primary-hover-custom'
+                                        : 'bg-foreground/5 text-muted-custom/10'
                                         }`}
                                 >
                                     <Send size={18} />
@@ -428,26 +431,26 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
 
             {/* Room Sidebar */}
             {showSidebar && (
-                <aside className="hidden xl:flex flex-col w-80 shrink-0 p-6 space-y-8 overflow-y-auto custom-scrollbar border-l border-white/5 bg-background-dark/30 animate-[fadeSlideLeft_0.4s_ease_forwards]">
+                <aside className="hidden xl:flex flex-col w-80 shrink-0 p-6 space-y-8 overflow-y-auto custom-scrollbar border-l border-card-border bg-background/30 animate-[fadeSlideLeft_0.4s_ease_forwards]">
                     {/* Room Details Bundle */}
                     <section>
                         <div className="flex items-center justify-between mb-5">
-                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-white/30 uppercase">Room Overview</h3>
-                            <button className="text-white/20 hover:text-white transition-colors">
+                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-muted-custom uppercase">Room Overview</h3>
+                            <button className="text-muted-custom/20 hover:text-foreground transition-colors">
                                 <Settings size={14} />
                             </button>
                         </div>
-                        <div className="bg-white/[0.03] rounded-2xl border border-white/5 overflow-hidden transition-all hover:border-white/10 shadow-xl">
-                            <div className="h-24 bg-gradient-to-br from-primary/40 to-purple-500/40 relative">
+                        <div className="bg-card-custom rounded-2xl border border-card-border overflow-hidden transition-all hover:border-primary-custom/30 shadow-xl">
+                            <div className="h-24 bg-gradient-to-br from-primary-custom/40 to-purple-500/40 relative">
                                 <div className="absolute inset-0 bg-black/20" />
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/circuit-board.png')] opacity-20" />
                             </div>
                             <div className="p-5 -mt-10 relative z-10 text-center flex flex-col items-center">
-                                <div className="w-16 h-16 rounded-2xl bg-background-dark border-4 border-background-dark flex items-center justify-center text-primary mb-4 shadow-2xl group">
+                                <div className="w-16 h-16 rounded-2xl bg-background border-4 border-background flex items-center justify-center text-primary-custom mb-4 shadow-2xl group">
                                     <Brain size={32} className="group-hover:scale-110 transition-transform" />
                                 </div>
-                                <h4 className="font-bold text-xl mb-1.5 text-white/90">{roomName}</h4>
-                                <p className="text-xs text-white/40 leading-relaxed mb-6 max-w-[200px]">Advanced topics in {roomName.toLowerCase()} and neural research.</p>
+                                <h4 className="font-bold text-xl mb-1.5 text-foreground/90">{roomName}</h4>
+                                <p className="text-xs text-muted-custom leading-relaxed mb-6 max-w-[200px]">Advanced topics in {roomName.toLowerCase()} and neural research.</p>
 
                             </div>
                         </div>
@@ -456,7 +459,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                     {/* Active Members section */}
                     <section>
                         <div className="flex items-center justify-between mb-5">
-                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-white/30 uppercase">Members — {members.length}</h3>
+                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-muted-custom uppercase">Members — {members.length}</h3>
                         </div>
                         <div className="space-y-4">
                             {members
@@ -479,16 +482,20 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                     return (
                                         <div key={member._id} className="flex items-center gap-3 p-1 group cursor-pointer">
                                             <div className="relative">
-                                                <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-colors">
-                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${member.fullName}`} className="w-full h-full object-cover" alt="Member" />
+                                                <div className="w-9 h-9 rounded-xl overflow-hidden border border-card-border group-hover:border-primary-custom/50 transition-colors">
+                                                    <img
+                                                        src={((isSelf && currentUser) ? currentUser.avatar : member.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.fullName}`}
+                                                        className="w-full h-full object-cover"
+                                                        alt="Member"
+                                                    />
                                                 </div>
-                                                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background-dark ${isOnline ? 'bg-green-500' : 'bg-white/20'}`} />
+                                                <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ${isOnline ? 'bg-green-500' : 'bg-muted-custom/20'}`} />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-bold truncate text-white/80 group-hover:text-white transition-colors">
+                                                <p className="text-sm font-bold truncate text-foreground/80 group-hover:text-foreground transition-colors">
                                                     {displayName} {isSelf && "(You)"}
                                                 </p>
-                                                <p className="text-[10px] text-white/20 uppercase font-bold tracking-widest">{isOnline ? "Online" : 'Offline'}</p>
+                                                <p className="text-[10px] text-muted-custom uppercase font-bold tracking-widest">{isOnline ? "Online" : 'Offline'}</p>
                                             </div>
                                         </div>
                                     );
@@ -499,23 +506,23 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                     {/* Shared Assets grid */}
                     <section>
                         <div className="flex items-center justify-between mb-5">
-                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-white/30 uppercase">Shared Assets</h3>
-                            <button className="text-[10px] text-primary font-bold uppercase hover:underline">View All</button>
+                            <h3 className="font-bold text-[10px] tracking-[0.2em] text-muted-custom uppercase">Shared Assets</h3>
+                            <button className="text-[10px] text-primary-custom font-bold uppercase hover:underline">View All</button>
                         </div>
                         <div className="grid grid-cols-3 gap-2">
-                            <div className="aspect-square rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:border-primary/40 hover:bg-white/[0.05] transition-all cursor-pointer group">
-                                <FileText size={18} className="text-white/20 group-hover:text-primary transition-colors" />
+                            <div className="aspect-square rounded-xl bg-foreground/[0.03] border border-card-border flex items-center justify-center hover:border-primary-custom/40 hover:bg-foreground/[0.05] transition-all cursor-pointer group">
+                                <FileText size={18} className="text-muted-custom/20 group-hover:text-primary-custom transition-colors" />
                             </div>
-                            <div className="aspect-square rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:border-primary/40 hover:bg-white/[0.05] transition-all cursor-pointer group">
-                                <LinkIcon size={18} className="text-white/20 group-hover:text-[#00f3ff] transition-colors" />
+                            <div className="aspect-square rounded-xl bg-foreground/[0.03] border border-card-border flex items-center justify-center hover:border-primary-custom/40 hover:bg-foreground/[0.05] transition-all cursor-pointer group">
+                                <LinkIcon size={18} className="text-muted-custom/20 group-hover:text-primary-custom transition-colors" />
                             </div>
-                            <div className="aspect-square rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden hover:border-primary/40 transition-all cursor-pointer relative group">
+                            <div className="aspect-square rounded-xl bg-foreground/[0.03] border border-card-border overflow-hidden hover:border-primary-custom/40 transition-all cursor-pointer relative group">
                                 <img
                                     src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200"
                                     className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity"
                                     alt="Asset"
                                 />
-                                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="absolute inset-0 bg-primary-custom/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                         </div>
                     </section>

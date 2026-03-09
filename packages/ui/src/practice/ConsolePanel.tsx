@@ -3,9 +3,9 @@ import { CheckCircle2 } from "../icons";
 
 export const ConsolePanel: React.FC = () => {
     return (
-        <div className="h-48 border-t border-white/10 bg-[#1e1e1e] flex flex-col shrink-0">
-            <div className="flex items-center px-4 border-b border-white/5 bg-[#252526]">
-                <button className="px-4 py-2 text-[10px] font-bold text-[#00d2ff] border-b-2 border-[#00d2ff] uppercase tracking-widest">
+        <div className="h-48 border-t border-primary-custom/10 bg-background flex flex-col shrink-0">
+            <div className="flex items-center px-4 border-b border-primary-custom/5 bg-background/80 backdrop-blur-sm">
+                <button className="px-4 py-2 text-[10px] font-bold text-primary-custom border-b-2 border-primary-custom uppercase tracking-widest">
                     Results
                 </button>
                 <button className="px-4 py-2 text-[10px] font-medium text-slate-500 hover:text-slate-300 uppercase tracking-widest transition-colors">
@@ -23,7 +23,7 @@ export const ConsolePanel: React.FC = () => {
                 <div className="space-y-4">
                     <div className="space-y-1.5">
                         <span className="text-[9px] text-slate-500 uppercase font-black tracking-tighter">Input</span>
-                        <div className="bg-black/40 p-3 rounded-lg text-xs font-mono text-slate-300 border border-white/5">
+                        <div className="bg-background/40 backdrop-blur-sm p-3 rounded-lg text-xs font-mono text-slate-300 border border-primary-custom/10">
                             height = [1,1]
                         </div>
                     </div>

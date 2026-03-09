@@ -41,25 +41,24 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
       <div className="flex flex-col gap-6">
         {/* Title */}
         <div className="flex items-center gap-3">
-          <div className="text-[#1337ec] p-2 bg-[#1337ec]/10 rounded-lg flex items-center justify-center">
+          <div className="text-primary-custom p-2 bg-primary-custom/10 rounded-lg flex items-center justify-center">
             <MdSchool size={24} />
           </div>
-          <h2 className="text-2xl font-bold font-display text-white tracking-tight">
+          <h2 className="text-2xl font-bold font-display text-foreground tracking-tight">
             Academic Syllabus
           </h2>
         </div>
 
         {/* Degree Selection Tabs (Now below the title) */}
-        <div className="flex p-1 bg-slate-900 border border-white/5 rounded-xl w-fit">
+        <div className="flex p-1 bg-background rounded-xl w-fit">
           {["BTech", "MCA"].map((degree) => (
             <button
               key={degree}
               onClick={() => handleDegreeChange(degree as "BTech" | "MCA")}
-              className={`px-8 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all duration-300 min-w-[100px] ${
-                activeDegree === degree
-                  ? "bg-[#1337ec] text-white shadow-lg shadow-[#1337ec]/20"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
+              className={`px-8 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all duration-300 min-w-[100px] ${activeDegree === degree
+                ? "bg-primary-custom text-white shadow-lg shadow-primary-custom/20"
+                : "text-slate-500 hover:text-slate-300"
+                }`}
             >
               {degree}
             </button>
@@ -68,16 +67,15 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
       </div>
 
       {/* Semester Navigation Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide border-b border-white/5">
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide border-b border-primary-custom/10">
         {semesters.map((sem) => (
           <button
             key={sem}
             onClick={() => setActiveSemester(sem)}
-            className={`px-5 py-2 rounded-full text-xs font-bold transition-all min-w-[60px] ${
-              activeSemester === sem
-                ? "bg-[#1337ec]/20 text-[#1337ec] border border-[#1337ec]"
-                : "border border-slate-800 bg-slate-900/50 text-slate-500 hover:border-slate-700"
-            }`}
+            className={`px-5 py-2 rounded-full text-xs font-bold transition-all min-w-[60px] ${activeSemester === sem
+              ? "bg-primary-custom/20 text-primary-custom border border-primary-custom"
+              : "border border-primary-custom/10 bg-background/50 text-slate-500 hover:border-primary-custom/30"
+              }`}
           >
             {sem}
           </button>
@@ -97,12 +95,12 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
           currentCourses.map((course) => (
             <div
               key={course.code}
-              className="bg-slate-900 border border-white/5 rounded-2xl p-6 hover:border-[#1337ec]/30 transition-all group"
+              className="bg-background/40 backdrop-blur-sm rounded-2xl p-6 transition-all group"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black text-[#1337ec] uppercase tracking-[0.2em]">
+                    <span className="text-[10px] font-black text-primary-custom uppercase tracking-[0.2em]">
                       {course.code}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-slate-700"></span>
@@ -110,7 +108,7 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
                       {activeDegree}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold font-display text-white group-hover:text-[#1337ec] transition-colors duration-300">
+                  <h3 className="text-xl font-bold font-display text-foreground group-hover:text-primary-custom transition-colors duration-300">
                     {course.title}
                   </h3>
                 </div>
@@ -137,7 +135,7 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
                             alt={edu.name}
                             src={
                               imgError[edu.name]
-                                ? `https://ui-avatars.com/api/?name=${edu.name}&background=1337ec&color=fff`
+                                ? `https://ui-avatars.com/api/?name=${edu.name}&background=var(--primary)&color=fff`
                                 : edu.avatar
                             }
                             fill
