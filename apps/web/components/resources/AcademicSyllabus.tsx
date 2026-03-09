@@ -112,7 +112,7 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
                     {course.title}
                   </h3>
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-[#1337ec] text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-white/5 active:scale-95">
+                <button className="flex items-center gap-2 px-5 py-2.5 bg-card-custom hover:bg-primary-custom text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all border border-card-border active:scale-95">
                   <MdDownload size={18} />
                   Download Syllabus
                 </button>
@@ -128,7 +128,7 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
                     {course.educators.map((edu, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl border border-white/5 group/edu hover:border-[#1337ec]/20 transition-colors"
+                        className="flex items-center gap-3 p-3 bg-card-custom/50 rounded-xl border border-card-border group/edu hover:border-primary-custom/20 transition-colors"
                       >
                         <div className="relative w-10 h-10 overflow-hidden rounded-full bg-slate-800 flex-shrink-0">
                           <Image
