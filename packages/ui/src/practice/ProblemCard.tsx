@@ -45,7 +45,7 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
     );
 
     return (
-        <div className={`group relative bg-background/40 backdrop-blur-sm ${problem.isDaily ? 'hover:shadow-[0_0_20px_rgba(var(--primary),0.1)]' : ''} rounded-2xl p-6 transition-all flex flex-col`}>
+        <div className={`group relative bg-background/40 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-1 ${problem.isDaily ? 'hover:shadow-primary-custom/10' : 'hover:shadow-black/5'} rounded-2xl p-6 transition-all duration-300 flex flex-col border border-primary-custom/5 hover:border-primary-custom/20`}>
 
 
             <div className="flex justify-between items-start mb-4">

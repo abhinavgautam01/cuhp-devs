@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Flame, Bell, Settings2 } from "../icons";
+import { ArrowLeft, Flame, Send, Play, RefreshCcw } from "../icons";
+
 import { DescriptionPanel } from "./DescriptionPanel";
 import { EditorPanel } from "./EditorPanel";
 import { ConsolePanel } from "./ConsolePanel";
@@ -34,99 +36,167 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
     const router = useRouter();
     const [language, setLanguage] = useState(Object.keys(problem.defaultCode)[0] || "python");
     const [code, setCode] = useState(problem.defaultCode[language] ?? "# No code available for this language.");
-    const [activeTab, setActiveTab] = useState<"description" | "solutions" | "submissions">("description");
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [resetKey, setResetKey] = useState(0);
+
+    // Resizing logic
+    const [leftWidth, setLeftWidth] = useState(480);
+    const isResizing = useRef(false);
+
+    const startResizing = useCallback(() => {
+        isResizing.current = true;
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+    }, []);
+
+    const stopResizing = useCallback(() => {
+        isResizing.current = false;
+        document.body.style.cursor = "default";
+        document.body.style.userSelect = "auto";
+    }, []);
+
+    const resize = useCallback((mouseMoveEvent: MouseEvent) => {
+        if (isResizing.current) {
+            const newWidth = mouseMoveEvent.clientX;
+            // Min 300px, Max 800px or screen width - 400px
+            if (newWidth > 300 && newWidth < Math.min(window.innerWidth - 400, 900)) {
+                setLeftWidth(newWidth);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener("mousemove", resize);
+        window.addEventListener("mouseup", stopResizing);
+        return () => {
+            window.removeEventListener("mousemove", resize);
+            window.removeEventListener("mouseup", stopResizing);
+        };
+    }, [resize, stopResizing]);
 
     const handleLanguageChange = (newLang: string) => {
         setLanguage(newLang);
         setCode(problem.defaultCode[newLang] ?? "# No code available for this language.");
     };
 
+    const handleReset = () => {
+        setCode(problem.defaultCode[language] ?? "# No code available for this language.");
+        setResetKey(prev => prev + 1);
+    };
+
     return (
         <div className="flex flex-col h-screen bg-background text-foreground font-sans overflow-hidden transition-colors duration-300">
-            {/* Top Header */}
+
+            {/* Problem Workspace Header */}
             <header className="h-14 bg-background/80 backdrop-blur-md border-b border-primary-custom/10 flex items-center justify-between px-6 shrink-0">
                 <div className="flex items-center gap-6">
-                    <div
+                    <button
                         onClick={() => router.push("/practice")}
-                        className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-slate-400 hover:text-foreground transition-all group pr-4 border-r border-primary-custom/10"
                     >
-                        <ArrowLeft size={16} />
-                        <span className="text-sm font-semibold">Problems</span>
-                        <span className="text-slate-600">/</span>
+                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <span className="text-slate-500 text-sm font-medium">Problems</span>
+                        <span className="text-slate-700 text-lg">/</span>
                         <span className="text-sm font-bold text-foreground">{problem.title}</span>
                     </div>
-                    <div className="h-4 w-px bg-slate-700/30"></div>
-                    {user && (
-                        <div className="flex items-center gap-3">
-                            <div className="bg-gradient-to-br from-amber-500 to-red-500 px-3 py-0.5 rounded-full flex items-center gap-1.5 shadow-md">
-                                <Flame className="text-white" size={14} />
-                                <span className="text-white font-bold text-[10px] uppercase tracking-wider">{user.streak} Days</span>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex items-center gap-6">
+                    {user && (
+                        <div className="flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/20 rounded-full shadow-sm">
+                            <Flame className="text-amber-500" size={16} />
+                            <span className="text-xs font-black text-amber-500 uppercase tracking-widest">{user.streak} Day Streak</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progress: 2/3 Daily Goals</span>
-                        <div className="w-32 h-1.5 bg-background border border-primary-custom/10 rounded-full overflow-hidden">
-                            <div className="w-2/3 h-full bg-primary-custom shadow-[0_0_8px_rgba(var(--primary),0.4)]"></div>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progress</span>
+                        <div className="w-24 h-1.5 bg-background border border-primary-custom/10 rounded-full overflow-hidden">
+                            <div className="w-2/3 h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
                         </div>
                     </div>
-                    <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                        <Settings2 size={20} />
-                    </button>
                 </div>
             </header>
 
             <div className="flex-1 flex overflow-hidden">
-                {/* Left Side: Description */}
-                <div className="w-[450px] border-r border-primary-custom/10 bg-background/60 backdrop-blur-sm flex flex-col overflow-hidden">
-                    <div className="flex border-b border-primary-custom/5 px-2 bg-background/20">
-                        {["description", "solutions", "submissions"].map((tab) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab as any)}
-                                className={`px-4 py-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 ${activeTab === tab
-                                    ? "border-primary-custom text-primary-custom"
-                                    : "border-transparent text-slate-500 hover:text-slate-300"
-                                    }`}
-                            >
-                                {tab}
-                            </button>
-                        ))}
+                <AnimatePresence initial={false}>
+                    {!isExpanded && (
+                        <motion.div
+                            initial={{ width: leftWidth, opacity: 1, x: 0 }}
+                            animate={{ width: leftWidth, opacity: 1, x: 0 }}
+                            exit={{ width: 0, opacity: 0, x: -100 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="shrink-0 overflow-y-auto border-r border-primary-custom/10 custom-scrollbar overflow-hidden"
+                        >
+                            <div className="p-8" style={{ width: `${leftWidth}px` }}>
+                                <DescriptionPanel problem={problem} />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Resizer Handle */}
+                {!isExpanded && (
+                    <div
+                        className="w-1.5 hover:w-2 bg-primary-custom/5 hover:bg-primary-custom/30 cursor-col-resize transition-all shrink-0 group relative z-50 flex items-center justify-center active:bg-primary-custom/50"
+                        onMouseDown={startResizing}
+                    >
+                        <div className="h-8 w-1 bg-primary-custom/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                    <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
-                        {activeTab === "description" && <DescriptionPanel problem={problem} />}
-                    </div>
-                </div>
+                )}
 
                 {/* Right Side: Editor & Console */}
-                <div className="flex-1 flex flex-col bg-[#272822]">
+                <motion.div
+                    layout
+                    className="flex-1 flex flex-col bg-background min-w-0"
+                >
                     <EditorPanel
                         code={code}
                         setCode={setCode}
                         language={language}
                         setLanguage={handleLanguageChange}
                         availableLanguages={Object.keys(problem.defaultCode)}
+                        isExpanded={isExpanded}
+                        setIsExpanded={setIsExpanded}
+                        resetKey={resetKey}
                     />
-                    <ConsolePanel />
+
+                    {/* Console/Test Cases section */}
+                    <AnimatePresence>
+                        {!isExpanded && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                            >
+                                <ConsolePanel />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* Bottom Toolbar */}
-                    <div className="h-14 border-t border-primary-custom/10 bg-background/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0">
-                        <button className="flex items-center gap-2 text-slate-400 hover:text-slate-200 transition-colors">
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Console</span>
-                        </button>
+                    <div className="h-16 border-t border-primary-custom/10 bg-background/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0">
                         <div className="flex items-center gap-3">
-                            <button className="px-5 py-2 bg-background/60 hover:bg-background/80 text-slate-200 rounded-lg text-xs font-bold transition-all border border-primary-custom/10">
+                            <button
+                                onClick={handleReset}
+                                className="px-5 py-2 bg-background/60 hover:bg-background/80 text-foreground border border-primary-custom/10 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 group"
+                            >
+                                <RefreshCcw size={14} className="text-muted-custom group-hover:rotate-180 transition-transform duration-500" />
+                                Reset
+                            </button>
+                            <button className="px-5 py-2 bg-background/60 hover:bg-background/80 text-foreground border border-primary-custom/10 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+                                <Play size={14} className="text-muted-custom" />
                                 Run Code
                             </button>
-                            <button className="px-8 py-2 bg-primary-custom hover:brightness-110 text-white rounded-lg text-xs font-bold shadow-lg shadow-primary-custom/20 transition-all transform active:scale-95">
-                                Submit
-                            </button>
                         </div>
+                        <button className="px-8 py-2 bg-primary-custom hover:brightness-110 text-white rounded-lg text-sm font-bold shadow-lg shadow-primary-custom/20 transition-all transform active:scale-95 flex items-center gap-2">
+                            <Send size={16} />
+                            Submit
+                        </button>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     );
