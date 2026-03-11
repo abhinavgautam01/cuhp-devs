@@ -8,6 +8,9 @@ import "./chatroom.model";
 import "./message.model";
 import "./post.model";
 import "./testcase.model";
+import "./testcase.model";
+import "./chatroom.model";
+import "./message.model";
 
 // export..!
 export { User } from "./user.model";

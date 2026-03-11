@@ -3,6 +3,7 @@ import {
   getRoomByName,
   createMessage,
   deleteMessageByOwner,
+  createRoom,
   RoomManager,
   getUserById,
 } from "./chat.service";
@@ -157,5 +158,21 @@ export const registerChatEvents = (
     socket.to(room._id.toString()).emit("user-stop-typing", {
       user: socket.data.user.fullName,
     });
+  });
+
+  // Create room
+socket.on("create-room", async ({ roomName }) => {
+
+  const room = await createRoom(roomName, socket.data.user.id);
+
+  if (!room) return;
+
+  socket.join(room._id.toString());
+
+  io.emit("room-created", {
+    name: room.name,
+    id: room._id
+    });
+
   });
 };

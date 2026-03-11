@@ -7,7 +7,7 @@ import path from "path";
 import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 
-
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 dotenv.config();
 

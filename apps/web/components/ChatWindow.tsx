@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
+import { Send, Hash, Users, Shield, Plus, Smile, Image as ImageIcon, Bell, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
     Send,
     Hash,
@@ -65,6 +67,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     const [onlineMemberIds, setOnlineMemberIds] = useState<string[]>([]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { isConnected, joinRoom, leaveRoom, sendMessage, socket } = useSocket(token);
 
@@ -144,6 +147,9 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             setTypingUsers(prev => prev.filter(u => u !== user));
         };
 
+        const handleMessageDeleted = ({ messageId }: { messageId: string }) => {
+            setMessages(prev => prev.filter(msg => msg._id !== messageId));
+
         const handleOnlineMembers = ({ onlineMembers }: { onlineMembers: any[] }) => {
             setOnlineMemberIds(onlineMembers.map(m => m._id));
 
@@ -176,12 +182,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
         socket.on("new-message", handleNewMessage);
         socket.on("user-typing", handleTyping);
         socket.on("user-stop-typing", handleStopTyping);
+        socket.on("message-deleted", handleMessageDeleted);
         socket.on("room-members-online", handleOnlineMembers);
 
         return () => {
             socket.off("new-message", handleNewMessage);
             socket.off("user-typing", handleTyping);
             socket.off("user-stop-typing", handleStopTyping);
+            socket.off("message-deleted", handleMessageDeleted);
             socket.off("room-members-online", handleOnlineMembers);
         };
     }, [socket, currentUser]);
@@ -211,6 +219,8 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             socket.emit("stop-typing", { roomName });
         }
     };
+    const handleDeleteMessage = (messageId: string) => {
+        if (!socket) return;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setInput(e.target.value);
@@ -290,7 +300,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             return part;
         });
     };
+    const handleLeaveRoom = () => {
+    leaveRoom(roomName);
 
+    socket?.emit("leave-room", { roomName });
+    socket?.disconnect();
+
+    router.push("/community");
+};
     return (
         <div className="flex-1 flex overflow-hidden bg-background relative border-x border-primary-custom/10">
             {/* Main Chat Area */}
@@ -365,6 +382,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                             <div className="w-3 h-3 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
                                         </div>
                                     )}
+                                    {msg.senderId?._id === currentUser?.id && !msg.isOptimistic && (
+                                      <button
+                                         onClick={() => handleDeleteMessage(msg._id)}
+                                         className="absolute right-4 top-2 text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500"
+                                      >
+                                         Delete
+                                      </button>
+)}
                                 </div>
                             </div>
                         );
