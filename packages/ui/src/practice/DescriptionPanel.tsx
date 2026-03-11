@@ -37,7 +37,7 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
                 <div className="prose prose-sm max-w-none 
                     prose-p:text-muted-custom prose-p:leading-relaxed prose-p:text-base
                     prose-strong:text-foreground prose-strong:font-bold
-                    prose-code:text-primary-custom prose-code:bg-primary-custom/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none font-mono">
+                    prose-code:text-primary-custom prose-code:bg-primary-custom/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {problem.description}
                     </ReactMarkdown>

@@ -41,26 +41,43 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
 
     // Resizing logic
     const [leftWidth, setLeftWidth] = useState(480);
-    const isResizing = useRef(false);
+    const [consoleHeight, setConsoleHeight] = useState(320);
+    const isResizingWidth = useRef(false);
+    const isResizingHeight = useRef(false);
 
-    const startResizing = useCallback(() => {
-        isResizing.current = true;
+    const startResizingWidth = useCallback(() => {
+        isResizingWidth.current = true;
         document.body.style.cursor = "col-resize";
         document.body.style.userSelect = "none";
     }, []);
 
+    const startResizingHeight = useCallback(() => {
+        isResizingHeight.current = true;
+        document.body.style.cursor = "row-resize";
+        document.body.style.userSelect = "none";
+    }, []);
+
     const stopResizing = useCallback(() => {
-        isResizing.current = false;
+        isResizingWidth.current = false;
+        isResizingHeight.current = false;
         document.body.style.cursor = "default";
         document.body.style.userSelect = "auto";
     }, []);
 
-    const resize = useCallback((mouseMoveEvent: MouseEvent) => {
-        if (isResizing.current) {
-            const newWidth = mouseMoveEvent.clientX;
-            // Min 300px, Max 800px or screen width - 400px
+    const resize = useCallback((e: MouseEvent) => {
+        if (isResizingWidth.current) {
+            const newWidth = e.clientX;
             if (newWidth > 300 && newWidth < Math.min(window.innerWidth - 400, 900)) {
                 setLeftWidth(newWidth);
+            }
+        } else if (isResizingHeight.current) {
+            const container = document.getElementById('right-panel');
+            if (container) {
+                const rect = container.getBoundingClientRect();
+                const newHeight = rect.bottom - e.clientY - 64; // Substracting toolbar height
+                if (newHeight > 100 && newHeight < window.innerHeight - 200) {
+                    setConsoleHeight(newHeight);
+                }
             }
         }
     }, []);
@@ -85,7 +102,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
     };
 
     return (
-        <div className="flex flex-col h-screen bg-background text-foreground font-sans overflow-hidden transition-colors duration-300">
+        <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
 
             {/* Problem Workspace Header */}
             <header className="h-14 bg-background/80 backdrop-blur-md border-b border-primary-custom/10 flex items-center justify-between px-6 shrink-0">
@@ -140,7 +157,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                 {!isExpanded && (
                     <div
                         className="w-1.5 hover:w-2 bg-primary-custom/5 hover:bg-primary-custom/30 cursor-col-resize transition-all shrink-0 group relative z-50 flex items-center justify-center active:bg-primary-custom/50"
-                        onMouseDown={startResizing}
+                        onMouseDown={startResizingWidth}
                     >
                         <div className="h-8 w-1 bg-primary-custom/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
@@ -149,7 +166,8 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                 {/* Right Side: Editor & Console */}
                 <motion.div
                     layout
-                    className="flex-1 flex flex-col bg-background min-w-0"
+                    id="right-panel"
+                    className="flex-1 flex flex-col bg-background min-w-0 h-full relative"
                 >
                     <EditorPanel
                         code={code}
@@ -162,6 +180,16 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                         resetKey={resetKey}
                     />
 
+                    {/* Console Resizer */}
+                    {!isExpanded && (
+                        <div
+                            className="h-1.5 hover:h-2 bg-primary-custom/5 hover:bg-primary-custom/30 cursor-row-resize transition-all shrink-0 group relative z-50 flex items-center justify-center active:bg-primary-custom/50"
+                            onMouseDown={startResizingHeight}
+                        >
+                            <div className="w-8 h-1 bg-primary-custom/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                    )}
+
                     {/* Console/Test Cases section */}
                     <AnimatePresence>
                         {!isExpanded && (
@@ -171,7 +199,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <ConsolePanel />
+                                <ConsolePanel height={consoleHeight} />
                             </motion.div>
                         )}
                     </AnimatePresence>

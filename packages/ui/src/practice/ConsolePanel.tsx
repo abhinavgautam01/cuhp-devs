@@ -1,8 +1,11 @@
 import { Play, Plus } from "../icons";
 
-export const ConsolePanel: React.FC = () => {
+export const ConsolePanel: React.FC<{ height?: number }> = ({ height = 320 }) => {
     return (
-        <div className="h-[320px] border-t border-primary-custom/10 bg-background flex flex-col shrink-0 overflow-hidden">
+        <div
+            className="border-t border-primary-custom/10 bg-background flex flex-col shrink-0 overflow-hidden"
+            style={{ height: `${height}px` }}
+        >
             <div className="flex items-center px-6 h-14 border-b border-primary-custom/5 bg-background/80 backdrop-blur-md">
                 <button className="px-6 h-full text-sm font-bold text-primary-custom border-b-2 border-primary-custom uppercase tracking-widest flex items-center">
                     Test Cases
