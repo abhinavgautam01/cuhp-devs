@@ -22,23 +22,23 @@ export const registerChatEvents = (
     const roomId = room._id.toString();
     socket.join(roomId);
 
-    // Track online user
+    // Track online user - Always fetch fresh data from DB to avoid stale JWT tokens
+    const freshUser = await getUserById(socket.data.user.id);
+    if (freshUser) {
+      socket.data.user.fullName = freshUser.fullName;
+      socket.data.user.email = freshUser.email;
+      socket.data.user.avatar = freshUser.avatar;
+    }
+
     let fullName = socket.data.user.fullName;
     let email = socket.data.user.email;
-
-    // Fallback for legacy tokens that don't have fullName
-    if (!fullName) {
-      const user = await getUserById(socket.data.user.id);
-      if (user) {
-        fullName = user.fullName;
-        email = user.email;
-      }
-    }
+    let avatar = socket.data.user.avatar;
 
     const userData = {
       _id: socket.data.user.id,
       fullName,
       email,
+      avatar,
     };
     roomManager.addUser(roomId, userData._id, userData);
     const activity = roomManager.logActivity(userData.fullName || "User", "joined", room.name);
@@ -122,7 +122,7 @@ export const registerChatEvents = (
 
     const populated = await message.populate(
       "senderId",
-      "fullName email"
+      "fullName email avatar"
     );
 
     io.to(room._id.toString()).emit("new-message", populated);
@@ -161,18 +161,31 @@ export const registerChatEvents = (
   });
 
   // Create room
-socket.on("create-room", async ({ roomName }) => {
+  socket.on("create-room", async ({ roomName }) => {
+    try {
+      const room = await createRoom(roomName, socket.data.user.id);
 
-  const room = await createRoom(roomName, socket.data.user.id);
+      if (!room) return;
 
-  if (!room) return;
+      socket.join(room._id.toString());
 
-  socket.join(room._id.toString());
+      // Only redirect the creator to the new room
+      socket.emit("room-created", {
+        name: room.name,
+        id: room._id
+      });
 
-  io.emit("room-created", {
-    name: room.name,
-    id: room._id
-    });
-
+      // Notify other users that a new room is available
+      socket.broadcast.emit("new-room-available", {
+        id: room._id,
+        name: room.name,
+        members: "1",
+        topContributor: socket.data.user.fullName || socket.data.user.email || "Unknown"
+      });
+    } catch (error) {
+      console.error("Error creating room:", error);
+      // Optional: send error back to client
+      // socket.emit("error", { message: "Failed to create room" });
+    }
   });
 };

@@ -28,21 +28,24 @@ export function RoomsRightSidebar({ masters, liveActivity }: RoomsRightSidebarPr
                     </h3>
                 </div>
                 <div className="p-4 space-y-4">
-                    {masters.map((master: any, i: number) => (
-                        <div key={master.name} className="flex items-center gap-3 group">
-                            <div className="w-8 h-8 rounded-lg bg-primary-custom/10 border border-card-border flex items-center justify-center font-bold text-primary-custom text-[10px] shrink-0 overflow-hidden relative">
-                                {master.name.charAt(0)}
-                                <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent pointer-events-none" />
+                    {masters.map((master: any, i: number) => {
+                        const displayName = master.name || "Master";
+                        return (
+                            <div key={master.name || i} className="flex items-center gap-3 group">
+                                <div className="w-8 h-8 rounded-lg bg-primary-custom/10 border border-card-border flex items-center justify-center font-bold text-primary-custom text-[10px] shrink-0 overflow-hidden relative">
+                                    {displayName.charAt(0)}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-foreground/5 to-transparent pointer-events-none" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold truncate text-foreground/90">{displayName}</p>
+                                    <p className="text-[10px] text-[#10b981] truncate font-medium">{master.subtitle || "Contributor"} • {20 + i} streak</p>
+                                </div>
+                                <span className="text-[10px] font-bold text-primary-custom bg-primary-custom/5 px-1.5 py-0.5 rounded">
+                                    {i === 0 ? "Top" : `#${i + 1}`}
+                                </span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold truncate text-foreground/90">{master.name}</p>
-                                <p className="text-[10px] text-[#10b981] truncate font-medium">{master.subtitle} • {20 + i} streak</p>
-                            </div>
-                            <span className="text-[10px] font-bold text-primary-custom bg-primary-custom/5 px-1.5 py-0.5 rounded">
-                                {i === 0 ? "Top" : `#${i + 1}`}
-                            </span>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { User, Users, ChevronRight, Cpu, Layers, Code, Shield, Globe, Terminal } from "../icons";
 
 interface RoomCategoryCardProps {
@@ -36,7 +37,10 @@ export function RoomCategoryCard({ room }: RoomCategoryCardProps) {
     const IconComponent = ICON_MAP[room.icon] || Code;
 
     return (
-        <div className="bg-card-custom backdrop-blur-md rounded-2xl border border-card-border p-5 flex flex-col hover:border-primary-custom/30 transition-all group hover:shadow-[0_10px_30px_rgba(var(--primary),0.1)] h-full overflow-hidden relative">
+        <motion.div
+            whileHover={{ y: -5 }}
+            className="bg-card-custom backdrop-blur-md rounded-2xl border border-card-border p-5 flex flex-col hover:border-primary-custom/30 transition-all group hover:shadow-[0_10px_30px_rgba(var(--primary),0.1)] h-full overflow-hidden relative"
+        >
             <div className="flex items-start justify-between mb-6 relative z-10">
                 {/* Icon Container */}
                 <div className={`w-12 h-12 rounded-xl bg-background/50 border border-card-border flex items-center justify-center ${gradient?.split(' ').pop() || ''} group-hover:scale-110 transition-transform duration-500`}>
@@ -56,8 +60,8 @@ export function RoomCategoryCard({ room }: RoomCategoryCardProps) {
             </div>
 
             <div className="relative z-10">
-                <h4 className="font-bold text-lg mb-1 group-hover:text-primary-custom transition-colors">{room.title}</h4>
-                <p className="text-xs text-muted-custom line-clamp-2 mb-6 leading-relaxed">Exploring {room.title.toLowerCase()} essentials and advanced architecture patterns.</p>
+                <h4 className="font-bold text-lg mb-1 group-hover:text-primary-custom transition-colors">{room.title || (room as any).name}</h4>
+                <p className="text-xs text-muted-custom line-clamp-2 mb-6 leading-relaxed">Exploring {(room.title || (room as any).name || "").toLowerCase()} essentials and advanced architecture patterns.</p>
             </div>
 
             <div className="mt-auto pt-4 border-t border-card-border flex items-center justify-between relative z-10">
@@ -76,6 +80,6 @@ export function RoomCategoryCard({ room }: RoomCategoryCardProps) {
 
             {/* Subtle background glow */}
             <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-primary-custom/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary-custom/10 transition-all" />
-        </div>
+        </motion.div>
     );
 }

@@ -2,8 +2,22 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { motion, Variants } from "framer-motion";
 import { SemesterData } from "../../lib/mock-resources-data";
 import { MdSchool, MdDownload, MdStar, MdAutoStories } from "react-icons/md";
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 
 interface AcademicSyllabusProps {
@@ -83,7 +97,13 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
       </div>
 
       {/* Content Area: Course Cards */}
-      <div className="space-y-6">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        key={`${activeDegree}-${activeSemester}`} // Re-trigger animation on tab change
+        className="space-y-6"
+      >
         {currentCourses.length === 0 ? (
           <div className="p-16 text-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
             <MdAutoStories className="mx-auto mb-4 text-slate-700" size={48} />
@@ -93,7 +113,8 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
           </div>
         ) : (
           currentCourses.map((course) => (
-            <div
+            <motion.div
+              variants={itemVariants}
               key={course.code}
               className="bg-background/40 backdrop-blur-sm rounded-2xl p-6 transition-all group"
             >
@@ -160,10 +181,10 @@ export function AcademicSyllabus({ initialData }: AcademicSyllabusProps) {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           ))
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

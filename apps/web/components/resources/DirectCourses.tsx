@@ -1,4 +1,18 @@
 import { MdFolderZip, MdCloudDownload, MdStorage } from "react-icons/md";
+import { motion, Variants } from "framer-motion";
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const resources = [
     { title: "Extra1", provider: "Udemy (Mega)", size: "53.4 GB", url: "https://mega.nz/folder/NyIW2CxI#KlSrcyOM-W1EElVz4ExrNg" },
@@ -17,9 +31,13 @@ export function DirectCourses() {
                 <h2 className="text-2xl font-bold text-foreground">Premium Courses Vault</h2>
             </div>
 
-            <div className="grid gap-4">
+            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-4">
                 {resources.map((res) => (
-                    <div key={res.title} className="bg-background p-1 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <motion.div
+                        variants={itemVariants}
+                        key={res.title}
+                        className="bg-background p-1 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                    >
                         <div className="flex items-center justify-between p-4 bg-background/40 backdrop-blur-sm rounded-xl">
                             <div className="flex items-center gap-4">
                                 <MdStorage className="text-primary-custom" size={28} />
@@ -38,9 +56,9 @@ export function DirectCourses() {
                                 Access Link
                             </a>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
         </div>
     );
 }

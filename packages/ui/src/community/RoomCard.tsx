@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { Users, Zap, Star, Activity, ArrowRight } from "../icons";
 
 interface RoomCardProps {
@@ -37,7 +38,10 @@ export function RoomCard({ room }: RoomCardProps) {
     const IconComponent = room.badge === "HOT" ? Zap : room.badge === "TOP" ? Star : room.badge === "LIVE" ? Activity : Users;
 
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-card-border bg-card-custom backdrop-blur-xl p-6 transition-all hover:border-primary-custom/40 hover:shadow-[0_20px_50px_rgba(var(--primary),0.15)] flex flex-col h-full">
+        <motion.div
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="group relative overflow-hidden rounded-2xl border border-card-border bg-card-custom backdrop-blur-xl p-6 transition-all hover:border-primary-custom/40 hover:shadow-[0_20px_50px_rgba(var(--primary),0.15)] flex flex-col h-full"
+        >
             {/* Top right badge */}
             <div className="absolute top-0 right-0 p-4">
                 <span className={`flex items-center gap-1 px-2 py-1 bg-gradient-to-r ${badgeClass} rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-card-border`}>
@@ -103,6 +107,6 @@ export function RoomCard({ room }: RoomCardProps) {
 
             {/* Background decorative glow */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary-custom/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary-custom/10 transition-all" />
-        </div>
+        </motion.div>
     );
 }

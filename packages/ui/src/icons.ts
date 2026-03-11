@@ -43,7 +43,8 @@ import {
     Camera,
     Clock,
     Maximize2,
-    Play
+    Play,
+    ChevronLeft
 } from "lucide-react";
 
 import {
@@ -81,7 +82,7 @@ export {
     BarChart3, Bitcoin, Gamepad2, Smartphone, Infinity,
     BarChart2, FolderOpen, Share2, PencilLine, Trash2, Globe,
     ArrowLeft, RefreshCcw, CheckCircle2, Settings2, X, Camera, LogOut,
-    Clock, Maximize2, Play,
+    Clock, Maximize2, Play,ChevronLeft,
 
     // React Icons (MD)
     MdCode, MdPsychology, MdCloudDone, MdLanguage, MdSchool,

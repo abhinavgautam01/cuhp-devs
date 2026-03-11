@@ -64,7 +64,7 @@ export const createRoom = async (roomName: string, userId: string) => {
 };
 
 export const getUserById = async (userId: string) => {
-  return User.findById(userId).select("fullName email").lean();
+  return User.findById(userId).select("fullName email avatar").lean();
 };
 
 export class RoomManager {

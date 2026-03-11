@@ -1,4 +1,4 @@
-"use client";
+
 
 export type FeedTab = "Recent" | "Questions" | "Snippet" | "debugging";
 
