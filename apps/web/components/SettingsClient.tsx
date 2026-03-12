@@ -6,502 +6,436 @@ import { apiFetch } from "../lib/api";
 import { toast } from "../store/useToastStore";
 import { useAuthStore } from "../store/useAuthStore";
 import {
-  User,
-  Shield,
-  Palette,
-  Settings,
-  FaGithub,
-  FcGoogle,
-  CheckCircle2,
-  HelpCircle,
-  Activity,
-  X,
-  Camera,
-  LogOut,
+    User,
+    Shield,
+    Palette,
+    CheckCircle2,
+    X,
+    Camera,
+    LogOut,
 } from "../lib/icon";
 import { AVATAR_STYLES, CURATED_AVATARS } from "../assets/Avatar";
+import { ThemeId, THEMES } from "./ThemeWrapper";
 import { Sidebar } from "@repo/ui/components/Sidebar";
 
 export function SettingsClient() {
-  const router = useRouter();
-  const {
-    user,
-    setUser,
-    logout: logoutStore,
-    theme,
-    setTheme,
-    isSidebarCollapsed,
-    toggleSidebarCollapsed,
-  } = useAuthStore();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState("curated");
+    const router = useRouter();
+    const {
+        user,
+        setUser,
+        logout: logoutStore,
+        theme,
+        setTheme,
+        isSidebarCollapsed,
+        toggleSidebarCollapsed,
+    } = useAuthStore();
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [selectedStyle, setSelectedStyle] = useState("curated");
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-  // Form states
-  const [fullName, setFullName] = useState(user?.fullName || "");
-  const [handle, setHandle] = useState(user?.handle || "");
-  const [bio, setBio] = useState(user?.bio || "");
-  const [avatar, setAvatar] = useState(user?.avatar || "");
+    // Form states
+    const [fullName, setFullName] = useState(user?.fullName || "");
+    const [handle, setHandle] = useState(user?.handle || "");
+    const [bio, setBio] = useState(user?.bio || "");
+    const [avatar, setAvatar] = useState(user?.avatar || "");
 
-  useEffect(() => {
-    if (user) {
-      setFullName(user.fullName || "");
-      setHandle(user.handle || "");
-      setBio(user.bio || "");
-      setAvatar(user.avatar || "");
+    useEffect(() => {
+        if (user) {
+            setFullName(user.fullName || "");
+            setHandle(user.handle || "");
+            setBio(user.bio || "");
+            setAvatar(user.avatar || "");
 
-      // Detect style from current avatar URL
-      if (user.avatar) {
-        if (CURATED_AVATARS.includes(user.avatar)) {
-          setSelectedStyle("curated");
-        } else {
-          const styleMatch = user.avatar.match(/7\.x\/([^/]+)\/svg/);
-          if (styleMatch && styleMatch[1]) {
-            setSelectedStyle(styleMatch[1]);
-          }
+            // Detect style from current avatar URL
+            if (user.avatar) {
+                if (CURATED_AVATARS.includes(user.avatar)) {
+                    setSelectedStyle("curated");
+                } else {
+                    const styleMatch = user.avatar.match(/7\.x\/([^/]+)\/svg/);
+                    if (styleMatch && styleMatch[1]) {
+                        setSelectedStyle(styleMatch[1]);
+                    }
+                }
+            }
         }
-      }
-    }
-  }, [user]);
+    }, [user]);
 
-  const handleLogout = async () => {
-    try {
-      setIsLoggingOut(true);
-      await apiFetch("/auth/logout", { method: "POST" });
-      logoutStore();
-      toast.success("Logged out successfully.");
-      router.push("/signin");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Logout failed.");
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    try {
-      setIsSaving(true);
-      const response = await apiFetch("/user/profile", {
-        method: "PUT",
-        body: JSON.stringify({
-          fullName,
-          handle,
-          bio,
-          avatar,
-          theme,
-        }),
-      });
-      setUser(response.user);
-      toast.success("Settings updated successfully.");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Update failed.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleThemeChange = (newTheme: "light" | "dark" | "cyber-orange") => {
-    setTheme(newTheme);
-  };
-
-  const AvatarSelectorModal = () => (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-background border border-card-border w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-card-border flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-bold">Select Avatar</h3>
-            <p className="text-sm text-muted-custom">
-              Choose a visual identity that fits you
-            </p>
-          </div>
-          <button
-            onClick={() => setIsAvatarModalOpen(false)}
-            className="p-2 hover:bg-foreground/10 rounded-full transition-colors cursor-pointer"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Style Switcher */}
-        <div className="px-6 py-3 bg-foreground/[0.02] border-b border-card-border flex gap-2 overflow-x-auto scrollbar-hide">
-          <button
-            onClick={() => setSelectedStyle("curated")}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === "curated" ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
-          >
-            Default
-          </button>
-          {AVATAR_STYLES.map((style) => (
-            <button
-              key={style.id}
-              onClick={() => setSelectedStyle(style.id)}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === style.id ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
-            >
-              {style.name}
-            </button>
-          ))}
-        </div>
-
-        <div className="p-6 grid grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto scrollbar-hide">
-          {selectedStyle === "curated"
-            ? CURATED_AVATARS.map((url, idx) => {
-                const isSelected = avatar === url;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setAvatar(url)}
-                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
-                  >
-                    <Image
-                      src={url}
-                      alt={`Curated ${idx}`}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                    {isSelected && (
-                      <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
-                        <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
-                          <CheckCircle2 size={16} />
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                );
-              })
-            : (() => {
-                const currentStyle = AVATAR_STYLES.find(
-                  (s) => s.id === selectedStyle,
-                );
-                return currentStyle?.seeds.map((seed) => {
-                  const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
-                  const isSelected = avatar === url;
-                  return (
-                    <button
-                      key={seed}
-                      onClick={() => setAvatar(url)}
-                      className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
-                    >
-                      <Image
-                        src={url}
-                        alt={`${selectedStyle} ${seed}`}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
-                          <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
-                            <CheckCircle2 size={16} />
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                });
-              })()}
-        </div>
-        <div className="p-6 border-t border-card-border flex gap-3">
-          <button
-            onClick={() => setIsAvatarModalOpen(false)}
-            className="flex-1 py-3 font-bold text-muted-custom hover:text-foreground transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => setIsAvatarModalOpen(false)}
-            className="flex-1 py-3 bg-primary-custom text-primary-foreground-custom rounded-xl font-bold hover:bg-primary-hover-custom transition-all shadow-lg shadow-primary-custom/20 cursor-pointer"
-          >
-            Change Avatar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="bg-background text-foreground min-h-screen flex font-display overflow-hidden transition-colors duration-300">
-      {/* Use Common Sidebar component */}
-      <Sidebar
-        user={{
-          name: user?.fullName || "Guest User",
-          role: user?.program || "Developer",
-          avatar:
-            avatar ||
-            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName || "Guest"}`,
-        }}
-        activeNav="settings"
-        setActiveNav={() => {}} // Controlled by pathname in other pages, here we keep it as settings
-        isCollapsed={isSidebarCollapsed}
-        onToggle={toggleSidebarCollapsed}
-      />
-
-      <main className="flex-1 flex flex-col lg:flex-row h-screen overflow-y-auto scrollbar-hide">
-        <section className="flex-1 p-6 md:p-10 space-y-12 max-w-4xl mx-auto w-full">
-          <header>
-            <div className="flex justify-between">
-
-            <h1 className="text-3xl font-bold">Account Settings</h1>
-            <button
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-            className=" flex items-center justify-center gap-2 py-3 text-red-500 font-bold hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
-            >
-            {isLoggingOut ? (
-                "Signing Out..."
-            ) : (
-                <>
-                <LogOut size={20} />
-                Sign Out
-              </>
-            )}
-          </button>
-            </div>
-            <p className="text-muted-custom mt-2">
-              Manage your account preferences and security settings.
-            </p>
-          </header>
-
-          {/* Profile Information */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 pb-2">
-              <User className="text-primary" size={24} />
-              <h2 className="text-xl font-bold">Profile Information</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative group">
-                  <div className="w-32 h-32 relative">
-                    <Image
-                      src={
-                        avatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName || "Guest"}`
-                      }
-                      alt="Profile"
-                      fill
-                      unoptimized
-                      className="rounded-full border-4 border-card-custom object-cover shadow-lg"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setIsAvatarModalOpen(true)}
-                    className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  >
-                    <Camera className="text-white" size={24} />
-                  </button>
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    <p className="text-muted-custom font-medium animate-pulse">Loading settings...</p>
                 </div>
-                <p onClick={() => setIsAvatarModalOpen(true)} className="text-xs text-muted-custom text-center uppercase tracking-wider font-bold cursor-pointer">
-                  Modify Avatar
-                </p>
-              </div>
-              <div className="md:col-span-2 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-muted-custom mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      value={user?.email || ""}
-                      disabled
-                      className="w-full bg-foreground/[0.05] border border-card-border rounded-lg text-muted-custom cursor-not-allowed p-2.5"
-                      type="email"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-custom mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-foreground/[0.03] dark:bg-background/50 border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5"
-                      type="text"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-custom mb-1">
-                      Public Handle
-                    </label>
-                    <input
-                      value={handle}
-                      onChange={(e) => setHandle(e.target.value)}
-                      className="w-full bg-foreground/[0.03] dark:bg-background/50 border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5"
-                      type="text"
-                      placeholder="@username"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-muted-custom mb-1">
-                    Bio
-                  </label>
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    className="w-full bg-foreground/[0.03] dark:bg-card-custom border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5 h-24 resize-none"
-                    placeholder="Tell us about yourself..."
-                  />
-                </div>
-              </div>
             </div>
-          </div>
+        );
+    }
 
-          {/* Account Security */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 pb-2">
-              <Shield className="text-primary-custom" size={24} />
-              <h2 className="text-xl font-bold">Account Security</h2>
-            </div>
-            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-card-custom border border-card-border rounded-xl">
-              <div>
-                <p className="font-bold">Password</p>
-                <p className="text-sm text-muted-custom">
-                  Last changed 3 months ago
-                </p>
-              </div>
-              <button className="mt-4 md:mt-0 text-sm font-bold text-primary-custom hover:text-primary-hover-custom transition-colors cursor-pointer">
-                Update Password
-              </button>
-            </div>
-          </div>
+    const handleLogout = async () => {
+        try {
+            setIsLoggingOut(true);
+            await apiFetch("/auth/logout", { method: "POST" });
+            logoutStore();
+            toast.success("Logged out successfully.");
+            router.push("/signin");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Logout failed.");
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
 
-          {/* Appearance */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 pb-2">
-              <Palette className="text-primary" size={24} />
-              <h2 className="text-xl font-bold">Appearance</h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {[
-                {
-                  id: "light",
-                  name: "Light",
-                  desc: "Clean & Bright",
-                  bg: "bg-white",
-                  border: "border-slate-200",
-                  text: "text-slate-900",
-                },
-                {
-                  id: "dark",
-                  name: "Dark",
-                  desc: "Eye Protection",
-                  bg: "bg-[#0a0c16]",
-                  border: "border-primary/30",
-                  text: "text-white",
-                },
-                {
-                  id: "cyber-orange",
-                  name: "Cyber Orange",
-                  desc: "Neon Glow",
-                  bg: "bg-[#1a0f00]",
-                  border: "border-[#ff6b00]/30",
-                  text: "text-[#ff6b00]",
-                },
-                {
-                  id: "rose-pine-dawn",
-                  name: "Rose Pine",
-                  desc: "Ethereal",
-                  bg: "bg-[#faf4ed]",
-                  border: "border-[#d7827e]/30",
-                  text: "text-[#575279]",
-                },
-                {
-                  id: "nord-light",
-                  name: "Nord Light",
-                  desc: "Arctic Frost",
-                  bg: "bg-[#e5e9f0]",
-                  border: "border-[#5e81ac]/30",
-                  text: "text-[#2e3440]",
-                },
-                {
-                  id: "solarized-light",
-                  name: "Solarized",
-                  desc: "Warm Paper",
-                  bg: "bg-[#fdf6e3]",
-                  border: "border-[#268bd2]/30",
-                  text: "text-[#657b83]",
-                },
-                {
-                  id: "vaporwave",
-                  name: "Vaporwave",
-                  desc: "Retro Neon",
-                  bg: "bg-[#2d1b4e]",
-                  border: "border-[#01cdfe]/30",
-                  text: "text-[#ff71ce]",
-                },
-                {
-                  id: "gruvbox-light",
-                  name: "Gruvbox",
-                  desc: "Retro Warm",
-                  bg: "bg-[#fbf1c7]",
-                  border: "border-[#af3a03]/30",
-                  text: "text-[#3c3836]",
-                },
-                {
-                  id: "vesper-light",
-                  name: "Vesper",
-                  desc: "Minimalist",
-                  bg: "bg-white",
-                  border: "border-black/10",
-                  text: "text-black",
-                },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => handleThemeChange(t.id as any)}
-                  className={`group flex flex-col gap-2 p-3 rounded-xl transition-all text-left relative overflow-hidden cursor-pointer ${theme === t.id ? "ring-2 ring-primary ring-offset-2 dark:ring-offset-background bg-primary/5 shadow-md" : "bg-card-custom border border-card-border hover:bg-foreground/[0.02]"}`}
-                >
-                  <div
-                    className={`h-12 w-full ${t.bg} rounded-lg border ${t.border} flex flex-col gap-1 p-1.5 justify-center items-center shadow-inner overflow-hidden`}
-                  >
-                    <div className="w-3/4 h-1 bg-foreground/10 rounded-full"></div>
-                    <div className="w-1/2 h-1 bg-foreground/5 rounded-full"></div>
-                  </div>
-                  <div>
-                    <p className={`text-xs font-bold leading-none ${t.text}`}>
-                      {t.name}
-                    </p>
-                    <p className="text-[10px] text-muted-custom mt-1 truncate">
-                      {t.desc}
-                    </p>
-                  </div>
-                  {theme === t.id && (
-                    <div className="absolute top-1 right-1">
-                      <CheckCircle2 size={12} className="text-primary" />
+    const handleSaveChanges = async () => {
+        try {
+            setIsSaving(true);
+            const response = await apiFetch("/user/profile", {
+                method: "PUT",
+                body: JSON.stringify({
+                    fullName,
+                    handle,
+                    bio,
+                    avatar,
+                    theme,
+                }),
+            });
+            setUser(response.user);
+            toast.success("Settings updated successfully.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Update failed.");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleThemeChange = (newTheme: ThemeId) => {
+        setTheme(newTheme);
+    };
+
+    const AvatarSelectorModal = () => (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-background border border-card-border w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                <div className="p-6 border-b border-card-border flex items-center justify-between">
+                    <div>
+                        <h3 className="text-xl font-bold">Select Avatar</h3>
+                        <p className="text-sm text-muted-custom">
+                            Choose a visual identity that fits you
+                        </p>
                     </div>
-                  )}
-                </button>
-              ))}
+                    <button
+                        onClick={() => setIsAvatarModalOpen(false)}
+                        className="p-2 hover:bg-foreground/10 rounded-full transition-colors cursor-pointer"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Style Switcher */}
+                <div className="px-6 py-3 bg-foreground/[0.02] border-b border-card-border flex gap-2 overflow-x-auto scrollbar-hide">
+                    <button
+                        onClick={() => setSelectedStyle("curated")}
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === "curated" ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
+                    >
+                        Default
+                    </button>
+                    {AVATAR_STYLES.map((style) => (
+                        <button
+                            key={style.id}
+                            onClick={() => setSelectedStyle(style.id)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedStyle === style.id ? "bg-primary-custom text-primary-foreground-custom shadow-md shadow-primary-custom/20" : "bg-card-custom border border-card-border text-muted-custom hover:border-primary-custom/50"}`}
+                        >
+                            {style.name}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="p-6 grid grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto scrollbar-hide">
+                    {selectedStyle === "curated"
+                        ? CURATED_AVATARS.map((url, idx) => {
+                            const isSelected = avatar === url;
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => setAvatar(url)}
+                                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
+                                >
+                                    <Image
+                                        src={url}
+                                        alt={`Curated ${idx}`}
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
+                                    />
+                                    {isSelected && (
+                                        <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
+                                            <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
+                                                <CheckCircle2 size={16} />
+                                            </div>
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })
+                        : (() => {
+                            const currentStyle = AVATAR_STYLES.find(
+                                (s) => s.id === selectedStyle,
+                            );
+                            return currentStyle?.seeds.map((seed) => {
+                                const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
+                                const isSelected = avatar === url;
+                                return (
+                                    <button
+                                        key={seed}
+                                        onClick={() => setAvatar(url)}
+                                        className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group cursor-pointer ${isSelected ? "border-primary-custom ring-2 ring-primary-custom/20 scale-95" : "border-card-border hover:border-primary-custom/50"}`}
+                                    >
+                                        <Image
+                                            src={url}
+                                            alt={`${selectedStyle} ${seed}`}
+                                            fill
+                                            unoptimized
+                                            className="object-cover"
+                                        />
+                                        {isSelected && (
+                                            <div className="absolute inset-0 bg-primary-custom/10 flex items-center justify-center">
+                                                <div className="bg-primary-custom text-primary-foreground-custom rounded-full p-1 shadow-lg">
+                                                    <CheckCircle2 size={16} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            });
+                        })()}
+                </div>
+                <div className="p-6 border-t border-card-border flex gap-3">
+                    <button
+                        onClick={() => setIsAvatarModalOpen(false)}
+                        className="flex-1 py-3 font-bold text-muted-custom hover:text-foreground transition-colors cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => setIsAvatarModalOpen(false)}
+                        className="flex-1 py-3 bg-primary-custom text-primary-foreground-custom rounded-xl font-bold hover:bg-primary-hover-custom transition-all shadow-lg shadow-primary-custom/20 cursor-pointer"
+                    >
+                        Change Avatar
+                    </button>
+                </div>
             </div>
-          </div>
+        </div>
+    );
 
-          <div className="pt-10 flex items-center justify-end gap-4">
-            <button
-              onClick={() => router.back()}
-              className="px-6 py-2.5 rounded-xl font-bold text-muted-custom hover:text-foreground transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSaveChanges}
-              disabled={isSaving}
-              className={`px-8 py-2.5 bg-primary-custom hover:bg-primary-hover-custom text-primary-foreground-custom rounded-xl font-bold shadow-[0_0_15px_rgba(var(--primary),0.3)] transition-all flex items-center gap-2 cursor-pointer ${isSaving ? "opacity-70 cursor-not-allowed" : ""}`}
-            >
-              {isSaving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-primary-foreground-custom/30 border-t-primary-foreground-custom rounded-full animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </button>
-          </div>
-        </section>
+    return (
+        <div className="bg-background text-foreground min-h-screen flex font-display overflow-hidden transition-colors duration-300">
+            {/* Use Common Sidebar component */}
+            <Sidebar
+                user={{
+                    name: user?.fullName || "Guest User",
+                    role: user?.program || "Developer",
+                    avatar:
+                        avatar ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`,
+                }}
+                activeNav="settings"
+                setActiveNav={() => { }} // Controlled by pathname in other pages, here we keep it as settings
+                isCollapsed={isSidebarCollapsed}
+                onToggle={toggleSidebarCollapsed}
+            />
 
-        {/* Right Sidebar - Matching Dashboard style */}
-        {/* TODO: Will see later to add this...!*/}
-        {/* <aside className="w-full lg:w-80 bg-background/20 p-6 border-l border-primary/10 overflow-y-auto scrollbar-hide space-y-8 shrink-0">
+            <main className="flex-1 flex flex-col lg:flex-row h-screen overflow-y-auto scrollbar-hide">
+                <section className="flex-1 p-6 md:p-10 space-y-12 max-w-4xl mx-auto w-full">
+                    <header>
+                        <div className="flex justify-between">
+
+                            <h1 className="text-3xl font-bold">Account Settings</h1>
+                            <button
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                className=" flex items-center justify-center gap-2 py-3 text-red-500 w-32 font-bold hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+                            >
+                                {isLoggingOut ? (
+                                    "Signing Out..."
+                                ) : (
+                                    <>
+                                        <LogOut size={20} />
+                                        Sign Out
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                        <p className="text-muted-custom mt-2">
+                            Manage your account preferences and security settings.
+                        </p>
+                    </header>
+
+                    {/* Profile Information */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 pb-2">
+                            <User className="text-primary" size={24} />
+                            <h2 className="text-xl font-bold">Profile Information</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="relative group">
+                                    <div className="w-32 h-32 relative">
+                                        <Image
+                                            src={
+                                                avatar ||
+                                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`
+                                            }
+                                            alt="Profile"
+                                            fill
+                                            unoptimized
+                                            className="rounded-full border-4 border-card-custom object-cover shadow-lg"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setIsAvatarModalOpen(true)}
+                                        className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                    >
+                                        <Camera className="text-white" size={24} />
+                                    </button>
+                                </div>
+                                <p onClick={() => setIsAvatarModalOpen(true)} className="text-xs text-muted-custom text-center uppercase tracking-wider font-bold cursor-pointer">
+                                    Modify Avatar
+                                </p>
+                            </div>
+                            <div className="md:col-span-2 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-custom mb-1">
+                                            Email Address
+                                        </label>
+                                        <input
+                                            value={user?.email || ""}
+                                            disabled
+                                            className="w-full bg-foreground/[0.05] border border-card-border rounded-lg text-muted-custom cursor-not-allowed p-2.5"
+                                            type="email"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-custom mb-1">
+                                            Full Name
+                                        </label>
+                                        <input
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            className="w-full bg-foreground/[0.03] dark:bg-background/50 border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5"
+                                            type="text"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted-custom mb-1">
+                                            Public Handle
+                                        </label>
+                                        <input
+                                            value={handle}
+                                            onChange={(e) => setHandle(e.target.value)}
+                                            className="w-full bg-foreground/[0.03] dark:bg-background/50 border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5"
+                                            type="text"
+                                            placeholder="@username"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-custom mb-1">
+                                        Bio
+                                    </label>
+                                    <textarea
+                                        value={bio}
+                                        onChange={(e) => setBio(e.target.value)}
+                                        className="w-full bg-foreground/[0.03] dark:bg-card-custom border border-card-border rounded-lg text-foreground focus:ring-primary-custom focus:border-primary-custom transition-all p-2.5 h-24 resize-none"
+                                        placeholder="Tell us about yourself..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Account Security */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 pb-2">
+                            <Shield className="text-primary-custom" size={24} />
+                            <h2 className="text-xl font-bold">Account Security</h2>
+                        </div>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-card-custom border border-card-border rounded-xl">
+                            <div>
+                                <p className="font-bold">Password</p>
+                                <p className="text-sm text-muted-custom">
+                                    Last changed 3 months ago
+                                </p>
+                            </div>
+                            <button className="mt-4 md:mt-0 text-sm font-bold text-primary-custom hover:text-primary-hover-custom transition-colors cursor-pointer">
+                                Update Password
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Appearance */}
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-2 pb-2">
+                            <Palette className="text-primary" size={24} />
+                            <h2 className="text-xl font-bold">Appearance</h2>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            {THEMES.map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => handleThemeChange(t.id as any)}
+                                    className={`group flex flex-col gap-2 p-3 rounded-xl transition-all text-left relative overflow-hidden cursor-pointer ${theme === t.id ? "ring-2 ring-primary ring-offset-2 dark:ring-offset-background bg-primary/5 shadow-md" : "bg-card-custom border border-card-border hover:bg-foreground/[0.02]"}`}
+                                >
+                                    <div
+                                        className={`h-12 w-full ${t.bg} rounded-lg border ${t.border} flex flex-col gap-1 p-1.5 justify-center items-center shadow-inner overflow-hidden`}
+                                    >
+                                        <div className="w-3/4 h-1 bg-foreground/10 rounded-full"></div>
+                                        <div className="w-1/2 h-1 bg-foreground/5 rounded-full"></div>
+                                    </div>
+                                    <div>
+                                        <p className={`text-xs font-bold leading-none ${t.text}`}>
+                                            {t.name}
+                                        </p>
+                                        <p className="text-[10px] text-muted-custom mt-1 truncate">
+                                            {t.desc}
+                                        </p>
+                                    </div>
+                                    {theme === t.id && (
+                                        <div className="absolute top-1 right-1">
+                                            <CheckCircle2 size={12} className="text-primary" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="pt-10 flex items-center justify-end gap-4">
+                        <button
+                            onClick={() => router.back()}
+                            className="px-6 py-2.5 rounded-xl font-bold text-muted-custom hover:text-foreground transition-colors cursor-pointer"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleSaveChanges}
+                            disabled={isSaving}
+                            className={`px-8 py-2.5 bg-primary-custom hover:bg-primary-hover-custom text-primary-foreground-custom rounded-xl font-bold shadow-[0_0_15px_rgba(var(--primary),0.3)] transition-all flex items-center gap-2 cursor-pointer ${isSaving ? "opacity-70 cursor-not-allowed" : ""}`}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-primary-foreground-custom/30 border-t-primary-foreground-custom rounded-full animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Changes"
+                            )}
+                        </button>
+                    </div>
+                </section>
+
+                {/* Right Sidebar - Matching Dashboard style */}
+                {/* TODO: Will see later to add this...!*/}
+                {/* <aside className="w-full lg:w-80 bg-background/20 p-6 border-l border-primary/10 overflow-y-auto scrollbar-hide space-y-8 shrink-0">
           <div className="space-y-4">
             <h3 className="font-bold text-lg">Connected Accounts</h3>
             <div className="space-y-3">
@@ -573,9 +507,9 @@ export function SettingsClient() {
             )}
           </button>
         </aside> */}
-      </main>
+            </main>
 
-      {isAvatarModalOpen && <AvatarSelectorModal />}
-    </div>
-  );
+            {isAvatarModalOpen && <AvatarSelectorModal />}
+        </div >
+    );
 }

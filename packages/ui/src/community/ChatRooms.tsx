@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, LayoutGrid, List, Plus, MessageSquare } from "../icons";
+import { TrendingUp, LayoutGrid, List, Plus, MessageSquare, X, Shield, Users, Hash } from "../icons";
 import { RoomCard } from "./RoomCard";
 import { RoomCategoryCard } from "./RoomCategoryCard";
 import { RoomsRightSidebar } from "./RoomsRightSidebar";
 import { useSocket } from "../../../../apps/web/hooks/useSocket";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatRoomsProps {
   data: {
@@ -29,13 +31,16 @@ function EmptyRoomsPlaceholder({ message }: { message: string }) {
   );
 }
 
-function CreateRoomCard() {
+function CreateRoomCard({ onClick }: { onClick: () => void }) {
   return (
-    <div className="bg-card-custom/50 backdrop-blur-xl rounded-2xl border border-dashed border-card-border p-5 flex flex-col items-center justify-center text-center hover:bg-primary-custom/5 hover:border-primary-custom/50 transition-all cursor-pointer group h-full min-h-[220px] relative overflow-hidden">
+    <div
+      onClick={onClick}
+      className="bg-card-custom/50 backdrop-blur-xl rounded-2xl border border-dashed border-card-border p-5 flex flex-col items-center justify-center text-center hover:bg-primary-custom/5 hover:border-primary-custom/50 transition-all cursor-pointer group h-full min-h-[220px] relative overflow-hidden"
+    >
       <div className="w-14 h-14 rounded-full border border-dashed border-card-border flex items-center justify-center text-muted-custom/30 mb-4 group-hover:scale-110 group-hover:bg-primary-custom group-hover:text-primary-foreground-custom group-hover:border-primary-custom transition-all duration-500 shadow-xl group-hover:shadow-primary-custom/40">
         <Plus size={28} />
       </div>
-      <h4 className="font-bold text-foreground/80 group-hover:text-primary-custom transition-colors text-lg">Start a New Room</h4>
+      <h4 className="font-bold text-foreground/80 group-hover:text-primary-custom transition-colors text-lg">Start or Join a New Room</h4>
       <p className="text-xs text-muted-custom max-w-[160px] mt-2 leading-relaxed">Can't find a topic? Create your own study group and invite friends.</p>
 
       {/* Decorative background glow */}
@@ -44,9 +49,86 @@ function CreateRoomCard() {
   );
 }
 
+function CreateRoomModal({ isOpen, onClose, onCreate }: { isOpen: boolean, onClose: () => void, onCreate: (name: string) => void }) {
+  const [name, setName] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) {
+      onCreate(name.trim());
+      setName("");
+      onClose();
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-background/60 backdrop-blur-md"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative w-full max-w-md bg-card-custom border border-card-border rounded-3xl shadow-2xl overflow-hidden p-8"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-black tracking-tight">Create New Room</h3>
+              <button onClick={onClose} className="p-2 hover:bg-foreground/5 rounded-xl transition-colors text-muted-custom">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-muted-custom uppercase tracking-[0.2em] ml-1">Room Name</label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-custom group-focus-within:text-primary-custom transition-colors">
+                    <Hash size={18} />
+                  </div>
+                  <input
+                    autoFocus
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Distributed Systems"
+                    className="w-full bg-background/50 border border-card-border rounded-2xl py-4 pl-12 pr-6 text-sm focus:outline-none focus:ring-2 focus:ring-primary-custom/20 focus:border-primary-custom transition-all placeholder:text-muted-custom/30"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 bg-primary-custom/5 border border-primary-custom/10 rounded-2xl flex gap-3 italic">
+                <Shield size={16} className="text-primary-custom shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-custom leading-relaxed">
+                  New rooms are public by default. Be the first to start the discussion!
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!name.trim()}
+                className="w-full py-4 bg-primary-custom text-primary-foreground-custom rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary-custom/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+              >
+                Launch Room
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) {
   const [data, setData] = useState(initialData);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { socket, isConnected } = useSocket(token);
+  const router = useRouter();
 
   useEffect(() => {
     if (!socket || !isConnected) return;
@@ -92,14 +174,37 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
       });
     };
 
+    const handleNewRoomAvailable = (room: any) => {
+      const normalizedRoom = {
+        ...room,
+        id: typeof room.id === 'string' ? [...room.id].reduce((acc, char) => acc + char.charCodeAt(0), 0) : Date.now(),
+        title: room.title || room.name || "New Room",
+        icon: room.icon || "hub",
+        contributor: room.topContributor || room.contributor || "Unknown"
+      };
+
+      setData(prev => ({
+        ...prev,
+        communityRooms: [normalizedRoom, ...prev.communityRooms]
+      }));
+    };
+
+    const handleRoomCreated = ({ name, id }: { name: string, id: string }) => {
+      router.push(`/community/chat-rooms/${name}`);
+    };
+
     socket.on("global-stats", handleGlobalStats);
     socket.on("global-user-activity", handleGlobalActivity);
     socket.on("global-rooms-stats", handleRoomsStats);
+    socket.on("room-created", handleRoomCreated);
+    socket.on("new-room-available", handleNewRoomAvailable);
 
     return () => {
       socket.off("global-stats", handleGlobalStats);
       socket.off("global-user-activity", handleGlobalActivity);
       socket.off("global-rooms-stats", handleRoomsStats);
+      socket.off("room-created", handleRoomCreated);
+      socket.off("new-room-available", handleNewRoomAvailable);
     };
   }, [socket, isConnected]);
 
@@ -181,7 +286,7 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
                   style={{ animationDelay: `${(data.communityRooms.length + data.trendingRooms.length) * 80}ms` }}
                   className="animate-[fadeSlideUp_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards] opacity-0"
                 >
-                  <CreateRoomCard />
+                  <CreateRoomCard onClick={() => setShowCreateModal(true)} />
                 </div>
               </>
             ) : (
@@ -190,6 +295,14 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
           </div>
         </section>
       </div>
+
+      <CreateRoomModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={(roomName) => {
+          socket?.emit("create-room", { roomName });
+        }}
+      />
 
       <RoomsRightSidebar
         masters={data.masters}

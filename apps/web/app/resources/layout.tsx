@@ -37,7 +37,7 @@ export default async function ResourcesLayout({ children }: LayoutProps) {
     }
 
     return (
-        <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
+        <div className="bg-background text-foreground h-screen flex overflow-hidden transition-colors duration-300">
             {/* Sidebar - Automatically handles active state internally against '/resources' */}
             <SidebarWrapper user={sidebarUser} />
 
@@ -47,25 +47,25 @@ export default async function ResourcesLayout({ children }: LayoutProps) {
                 <nav className="sticky top-0 z-50 border-b border-primary-custom/10 bg-background/80 backdrop-blur-md">
                     <div className="px-8 h-16 flex items-center justify-between gap-8">
                         <div className="flex items-center gap-8 text-sm font-medium">
-                            <span className="font-bold text-lg text-white border-b-2 border-[#1337ec] pb-1">Resources Portal</span>
+                            <span className="font-bold text-lg text-white border-b-2 border-primary-custom pb-1">Resources Portal</span>
                         </div>
 
                         {/* Search */}
                         <div className="flex-1 max-w-xl hidden md:block">
                             <div className="relative group">
-                                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#1337ec]" />
+                                <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-custom" />
 
                                 <input
                                     type="text"
                                     placeholder="Search syllabus or skills..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-[#1337ec] focus:border-[#1337ec] placeholder:text-white/20 outline-none transition-all text-white"
+                                    className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary-custom focus:border-primary-custom placeholder:text-white/20 outline-none transition-all text-white"
                                 />
                             </div>
                         </div>
 
                         {/* Notifications */}
                         <div className="flex items-center gap-4">
-                            <button className="p-2 hover:bg-[#1337ec]/10 rounded-full transition relative text-white/60 hover:text-white">
+                            <button className="p-2 hover:bg-primary-custom/10 rounded-full transition relative text-white/60 hover:text-white">
                                 <MdNotifications size={22} />
                             </button>
                         </div>

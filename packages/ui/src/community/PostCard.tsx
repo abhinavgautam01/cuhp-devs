@@ -87,7 +87,6 @@ export function PostCard({ post, onLike, onBookmark, currentUserId, userAvatar, 
                             onClick={() => onLike?.(postId)}
                             className={`flex items-center gap-2 transition-all duration-300 group/btn relative ${isLiked ? "text-primary-custom drop-shadow-[0_0_10px_rgba(var(--primary),0.5)] scale-110" : "text-muted-custom hover:text-primary-custom"}`}
                         >
-                            <div className={`absolute -inset-2 rounded-full bg-primary-custom/0 group-hover/btn:bg-primary-custom/10 transition-colors duration-300 -z-10`} />
                             <ThumbsUp className={`${isLiked ? "fill-primary-custom" : ""} group-active/btn:scale-125 transition-all duration-300`} size={18} />
                             <span className="text-xs font-bold">{post.likes.length}</span>
                         </button>
@@ -95,7 +94,6 @@ export function PostCard({ post, onLike, onBookmark, currentUserId, userAvatar, 
                             onClick={() => onBookmark?.(postId)}
                             className={`flex items-center gap-2 transition-all duration-300 group/btn relative ${isSaved ? "text-yellow-500 scale-110" : "text-muted-custom hover:text-yellow-500"}`}
                         >
-                            <div className={`absolute -inset-2 rounded-full bg-yellow-500/0 group-hover/btn:bg-yellow-500/10 transition-colors duration-300 -z-10`} />
                             <Bookmark className={`${isSaved ? "fill-yellow-500" : ""} group-active/btn:scale-125 transition-all duration-300`} size={18} />
                             <span className="text-xs font-bold">{isSaved ? "Saved" : "Save"}</span>
                         </button>

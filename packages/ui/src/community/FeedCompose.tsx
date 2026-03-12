@@ -68,7 +68,7 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
                             onClick={() => setSelectedType(label)}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium ${selectedType === label
                                 ? "bg-primary-custom/20 text-primary-custom"
-                                : "text-muted-custom hover:text-foreground hover:bg-foreground/[0.03]"
+                                : "text-muted-custom hover:text-foreground"
                                 }`}
                         >
                             <Icon className={`${selectedType === label ? color : 'text-gray-500'}`} size={18} />

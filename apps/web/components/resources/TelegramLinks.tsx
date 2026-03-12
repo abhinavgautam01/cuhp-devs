@@ -1,4 +1,18 @@
 import { MdSend, MdGroups, MdOpenInNew } from "react-icons/md";
+import { motion, Variants } from "framer-motion";
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 const groups = [
     { name: "CBOX: CyberSecurity", members: "120 members", link: "https://t.me/cbox_backup" },
@@ -16,10 +30,12 @@ export function TelegramLinks() {
                 <h2 className="text-2xl font-bold text-foreground font-display">Community Groups</h2>
             </div>
 
-            <div className="grid gap-4">
+            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-4">
                 <h2 className="font-bold text-red-500">Engage in groups on your own risk..!</h2>
                 {groups.map((group) => (
-                    <a
+                    <motion.a
+                        variants={itemVariants}
+                        whileHover={{ scale: 1.02 }}
                         key={group.name}
                         href={group.link}
                         target="_blank"
@@ -43,9 +59,9 @@ export function TelegramLinks() {
                             Join
                             <MdOpenInNew size={18} />
                         </div>
-                    </a>
+                    </motion.a>
                 ))}
-            </div>
+            </motion.div>
         </div>
     );
 }

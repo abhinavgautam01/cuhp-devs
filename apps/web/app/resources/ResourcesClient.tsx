@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { AcademicSyllabus } from "../../components/resources/AcademicSyllabus";
 import { TechSkills } from "../../components/resources/TechSkills";
 import { TelegramLinks } from "../../components/resources/TelegramLinks";
@@ -33,8 +34,8 @@ export function ResourcesClient({ data }: ResourcesClientProps) {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === tab.id
-                                ? "bg-primary-custom text-white shadow-[0_0_20px_rgba(var(--primary),0.3)]"
-                                : "text-slate-400 hover:text-foreground hover:bg-white/5"
+                            ? "bg-primary-custom text-white shadow-[0_0_20px_rgba(var(--primary),0.3)]"
+                            : "text-slate-400 hover:text-foreground hover:bg-white/5"
                             }`}
                     >
                         <tab.icon size={20} />
@@ -44,15 +45,24 @@ export function ResourcesClient({ data }: ResourcesClientProps) {
             </div>
 
             {/* Tab Content */}
-            <div className="animate-slide-up">
-                {/* TODO: add syllabus, previous question papers..! */}
-                {activeTab === "academic" && <AcademicSyllabus initialData={data.academicSyllabus} />}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full"
+                >
+                    {/* TODO: add syllabus, previous question papers..! */}
+                    {activeTab === "academic" && <AcademicSyllabus initialData={data.academicSyllabus} />}
 
-                {/* TODO: will see later...if want to add this...! */}
-                {/* {activeTab === "tech" && <TechSkills categories={data.techSkills} />} */}
-                {activeTab === "telegram" && <TelegramLinks />}
-                {activeTab === "vault" && <DirectCourses />}
-            </div>
+                    {/* TODO: will see later...if want to add this...! */}
+                    {/* {activeTab === "tech" && <TechSkills categories={data.techSkills} />} */}
+                    {activeTab === "telegram" && <TelegramLinks />}
+                    {activeTab === "vault" && <DirectCourses />}
+                </motion.div>
+            </AnimatePresence>
         </>
     );
 }

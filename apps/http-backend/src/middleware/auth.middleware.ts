@@ -7,10 +7,14 @@ export interface AuthRequest extends Request {
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies.token;
+        let token = req.cookies.token;
+
+        if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
 
         if (!token) {
-            console.warn("Auth check failed: No token cookie present");
+            console.warn("Auth check failed: No token cookie or header present");
             return res.status(401).json({ message: "Not authorized, no token" });
         }
 

@@ -6,7 +6,7 @@ export default async function ResourcesPage() {
     const data = await getMockResourcesData();
 
     return (
-        <main className="flex-1 overflow-y-auto bg-background min-h-screen transition-colors duration-300">
+        <main className="flex-1 overflow-y-auto scrollbar-hide bg-background transition-colors duration-300">
             <div className="max-w-5xl mx-auto p-6 lg:p-10">
                 <header className="mb-10 animate-fade-in text-center">
                     <h1 className="text-4xl font-bold mb-2 font-display text-foreground tracking-tight">

@@ -1,8 +1,8 @@
 import { Document } from "mongoose";
-import { ChatRoomName } from "../enums/index";
 
 export interface IChatRoom extends Document {
-  name: ChatRoomName;
+  name: string;
+  createdBy?: any;
   createdAt: Date;
   updatedAt: Date;
 }

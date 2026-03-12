@@ -21,9 +21,9 @@ export const useSocket = (token: string | null): {
 
         const socket = io(SOCKET_URL, {
             auth: { token },
-            transports: ["websocket"],
+            transports: ["polling", "websocket"],
             timeout: 10000,
-            reconnectionAttempts: 3,
+            reconnectionAttempts: 5,
             reconnectionDelay: 1000,
         });
 
