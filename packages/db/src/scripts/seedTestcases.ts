@@ -41,7 +41,7 @@ async function seed() {
       const outputPath = path.join(outputDir, file);
 
       if (!fs.existsSync(outputPath)) {
-        console.log(`❌ Missing output for ${file}`);
+        console.log(`Missing output for ${file}`);
         continue;
       }
 
@@ -49,7 +49,7 @@ async function seed() {
       const output = fs.readFileSync(outputPath, "utf-8").trim();
 
       if (!input || !output) {
-        console.log(`❌ Empty testcase skipped: ${file}`);
+        console.log(`Empty testcase skipped: ${file}`);
         continue;
       }
 

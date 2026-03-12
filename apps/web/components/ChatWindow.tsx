@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
-import { AnimatePresence,motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
     Send,
@@ -180,8 +180,14 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
         if (!socket) return;
 
         const handleNewMessage = (message: Message) => {
+            console.log("[ChatWindow] Received new message:", message);
             setMessages((prev) => {
-                const filtered = prev.filter(m => !(m.isOptimistic && m.content === message.content && m.senderId?._id === message.senderId?._id));
+                // More robust optimistic filtering
+                const filtered = prev.filter(m => {
+                    if (!m.isOptimistic) return true;
+                    const isMatch = m.content === message.content && m.senderId?._id === message.senderId?._id;
+                    return !isMatch;
+                });
                 return [...filtered, message];
             });
 
@@ -269,6 +275,8 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
         socket.on("user-stop-typing", handleStopTyping);
         socket.on("message-deleted", handleMessageDeleted);
         socket.on("room-members-online", handleOnlineMembers);
+
+        console.log("[ChatWindow] Socket listeners registered for room:", roomName);
 
         return () => {
             socket.off("new-message", handleNewMessage);

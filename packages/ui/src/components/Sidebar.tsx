@@ -162,11 +162,12 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                 </Link>
 
                 {/* User Profile */}
-                <div className="mt-4 flex items-center gap-3 px-3 whitespace-nowrap">
+                <div className="mt-4 flex items-center gap-3 px-3">
                     <img
                         src={safeUser.avatar}
                         alt={safeUser.name}
-                        className="w-10 h-10 rounded-full border-2 border-primary-custom/20 shrink-0 object-cover"
+                        className={`rounded-full border-2 border-primary-custom/20 object-cover shrink-0 transition-all duration-300 ${isCollapsed ? "w-6 h-6" : "w-10 h-10"
+                            }`}
                     />
                     <AnimatePresence>
                         {!isCollapsed && (
@@ -174,7 +175,7 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
-                                className="overflow-hidden"
+                                className="overflow-hidden whitespace-nowrap"
                             >
                                 <p className="text-sm font-bold truncate">{safeUser.name}</p>
                                 <p className="text-xs text-muted-custom truncate">{safeUser.role}</p>

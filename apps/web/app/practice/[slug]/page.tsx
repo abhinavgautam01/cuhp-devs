@@ -24,6 +24,7 @@ export default async function ProblemPage({ params }: { params: { slug: string }
         // Map API problem to interface format
         const problem = {
             id: found._id,
+            slug: found.slug,
             title: found.title,
             difficulty: found.difficulty,
             description: found.description,

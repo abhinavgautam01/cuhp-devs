@@ -48,6 +48,7 @@ export default async function PracticePage({
 
         // Fetch problems
         problems = await serverApiFetch("/problems") as Problem[];
+        console.log(`[PracticePage] Fetched ${problems.length} problems`);
     } catch (error) {
         console.error("Failed to fetch initial data for Practice page:", error);
     }
