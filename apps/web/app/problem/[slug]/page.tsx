@@ -43,6 +43,7 @@ export default async function ProblemPage({ params }: { params: { slug: string }
                     output: "N/A"
                 }
             ],
+            testCases: dbProblem.sampleTestCases || [],
             constraints: dbProblem.constraints || ["No constraints provided"],
             defaultCode: defaultCode && Object.keys(defaultCode).length > 0 ? defaultCode : {}
         };

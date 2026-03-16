@@ -62,7 +62,14 @@ async function seed() {
       });
     }
 
-    await TestCase.insertMany(testcases);
+    await TestCase.deleteMany({
+      problemId: problem._id,
+      isSample: true,
+    });
+
+    if (testcases.length > 0) {
+      await TestCase.insertMany(testcases);
+    }
 
     console.log(`✅ Seeded ${testcases.length} testcases for ${slug}`);
   }

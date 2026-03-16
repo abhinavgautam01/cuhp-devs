@@ -89,6 +89,58 @@ import { buildExecutableCode } from "../utils/buildExecutableCode";
 import { executeCode } from "../utils/piston";
 import pLimit from "p-limit";
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const dedupeTestcases = <T extends { input?: string; output?: string }>(
+  testcases: T[]
+) => {
+  const seen = new Set<string>();
+  const normalizeValue = (value?: string) =>
+    (value ?? "").replace(/\r\n/g, "\n").replace(/\s+/g, " ").trim();
+
+  return testcases.filter((tc) => {
+    const normalizedInput = normalizeValue(tc.input);
+    const normalizedOutput = normalizeValue(tc.output);
+
+    if (!normalizedInput && !normalizedOutput) {
+      return false;
+    }
+
+    const key = `${normalizedInput}::${normalizedOutput}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
+
+const getExecutionStatus = (run: any, expectedOutput: string) => {
+  if (!run) {
+    return "Execution Error";
+  }
+
+  if (run.code !== 0) {
+    switch (run.status) {
+      case "TO":
+        return "Time Limit Exceeded";
+      case "RE":
+        return "Runtime Error";
+      default:
+        return "Runtime Error";
+    }
+  }
+
+  const actualOutput = run.stdout?.trim() ?? "";
+  if (actualOutput !== expectedOutput.trim()) {
+    return "Wrong Answer";
+  }
+
+  return "Accepted";
+};
+
 export const runCode = async (req: Request, res: Response) => {
   try {
     const { problemSlug, code, language } = req.body;
@@ -105,18 +157,35 @@ export const runCode = async (req: Request, res: Response) => {
     }
 
     // Validate language
-    const lang = await Language.findOne({ name: language });
+    const normalizedLanguage = String(language).trim();
+    const languagePattern = new RegExp(
+      `^${escapeRegex(normalizedLanguage)}$`,
+      "i"
+    );
+
+    const lang = await Language.findOne({
+      $or: [
+        { name: languagePattern },
+        { runtime: languagePattern },
+        { aliases: languagePattern },
+      ],
+    }).lean() as any;
+
     if (!lang) {
-      return res.status(400).json({ message: "Invalid language" });
+      return res.status(400).json({
+        message: `Invalid language: ${normalizedLanguage}`,
+      });
     }
 
     // Fetch sample testcases
-    const testcases = await TestCase.find({
+    const testcaseDocs = await TestCase.find({
       problemId: problem._id,
       isSample: true,
     })
       .sort({ order: 1 })
       .lean();
+
+    const testcases = dedupeTestcases(testcaseDocs);
 
     if (!testcases.length) {
       return res.status(400).json({ message: "No sample testcases found" });
@@ -145,13 +214,47 @@ export const runCode = async (req: Request, res: Response) => {
               tc.input
             );
 
+            const compile = pistonResult.compile;
             const run = pistonResult.run;
+            const compileError =
+              compile && compile.code !== 0
+                ? compile.stderr?.trim() ||
+                  compile.output?.trim() ||
+                  compile.message ||
+                  "Compilation failed"
+                : "";
+
+            if (compileError) {
+              return {
+                testcase: i + 1,
+                stdout: compile.stdout?.trim() ?? "",
+                stderr: compileError,
+                status: "Compilation Error",
+                time: compile.cpu_time ?? null,
+                memory: compile.memory ?? null,
+              };
+            }
+
+            if (!run) {
+              return {
+                testcase: i + 1,
+                stdout: "",
+                stderr: pistonResult.message || "No execution result returned",
+                status: "Execution Error",
+                time: null,
+                memory: null,
+              };
+            }
+
+            const stderr = [run.stderr?.trim(), run.message?.trim()]
+              .filter(Boolean)
+              .join("\n");
 
             return {
               testcase: i + 1,
               stdout: run.stdout?.trim(),
-              stderr: run.stderr?.trim(),
-              status: run.code === 0 ? "Accepted" : "Runtime Error",
+              stderr,
+              status: getExecutionStatus(run, tc.output),
               time: run.cpu_time,
               memory: run.memory,
             };
@@ -162,7 +265,8 @@ export const runCode = async (req: Request, res: Response) => {
             return {
               testcase: i + 1,
               stdout: "",
-              stderr: "Execution error",
+              stderr:
+                err instanceof Error ? err.message : "Execution error",
               status: "Error",
               time: null,
               memory: null,
@@ -179,7 +283,8 @@ export const runCode = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Run code error:", err);
     return res.status(500).json({
-      message: "Internal server error",
+      message:
+        err instanceof Error ? err.message : "Internal server error",
     });
   }
 };

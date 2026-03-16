@@ -1,13 +1,42 @@
 import React, { useState } from "react";
-import { Play, Plus, CheckCircle2 } from "../icons";
 
 interface ConsolePanelProps {
     output: any[] | null;
+    testCases: Array<{
+        input: string;
+        output: string;
+        explanation?: string;
+    }>;
     height?: number;
 }
 
-export const ConsolePanel: React.FC<ConsolePanelProps> = ({ output, height }) => {
+const normalizeTestCaseValue = (value: string) =>
+    value.replace(/\r\n/g, "\n").replace(/\s+/g, " ").trim();
+
+const dedupeTestCases = (testCases: ConsolePanelProps["testCases"]) => {
+    const seen = new Set<string>();
+
+    return testCases.filter((testCase) => {
+        const normalizedInput = normalizeTestCaseValue(testCase.input);
+        const normalizedOutput = normalizeTestCaseValue(testCase.output);
+
+        if (!normalizedInput && !normalizedOutput) {
+            return false;
+        }
+
+        const key = `${normalizedInput}::${normalizedOutput}`;
+        if (seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+};
+
+export const ConsolePanel: React.FC<ConsolePanelProps> = ({ output, testCases, height }) => {
     const [activeTab, setActiveTab] = useState<"testCases" | "testResults">("testResults");
+    const uniqueTestCases = dedupeTestCases(testCases);
 
     return (
         <div
@@ -38,56 +67,42 @@ export const ConsolePanel: React.FC<ConsolePanelProps> = ({ output, height }) =>
             <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-muted-custom/[0.02]">
                 {activeTab === "testCases" ? (
                     <div className="flex flex-col gap-6 max-w-3xl">
-                        <div className="bg-card-custom border border-card-border rounded-2xl p-6 shadow-sm group hover:border-primary-custom/20 transition-all">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-sm font-bold text-foreground flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    Test Case 1
-                                </span>
-                                <button className="px-4 py-1.5 text-xs font-bold text-muted-custom hover:text-primary-custom hover:bg-primary-custom/5 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-primary-custom/10">
-                                    <Play size={12} />
-                                    Run
-                                </button>
-                            </div>
-                            <div className="bg-background border border-primary-custom/5 p-4 rounded-xl font-mono text-sm space-y-2">
-                                <div className="flex gap-3">
-                                    <span className="text-muted-custom min-w-[70px]">nums =</span>
-                                    <span className="text-foreground">[2, 7, 11, 15]</span>
+                        {uniqueTestCases.length > 0 ? (
+                            uniqueTestCases.map((testCase, index) => (
+                                <div
+                                    key={`${index}-${testCase.input}`}
+                                    className="bg-card-custom border border-card-border rounded-2xl p-6 shadow-sm group hover:border-primary-custom/20 transition-all"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            Test Case {index + 1}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-muted-custom uppercase tracking-widest">
+                                            Sample Input
+                                        </span>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="bg-background border border-primary-custom/5 p-4 rounded-xl">
+                                            <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Input</span>
+                                            <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-sm text-foreground">
+                                                {testCase.input}
+                                            </pre>
+                                        </div>
+                                        <div className="bg-background border border-primary-custom/5 p-4 rounded-xl">
+                                            <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Expected Output</span>
+                                            <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-sm text-foreground">
+                                                {testCase.output}
+                                            </pre>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex gap-3">
-                                    <span className="text-muted-custom min-w-[70px]">target =</span>
-                                    <span className="text-foreground">9</span>
-                                </div>
+                            ))
+                        ) : (
+                            <div className="text-sm text-slate-500 font-medium italic">
+                                No sample test cases available for this problem.
                             </div>
-                        </div>
-
-                        <div className="bg-card-custom border border-card-border rounded-2xl p-6 shadow-sm group hover:border-primary-custom/20 transition-all">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-sm font-bold text-foreground flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                    Test Case 2
-                                </span>
-                                <button className="px-4 py-1.5 text-xs font-bold text-muted-custom hover:text-primary-custom hover:bg-primary-custom/5 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-primary-custom/10">
-                                    <Play size={12} />
-                                    Run
-                                </button>
-                            </div>
-                            <div className="bg-background border border-primary-custom/5 p-4 rounded-xl font-mono text-sm space-y-2">
-                                <div className="flex gap-3">
-                                    <span className="text-muted-custom min-w-[70px]">nums =</span>
-                                    <span className="text-foreground">[3, 2, 4]</span>
-                                </div>
-                                <div className="flex gap-3">
-                                    <span className="text-muted-custom min-w-[70px]">target =</span>
-                                    <span className="text-foreground">6</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button className="w-full py-6 border-2 border-dashed border-card-border rounded-2xl text-muted-custom hover:text-primary-custom hover:border-primary-custom/30 hover:bg-primary-custom/5 transition-all flex items-center justify-center gap-3 font-bold group">
-                            <Plus size={20} className="transition-transform group-hover:scale-110" />
-                            Add Test Case
-                        </button>
+                        )}
                     </div>
                 ) : (
                     // Test Results Tab

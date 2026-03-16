@@ -9,6 +9,8 @@ import { DescriptionPanel } from "./DescriptionPanel";
 import { EditorPanel } from "./EditorPanel";
 import { ConsolePanel } from "./ConsolePanel";
 
+const FALLBACK_CODE = "# No code available for this language.";
+
 interface ProblemData {
   id: string;
   slug: string;
@@ -22,6 +24,11 @@ interface ProblemData {
   }>;
   constraints: string[];
   defaultCode: Record<string, string>;
+  testCases: Array<{
+    input: string;
+    output: string;
+    explanation?: string;
+  }>;
 }
 
 interface ProblemInterfaceProps {
@@ -35,8 +42,11 @@ interface ProblemInterfaceProps {
 
 export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, user }) => {
   const router = useRouter();
-  const [language, setLanguage] = useState(Object.keys(problem.defaultCode)[0] || "python");
-  const [code, setCode] = useState(problem.defaultCode[language] ?? "# No code available for this language.");
+  const availableLanguages = Object.keys(problem.defaultCode);
+  const defaultLanguage = availableLanguages[0] || "python";
+
+  const [language, setLanguage] = useState(defaultLanguage);
+  const [code, setCode] = useState(problem.defaultCode[defaultLanguage] ?? FALLBACK_CODE);
   const [isExpanded, setIsExpanded] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [output, setOutput] = useState<any | null>(null);
@@ -94,13 +104,21 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
     };
   }, [resize, stopResizing]);
 
+  useEffect(() => {
+    const nextLanguage = Object.keys(problem.defaultCode)[0] || "python";
+    setLanguage(nextLanguage);
+    setCode(problem.defaultCode[nextLanguage] ?? FALLBACK_CODE);
+    setOutput(null);
+    setResetKey((prev) => prev + 1);
+  }, [problem.id, problem.defaultCode]);
+
   const handleLanguageChange = (newLang: string) => {
     setLanguage(newLang);
-    setCode(problem.defaultCode[newLang] ?? "# No code available for this language.");
+    setCode(problem.defaultCode[newLang] ?? FALLBACK_CODE);
   };
 
   const handleReset = () => {
-    setCode(problem.defaultCode[language] ?? "# No code available for this language.");
+    setCode(problem.defaultCode[language] ?? FALLBACK_CODE);
     setResetKey(prev => prev + 1);
   };
 
@@ -208,7 +226,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
             setCode={setCode}
             language={language}
             setLanguage={handleLanguageChange}
-            availableLanguages={Object.keys(problem.defaultCode)}
+            availableLanguages={availableLanguages}
             isExpanded={isExpanded}
             setIsExpanded={setIsExpanded}
             resetKey={resetKey}
@@ -233,7 +251,11 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden bg-background"
               >
-                <ConsolePanel output={output} height={consoleHeight} />
+                <ConsolePanel
+                  output={output}
+                  testCases={problem.testCases}
+                  height={consoleHeight}
+                />
               </motion.div>
             )}
           </AnimatePresence>
