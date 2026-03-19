@@ -11,15 +11,15 @@ async function seed() {
             // { name: "Rust", judge0Id: 73 }
             {
                 name: "Javascript",
-                runtime: "node",
+                runtime: "javascript",
                 version: "18.15.0",
-                aliases: ["node-javascript", "node-js", "javascript", "js"],
+                aliases: ["node-javascript", "node-js", "javascript", "js", "node"],
             },
             {
                 name: "C++",
-                runtime: "gcc",
+                runtime: "c++",
                 version: "10.2.0",
-                aliases: ["cpp", "g++"],
+                aliases: ["cpp", "g++", "gcc"],
             },
             {
                 name: "Python",
