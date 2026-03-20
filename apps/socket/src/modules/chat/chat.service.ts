@@ -57,7 +57,6 @@ export const createRoom = async (roomName: string, userId: string) => {
 
   const room = await ChatRoom.create({
     name: decoded,
-    createdBy: userId,
   });
 
   return room;
