@@ -23,6 +23,18 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             onboardingCompleted: Boolean(program && semester),
         };
 
+        // Check if handle is already taken (case-insensitive)
+        if (handle) {
+            const trimmedHandle = handle.trim();
+            const existingUser = await User.findOne({ 
+                handle: { $regex: new RegExp(`^${trimmedHandle}$`, "i") }, 
+                _id: { $ne: userId } 
+            });
+            if (existingUser) {
+                return res.status(400).json({ message: "Handle is already taken" });
+            }
+        }
+
         // Remove undefined fields to avoid overwriting with null/undefined
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
