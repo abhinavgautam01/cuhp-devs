@@ -12,12 +12,14 @@ type ProfileResponse = {
   fullName?: string;
   name?: string;
   avatar?: string;
+  handle?: string;
 };
 
 const DEFAULT_SIDEBAR_USER = {
   name: "Guest User",
   role: "Student",
   avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest-user",
+  handle: "guest",
 };
 
 export default async function CommunityLayout({ children }: LayoutProps) {
@@ -31,6 +33,7 @@ export default async function CommunityLayout({ children }: LayoutProps) {
       name: resolvedName,
       role: "Student",
       avatar: profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(resolvedName)}`,
+      handle: profile?.handle || DEFAULT_SIDEBAR_USER.handle,
     };
   } catch (error) {
     console.error("Failed to fetch profile for sidebar:", error);

@@ -16,6 +16,7 @@ interface User {
     name: string;
     role: string;
     avatar: string;
+    handle?: string;
 }
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ interface SidebarProps {
     // We ignore external isCollapsed/onToggle since the requested behavior is purely hover-driven now.
     isCollapsed?: boolean;
     onToggle?: () => void;
+    onProfileClick?: (e: React.MouseEvent) => void;
 }
 
 const DEFAULT_USER: User = {
@@ -162,11 +164,20 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                 </Link>
 
                 {/* User Profile */}
-                <div className="mt-4 flex items-center gap-3 px-3">
+                <Link
+                    href={safeUser.handle ? `/${safeUser.handle}` : "#"}
+                    onClick={(e) => {
+                        if (!safeUser.handle) {
+                            e.preventDefault();
+                        }
+                        onProfileClick?.(e);
+                    }}
+                    className="mt-4 flex items-center gap-3 px-3 group cursor-pointer"
+                >
                     <img
                         src={safeUser.avatar}
                         alt={safeUser.name}
-                        className={`rounded-full border-2 border-primary-custom/20 object-cover shrink-0 transition-all duration-300 ${isCollapsed ? "w-6 h-6" : "w-10 h-10"
+                        className={`rounded-full border-2 border-primary-custom/20 object-cover shrink-0 transition-all duration-300 group-hover:border-primary-custom ${isCollapsed ? "w-6 h-6" : "w-10 h-10"
                             }`}
                     />
                     <AnimatePresence>
@@ -177,12 +188,12 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                                 exit={{ opacity: 0, x: -10 }}
                                 className="overflow-hidden whitespace-nowrap"
                             >
-                                <p className="text-sm font-bold truncate">{safeUser.name}</p>
+                                <p className="text-sm font-bold truncate group-hover:text-primary-custom transition-colors">{safeUser.name}</p>
                                 <p className="text-xs text-muted-custom truncate">{safeUser.role}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </div>
+                </Link>
             </div>
         </motion.aside>
     );

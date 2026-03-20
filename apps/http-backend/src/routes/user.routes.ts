@@ -1,11 +1,24 @@
 import { Router } from "express";
-import { updateProfile, getProfile, getDashboardData, getCommunityFeed, getCommunityRooms, getCommunitySnippets, getChatMessages, getChatRoomMembers } from "../controller/user.controller.js";
+import { 
+    updateProfile, 
+    getProfile, 
+    getDashboardData, 
+    getCommunityFeed, 
+    getCommunityRooms, 
+    getCommunitySnippets, 
+    getChatMessages, 
+    getChatRoomMembers,
+    getProfileByHandle,
+    searchUsers
+} from "../controller/user.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
 const router: Router = Router();
 
 router.put("/profile", protect, updateProfile);
 router.get("/profile", protect, getProfile);
+router.get("/suggest", searchUsers);
+router.get("/profile/handle/:handle", getProfileByHandle);
 router.get("/dashboard", protect, getDashboardData);
 router.get("/community/feed", protect, getCommunityFeed);
 router.get("/community/rooms", protect, getCommunityRooms);

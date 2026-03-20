@@ -87,6 +87,10 @@ export function SettingsClient() {
     };
 
     const handleSaveChanges = async () => {
+        if (!handle.trim()) {
+            toast.error("Public handle can't be empty");
+            return;
+        }
         try {
             setIsSaving(true);
             const response = await apiFetch("/user/profile", {
@@ -236,11 +240,17 @@ export function SettingsClient() {
                     avatar:
                         avatar ||
                         `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`,
+                    handle: user?.handle,
                 }}
                 activeNav="settings"
                 setActiveNav={() => { }} // Controlled by pathname in other pages, here we keep it as settings
                 isCollapsed={isSidebarCollapsed}
                 onToggle={toggleSidebarCollapsed}
+                onProfileClick={() => {
+                    if (!user?.handle) {
+                        toast.error("Please setup a public handle to view your profile dashboard!");
+                    }
+                }}
             />
 
             <main className="flex-1 flex flex-col lg:flex-row h-screen overflow-y-auto scrollbar-hide">

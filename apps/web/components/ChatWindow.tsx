@@ -495,7 +495,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                         {msg.senderId?._id === currentUser?.id && !msg.isOptimistic && (
                                             <button
                                                 onClick={() => handleDeleteMessage(msg._id)}
-                                                className="absolute cursor-pointer right-4 top-2 text-[10px] text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500"
+                                                className="cursor-pointer text-sm hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                                             >
                                                 Delete
                                             </button>
