@@ -1,5 +1,5 @@
-import { Response } from "express";
-import { User, ChatRoom, Message, ChatRoomName, IUser } from "@repo/db/index.js";
+import { Request, Response } from "express";
+import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post } from "@repo/db/index.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -22,6 +22,18 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             theme,
             onboardingCompleted: Boolean(program && semester),
         };
+
+        // Check if handle is already taken (case-insensitive)
+        if (handle) {
+            const trimmedHandle = handle.trim();
+            const existingUser = await User.findOne({ 
+                handle: { $regex: new RegExp(`^${trimmedHandle}$`, "i") }, 
+                _id: { $ne: userId } 
+            });
+            if (existingUser) {
+                return res.status(400).json({ message: "Handle is already taken" });
+            }
+        }
 
         // Remove undefined fields to avoid overwriting with null/undefined
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
@@ -121,6 +133,7 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
         const dashboardData = {
             user: {
                 name: user.fullName,
+                handle: user.handle,
                 role: "Student",
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}`,
                 program: user.program || "Not selected",
@@ -391,5 +404,195 @@ export const getChatRoomMembers = async (req: AuthRequest, res: Response) => {
     } catch (error) {
         console.error("Get chat room members error:", error);
         return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
+    try {
+        const { handle } = req.params;
+        if (!handle) {
+            return res.status(400).json({ message: "Handle is required" });
+        }
+
+        const user = await User.findOne({ handle }).select("-password");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userId = user._id;
+
+        // 1. Solved Problems Count 
+        const solvedSubmissions = await Submission.distinct("problemId", { 
+            userId, 
+            status: "Accepted" 
+        });
+
+        // 2. Total Points (Solved count * 10 for now)
+        const totalPoints = solvedSubmissions.length * 10;
+
+        // 3. Department Rank (Based on solved problems)
+        const allUserSolves = await Submission.aggregate([
+            { $match: { status: "Accepted" } },
+            { $group: { _id: "$userId", count: { $addToSet: "$problemId" } } },
+            { $project: { _id: 1, solveCount: { $size: "$count" } } },
+            { $sort: { solveCount: -1 } }
+        ]);
+        
+        const rank = allUserSolves.findIndex(u => u._id.toString() === userId.toString()) + 1 || allUserSolves.length + 1;
+
+        // 4. Activity Heatmap (Start from March 2026)
+        const startDate = new Date(2026, 2, 1);
+        
+        const heatmapData = await Submission.aggregate([
+            { $match: { userId, createdAt: { $gte: startDate } } },
+            { $group: { 
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                count: { $sum: 1 }
+            }},
+            { $project: { date: "$_id", count: 1, _id: 0 } }
+        ]);
+
+        // 5. Current Streak
+        const allSubmissions = await Submission.find({ userId })
+            .sort({ createdAt: -1 })
+            .select("createdAt");
+        
+        let currentStreak = 0;
+        const latestSubmission = allSubmissions[0];
+        if (latestSubmission) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let lastDate = new Date(latestSubmission.createdAt);
+            lastDate.setHours(0, 0, 0, 0);
+            
+            const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+            
+            if (diffInDays <= 1) {
+                currentStreak = 1;
+                const uniqueDates = Array.from(new Set(allSubmissions.map(s => {
+                    const d = new Date(s.createdAt);
+                    d.setHours(0, 0, 0, 0);
+                    return d.getTime();
+                }))).sort((a, b) => (b as number) - (a as number));
+
+                for (let i = 0; i < uniqueDates.length - 1; i++) {
+                    const current = uniqueDates[i] as number;
+                    const next = uniqueDates[i+1] as number;
+                    if (current - next === 1000 * 3600 * 24) {
+                        currentStreak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 6. Submissions Today
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const submissionsToday = await Submission.find({ 
+            userId, 
+            createdAt: { $gte: startOfToday } 
+        }).populate("problemId", "title difficulty");
+
+        // 7. Recent Activity
+        const recentSubmissions = await Submission.find({ userId })
+            .sort({ createdAt: -1 })
+            .limit(10)
+            .populate("problemId", "title");
+            
+        const recentPosts = await Post.find({ author: userId })
+            .sort({ createdAt: -1 })
+            .limit(5);
+
+        const recentActivity = [
+            ...recentSubmissions.map(s => ({
+                id: s._id,
+                type: "submission",
+                content: `Solved problem: ${ (s.problemId as any)?.title || "Unknown" }`,
+                time: (s as any).createdAt,
+                status: s.status
+            })),
+            ...recentPosts.map(p => ({
+                id: p._id,
+                type: "post",
+                content: `Shared a post: ${ p.content.substring(0, 50) }...`,
+                time: (p as any).createdAt
+            }))
+        ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 10);
+
+                // 8. Total XP (Solved count * 100)
+                const totalXp = solvedSubmissions.length * 100;
+
+                // 9. Badges Earned (Based on milestones)
+                let badgesCount = 0;
+                if (solvedSubmissions.length >= 1) badgesCount++; // First Solve
+                if (solvedSubmissions.length >= 5) badgesCount++; // 5 Solves
+                if (solvedSubmissions.length >= 25) badgesCount++; // 25 Solves
+                if (solvedSubmissions.length >= 100) badgesCount++; // 100 Solves
+                if (currentStreak >= 7) badgesCount++; // Weekly Warrior
+                if (currentStreak >= 30) badgesCount++; // Monthly Master
+
+                return res.status(200).json({
+                    user: {
+                        _id: user._id,
+                        fullName: user.fullName,
+                        handle: user.handle,
+                        avatar: user.avatar,
+                        program: user.program,
+                        semester: user.semester,
+                        bio: user.bio,
+                        points: totalPoints,
+                        solvedCount: solvedSubmissions.length,
+                        rank,
+                        currentStreak,
+                        heatmapData,
+                        totalXp,
+                        badgesCount,
+                        submissionsToday: submissionsToday.map(s => ({
+                            id: s._id,
+                            title: (s.problemId as any)?.title || "Unknown",
+                            difficulty: (s.problemId as any)?.difficulty || "Easy",
+                            time: (s as any).createdAt,
+                            status: s.status
+                        })),
+                        recentActivity
+                    }
+                });
+    } catch (error) {
+        console.error("Get profile by handle error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const searchUsers = async (req: Request, res: Response) => {
+    try {
+        const { q } = req.query;
+        if (!q || typeof q !== 'string' || q.trim() === '') {
+            return res.json({ users: [] });
+        }
+
+        const users = await User.find({
+            $or: [
+                { fullName: { $regex: q.trim(), $options: 'i' } },
+                { handle: { $regex: q.trim(), $options: 'i' } }
+            ]
+        })
+        .select('fullName handle avatar profile')
+        .limit(10);
+
+        const results = users.map(user => ({
+            _id: user._id,
+            fullName: user.fullName,
+            handle: user.handle,
+            avatar: user.avatar,
+            program: (user as any).profile?.program || "CUHP Dev"
+        }));
+
+        return res.json({ users: results });
+    } catch (error) {
+        console.error("Search error:", error);
+        return res.status(500).json({ message: "Error searching users" });
     }
 };

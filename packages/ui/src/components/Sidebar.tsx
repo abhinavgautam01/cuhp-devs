@@ -16,6 +16,7 @@ interface User {
     name: string;
     role: string;
     avatar: string;
+    handle?: string;
 }
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ interface SidebarProps {
     // We ignore external isCollapsed/onToggle since the requested behavior is purely hover-driven now.
     isCollapsed?: boolean;
     onToggle?: () => void;
+    onProfileClick?: (e: React.MouseEvent) => void;
 }
 
 const DEFAULT_USER: User = {
@@ -33,7 +35,7 @@ const DEFAULT_USER: User = {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest-user",
 };
 
-export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
+export function Sidebar({ user, activeNav, setActiveNav, onProfileClick }: SidebarProps) {
     const [isHovered, setIsHovered] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const safeUser: User = user ?? DEFAULT_USER;
@@ -162,11 +164,21 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                 </Link>
 
                 {/* User Profile */}
-                <div className="mt-4 flex items-center gap-3 px-3 whitespace-nowrap">
+                <Link
+                    href={safeUser.handle ? `/${safeUser.handle}` : "#"}
+                    onClick={(e) => {
+                        if (!safeUser.handle) {
+                            e.preventDefault();
+                        }
+                        onProfileClick?.(e);
+                    }}
+                    className="mt-4 flex items-center gap-3 px-3 group cursor-pointer"
+                >
                     <img
                         src={safeUser.avatar}
                         alt={safeUser.name}
-                        className="w-10 h-10 rounded-full border-2 border-primary-custom/20 shrink-0 object-cover"
+                        className={`rounded-full border-2 border-primary-custom/20 object-cover shrink-0 transition-all duration-300 group-hover:border-primary-custom ${isCollapsed ? "w-6 h-6" : "w-10 h-10"
+                            }`}
                     />
                     <AnimatePresence>
                         {!isCollapsed && (
@@ -174,14 +186,14 @@ export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
-                                className="overflow-hidden"
+                                className="overflow-hidden whitespace-nowrap"
                             >
-                                <p className="text-sm font-bold truncate">{safeUser.name}</p>
+                                <p className="text-sm font-bold truncate group-hover:text-primary-custom transition-colors">{safeUser.name}</p>
                                 <p className="text-xs text-muted-custom truncate">{safeUser.role}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </div>
+                </Link>
             </div>
         </motion.aside>
     );

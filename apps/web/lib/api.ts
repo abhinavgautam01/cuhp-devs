@@ -48,7 +48,10 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
     if (!response.ok) {
         const errorData = (await response.json().catch(() => ({}))) as ApiErrorPayload;
-        throw new Error(buildApiErrorMessage(errorData, response.status));
+        const error = new Error(buildApiErrorMessage(errorData, response.status)) as any;
+        error.status = response.status;
+        error.errorData = errorData;
+        throw error;
     }
 
     if (response.status === 204) {

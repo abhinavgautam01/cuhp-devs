@@ -14,7 +14,33 @@ interface ProblemData {
     constraints: string[];
 }
 
+const escapeRegex = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const dedupeExamples = (examples: ProblemData["examples"]) => {
+    const seen = new Set<string>();
+
+    return examples.filter((example) => {
+        const key = `${example.input}::${example.output}::${example.explanation ?? ""}`;
+        if (seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+};
+
 export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }) => {
+    const normalizedDescription = problem.description
+        .replace(new RegExp(`^#\\s+${escapeRegex(problem.title)}\\s*\\n+`, "i"), "")
+        .replace(/^##\s+Problem Statement\s*\n+/i, "")
+        .trim();
+
+    const descriptionHasExamples = /^#{1,6}\s+Examples?\b/im.test(normalizedDescription);
+    const descriptionHasConstraints = /^#{1,6}\s+Constraints?\b/im.test(normalizedDescription);
+    const examples = dedupeExamples(problem.examples);
+
     return (
         <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-4">
@@ -39,54 +65,58 @@ export const DescriptionPanel: React.FC<{ problem: ProblemData }> = ({ problem }
                     prose-strong:text-foreground prose-strong:font-bold
                     prose-code:text-primary-custom prose-code:bg-primary-custom/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {problem.description}
+                        {normalizedDescription}
                     </ReactMarkdown>
                 </div>
             </div>
 
-            <div className="space-y-6">
-                {problem.examples.map((example, index) => (
-                    <div key={index} className="bg-card-custom border border-card-border rounded-2xl p-8 shadow-sm space-y-4">
-                        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                            Example {index + 1}
-                        </h3>
-                        <div className="bg-background border border-primary-custom/10 rounded-xl p-6 font-mono text-sm leading-relaxed">
-                            <div className="space-y-1">
-                                <div className="flex gap-2">
-                                    <span className="text-muted-custom min-w-[70px]">Input:</span>
-                                    <span className="text-foreground">{example.input}</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <span className="text-muted-custom min-w-[70px]">Output:</span>
-                                    <span className="text-foreground">{example.output}</span>
-                                </div>
-                                {example.explanation && (
-                                    <div className="mt-4 pt-4 border-t border-primary-custom/5">
-                                        <span className="text-muted-custom block mb-1 italic">Explanation:</span>
-                                        <span className="text-muted-custom/90">{example.explanation}</span>
+            {!descriptionHasExamples && examples.length > 0 && (
+                <div className="space-y-6">
+                    {examples.map((example, index) => (
+                        <div key={index} className="bg-card-custom border border-card-border rounded-2xl p-8 shadow-sm space-y-4">
+                            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                Example {index + 1}
+                            </h3>
+                            <div className="bg-background border border-primary-custom/10 rounded-xl p-6 font-mono text-sm leading-relaxed">
+                                <div className="space-y-1">
+                                    <div className="flex gap-2">
+                                        <span className="text-muted-custom min-w-[70px]">Input:</span>
+                                        <span className="text-foreground whitespace-pre-wrap break-words">{example.input}</span>
                                     </div>
-                                )}
+                                    <div className="flex gap-2">
+                                        <span className="text-muted-custom min-w-[70px]">Output:</span>
+                                        <span className="text-foreground whitespace-pre-wrap break-words">{example.output}</span>
+                                    </div>
+                                    {example.explanation && (
+                                        <div className="mt-4 pt-4 border-t border-primary-custom/5">
+                                            <span className="text-muted-custom block mb-1 italic">Explanation:</span>
+                                            <span className="text-muted-custom/90">{example.explanation}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="bg-card-custom border border-card-border rounded-2xl p-8 shadow-sm">
-                <h3 className="text-xl font-bold text-foreground mb-6">Constraints</h3>
-                <ul className="space-y-3">
-                    {problem.constraints.map((constraint, index) => (
-                        <li key={index} className="flex items-start gap-3 text-muted-custom group">
-                            <span className="w-1.5 h-1.5 rounded-full bg-primary-custom/40 mt-2 transition-colors group-hover:bg-primary-custom"></span>
-                            <span className="font-mono text-sm">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {constraint}
-                                </ReactMarkdown>
-                            </span>
-                        </li>
                     ))}
-                </ul>
-            </div>
+                </div>
+            )}
+
+            {!descriptionHasConstraints && problem.constraints.length > 0 && (
+                <div className="bg-card-custom border border-card-border rounded-2xl p-8 shadow-sm">
+                    <h3 className="text-xl font-bold text-foreground mb-6">Constraints</h3>
+                    <ul className="space-y-3">
+                        {problem.constraints.map((constraint, index) => (
+                            <li key={index} className="flex items-start gap-3 text-muted-custom group">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-custom/40 mt-2 transition-colors group-hover:bg-primary-custom"></span>
+                                <span className="font-mono text-sm">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {constraint}
+                                    </ReactMarkdown>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 };

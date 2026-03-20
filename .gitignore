@@ -2,6 +2,7 @@
 
 # Dependencies
 node_modules
+piston
 .pnp
 .pnp.js
 
@@ -33,10 +34,12 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+*.log
 # Misc
 .DS_Store
 *.pem
+piston
+mongo-fix
 
 
 judge0/

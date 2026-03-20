@@ -20,17 +20,18 @@ interface ProblemCardProps {
 }
 
 export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
+    const difficulty = problem.difficulty || 'EASY';
     const difficultyColor = {
         EASY: 'text-emerald-500 bg-emerald-500/10',
         MEDIUM: 'text-yellow-500 bg-yellow-500/10',
         HARD: 'text-rose-500 bg-rose-500/10',
-    }[problem.difficulty];
+    }[difficulty] || 'text-emerald-500 bg-emerald-500/10';
 
     const icon = {
         EASY: 'account_tree',
         MEDIUM: 'psychology',
         HARD: 'dynamic_form',
-    }[problem.difficulty];
+    }[difficulty] || 'account_tree';
 
     const ActionButton = () => (
         <button

@@ -41,7 +41,7 @@ async function seed() {
       const outputPath = path.join(outputDir, file);
 
       if (!fs.existsSync(outputPath)) {
-        console.log(`❌ Missing output for ${file}`);
+        console.log(`Missing output for ${file}`);
         continue;
       }
 
@@ -49,7 +49,7 @@ async function seed() {
       const output = fs.readFileSync(outputPath, "utf-8").trim();
 
       if (!input || !output) {
-        console.log(`❌ Empty testcase skipped: ${file}`);
+        console.log(`Empty testcase skipped: ${file}`);
         continue;
       }
 
@@ -62,7 +62,14 @@ async function seed() {
       });
     }
 
-    await TestCase.insertMany(testcases);
+    await TestCase.deleteMany({
+      problemId: problem._id,
+      isSample: true,
+    });
+
+    if (testcases.length > 0) {
+      await TestCase.insertMany(testcases);
+    }
 
     console.log(`✅ Seeded ${testcases.length} testcases for ${slug}`);
   }

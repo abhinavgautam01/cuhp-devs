@@ -4,7 +4,9 @@ import path from "path";
 const extensionMap: Record<string, string> = {
   python: "py",
   javascript: "js",
+  node: "js",
   "c++": "cpp",
+  gcc: "cpp",
   rust: "rs",
 };
 
@@ -20,10 +22,9 @@ export function buildExecutableCode(
     throw new Error(`Unsupported runtime: ${runtime}`);
   }
 
-  const boilerplatePath = path.join(
-    process.cwd(),
-    "..",
-    "problems",
+  const boilerplatePath = path.resolve(
+    __dirname,
+    "../../../problems",
     problemSlug,
     "boilerplate-full",
     `function.${ext}`

@@ -33,6 +33,7 @@ export default async function ProblemPage({ params }: { params: { slug: string }
         // Map API problem to interface format
         const problemData = {
             id: dbProblem._id,
+            slug: dbProblem.slug,
             title: dbProblem.title,
             difficulty: dbProblem.difficulty as "EASY" | "MEDIUM" | "HARD",
             description: dbProblem.description,
@@ -42,6 +43,7 @@ export default async function ProblemPage({ params }: { params: { slug: string }
                     output: "N/A"
                 }
             ],
+            testCases: dbProblem.sampleTestCases || [],
             constraints: dbProblem.constraints || ["No constraints provided"],
             defaultCode: defaultCode && Object.keys(defaultCode).length > 0 ? defaultCode : {}
         };

@@ -125,6 +125,7 @@ export const registerChatEvents = (
       "fullName email avatar"
     );
 
+    console.log(`[Socket] Broadcasting new message in ${room._id}:`, populated.content);
     io.to(room._id.toString()).emit("new-message", populated);
   });
 

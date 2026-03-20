@@ -7,7 +7,7 @@ fn main() {
     io::stdin().read_to_string(&mut input).unwrap();
     let mut iter = input.split_whitespace();
 
-    let s: i32 = iter.next().unwrap().parse().unwrap();
+    let s: String = iter.next().unwrap().to_string();
 
     let result = isValid(s);
     println!("{}", result);
