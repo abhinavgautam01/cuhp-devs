@@ -32,12 +32,19 @@ import {
     BarChart2,
     FolderOpen,
     Share2,
+    LogOut,
     PencilLine,
     Trash2,
     Globe,
     RefreshCcw,
     CheckCircle2,
-    Settings2
+    Settings2,
+    X,
+    Camera,
+    Clock,
+    Maximize2,
+    Play,
+    ChevronLeft
 } from "lucide-react";
 
 import {
@@ -74,7 +81,8 @@ export {
     ArrowRight, Activity, Zap, ShieldCheck, Layout, Cloud,
     BarChart3, Bitcoin, Gamepad2, Smartphone, Infinity,
     BarChart2, FolderOpen, Share2, PencilLine, Trash2, Globe,
-    ArrowLeft, RefreshCcw, CheckCircle2, Settings2,
+    ArrowLeft, RefreshCcw, CheckCircle2, Settings2, X, Camera, LogOut,
+    Clock, Maximize2, Play,ChevronLeft,
 
     // React Icons (MD)
     MdCode, MdPsychology, MdCloudDone, MdLanguage, MdSchool,

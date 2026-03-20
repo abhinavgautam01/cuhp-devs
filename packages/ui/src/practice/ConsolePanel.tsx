@@ -1,39 +1,162 @@
-import React from "react";
-import { CheckCircle2 } from "../icons";
+import React, { useState } from "react";
 
-export const ConsolePanel: React.FC = () => {
+interface ConsolePanelProps {
+    output: any[] | null;
+    testCases: Array<{
+        input: string;
+        output: string;
+        explanation?: string;
+    }>;
+    height?: number;
+}
+
+const normalizeTestCaseValue = (value: string) =>
+    value.replace(/\r\n/g, "\n").replace(/\s+/g, " ").trim();
+
+const dedupeTestCases = (testCases: ConsolePanelProps["testCases"]) => {
+    const seen = new Set<string>();
+
+    return testCases.filter((testCase) => {
+        const normalizedInput = normalizeTestCaseValue(testCase.input);
+        const normalizedOutput = normalizeTestCaseValue(testCase.output);
+
+        if (!normalizedInput && !normalizedOutput) {
+            return false;
+        }
+
+        const key = `${normalizedInput}::${normalizedOutput}`;
+        if (seen.has(key)) {
+            return false;
+        }
+
+        seen.add(key);
+        return true;
+    });
+};
+
+export const ConsolePanel: React.FC<ConsolePanelProps> = ({ output, testCases, height }) => {
+    const [activeTab, setActiveTab] = useState<"testCases" | "testResults">("testResults");
+    const uniqueTestCases = dedupeTestCases(testCases);
+
     return (
-        <div className="h-48 border-t border-white/10 bg-[#1e1e1e] flex flex-col shrink-0">
-            <div className="flex items-center px-4 border-b border-white/5 bg-[#252526]">
-                <button className="px-4 py-2 text-[10px] font-bold text-[#00d2ff] border-b-2 border-[#00d2ff] uppercase tracking-widest">
-                    Results
+        <div
+            className="border-t border-primary-custom/10 bg-background flex flex-col shrink-0 overflow-hidden"
+            style={{ height: height ? `${height}px` : "100%" }}
+        >
+            <div className="flex items-center px-6 h-14 border-b border-primary-custom/5 bg-background/80 backdrop-blur-md">
+                <button
+                    onClick={() => setActiveTab("testCases")}
+                    className={`px-6 h-full text-sm font-bold uppercase tracking-widest flex items-center transition-colors ${activeTab === "testCases"
+                        ? "text-primary-custom border-b-2 border-primary-custom"
+                        : "text-muted-custom hover:text-foreground border-b-2 border-transparent"
+                        }`}
+                >
+                    Test Cases
                 </button>
-                <button className="px-4 py-2 text-[10px] font-medium text-slate-500 hover:text-slate-300 uppercase tracking-widest transition-colors">
-                    Console
+                <button
+                    onClick={() => setActiveTab("testResults")}
+                    className={`px-6 h-full text-sm font-bold uppercase tracking-widest flex items-center transition-colors ${activeTab === "testResults"
+                        ? "text-primary-custom border-b-2 border-primary-custom"
+                        : "text-muted-custom hover:text-foreground border-b-2 border-transparent"
+                        }`}
+                >
+                    Test Results
                 </button>
             </div>
 
-            <div className="flex-1 p-4 overflow-y-auto scrollbar-hide">
-                <div className="flex items-center gap-3 text-emerald-400 font-bold mb-4">
-                    <CheckCircle2 size={16} />
-                    <span className="text-xs uppercase tracking-wider">Accepted</span>
-                    <span className="text-[10px] font-medium text-slate-600 ml-2">Runtime: 48ms</span>
-                </div>
+            <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-muted-custom/[0.02]">
+                {activeTab === "testCases" ? (
+                    <div className="flex flex-col gap-6 max-w-3xl">
+                        {uniqueTestCases.length > 0 ? (
+                            uniqueTestCases.map((testCase, index) => (
+                                <div
+                                    key={`${index}-${testCase.input}`}
+                                    className="bg-card-custom border border-card-border rounded-2xl p-6 shadow-sm group hover:border-primary-custom/20 transition-all"
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            Test Case {index + 1}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-muted-custom uppercase tracking-widest">
+                                            Sample Input
+                                        </span>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="bg-background border border-primary-custom/5 p-4 rounded-xl">
+                                            <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Input</span>
+                                            <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-sm text-foreground">
+                                                {testCase.input}
+                                            </pre>
+                                        </div>
+                                        <div className="bg-background border border-primary-custom/5 p-4 rounded-xl">
+                                            <span className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Expected Output</span>
+                                            <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-sm text-foreground">
+                                                {testCase.output}
+                                            </pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-sm text-slate-500 font-medium italic">
+                                No sample test cases available for this problem.
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    // Test Results Tab
+                    <div className="flex flex-col gap-6 max-w-3xl">
+                        {output && output.length > 0 ? (
+                            <div className="space-y-4">
+                                {output.map((res: any, idx: number) => (
+                                    <div key={idx} className="space-y-1.5 bg-card-custom border border-card-border p-4 rounded-xl shadow-sm">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-bold text-foreground flex items-center gap-2">
+                                                Test Case {res.testcase || idx + 1}
+                                            </span>
+                                            <span className={`text-xs font-bold px-2 py-1 rounded-md ${res.status === 'Accepted' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                    res.status === 'Running' ? 'bg-blue-500/10 text-blue-500' :
+                                                        'bg-red-500/10 text-red-500'
+                                                }`}>
+                                                {res.status || 'Unknown'}
+                                            </span>
+                                        </div>
 
-                <div className="space-y-4">
-                    <div className="space-y-1.5">
-                        <span className="text-[9px] text-slate-500 uppercase font-black tracking-tighter">Input</span>
-                        <div className="bg-black/40 p-3 rounded-lg text-xs font-mono text-slate-300 border border-white/5">
-                            height = [1,1]
-                        </div>
+                                        {res.time !== null && res.time !== undefined && (
+                                            <div className="flex gap-4 mb-3 text-xs text-muted-custom font-mono">
+                                                <span>Time: {res.time}s</span>
+                                                {res.memory && <span>Memory: {Math.round(res.memory / 1024)}KB</span>}
+                                            </div>
+                                        )}
+
+                                        {res.stdout && res.stdout.trim() !== "" && (
+                                            <div className="space-y-1">
+                                                <span className="text-[9px] text-slate-500 uppercase font-black tracking-tighter">Stdout</span>
+                                                <div className="bg-emerald-500/5 p-3 rounded-lg text-xs font-mono text-emerald-400 border border-emerald-500/10 whitespace-pre-wrap">
+                                                    {res.stdout}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {res.stderr && res.stderr.trim() !== "" && (
+                                            <div className="space-y-1 mt-2">
+                                                <span className="text-[9px] text-slate-500 uppercase font-black tracking-tighter">Stderr</span>
+                                                <div className="bg-red-500/5 p-3 rounded-lg text-xs font-mono text-red-400 border border-red-500/10 whitespace-pre-wrap">
+                                                    {res.stderr}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-sm text-slate-500 font-medium italic mt-4">
+                               {output?.length === 0 ? "No output yet" : "No output"}
+                            </div>
+                        )}
                     </div>
-                    <div className="space-y-1.5">
-                        <span className="text-[9px] text-slate-500 uppercase font-black tracking-tighter">Your Output</span>
-                        <div className="bg-emerald-500/5 p-3 rounded-lg text-xs font-mono text-emerald-400 border border-emerald-500/10">
-                            1
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import React from "react";
 import Editor from "@monaco-editor/react";
-import { Code2, RefreshCcw, Info } from "../icons";
+import { Code2, RefreshCcw, Info, Settings, Maximize2, Clock } from "../icons";
 
 interface EditorPanelProps {
     code: string;
@@ -8,6 +8,9 @@ interface EditorPanelProps {
     language: string;
     setLanguage: (language: string) => void;
     availableLanguages: string[];
+    isExpanded: boolean;
+    setIsExpanded: (expanded: boolean) => void;
+    resetKey?: number;
 }
 
 export const EditorPanel: React.FC<EditorPanelProps> = ({
@@ -15,9 +18,34 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
     setCode,
     language,
     setLanguage,
-    availableLanguages
+    availableLanguages,
+    isExpanded,
+    setIsExpanded,
+    resetKey
 }) => {
-    // Map display language to monaco language
+    const [elapsedTime, setElapsedTime] = React.useState(0);
+    const [hasTyped, setHasTyped] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!hasTyped) return;
+        const timer = setInterval(() => {
+            setElapsedTime(prev => prev + 1);
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [hasTyped]);
+
+    React.useEffect(() => {
+        setElapsedTime(0);
+        setHasTyped(false);
+    }, [resetKey]);
+
+    const formatTime = (seconds: number) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
     const getMonacoLang = (lang: string) => {
         const lower = lang.toLowerCase();
         if (lower === "c++" || lower === "cpp") return "cpp";
@@ -30,51 +58,66 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({
     return (
         <div className="flex-1 flex flex-col overflow-hidden">
             {/* Editor Header */}
-            <div className="h-12 border-b border-white/5 bg-[#1e1e1e] flex items-center justify-between px-4">
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 bg-slate-800/80 px-4 py-1.5 rounded-lg border border-white/10 hover:bg-slate-700/80 transition-all cursor-pointer group">
-                        <Code2 className="text-blue-400 group-hover:text-blue-300" size={14} />
+            <div className="h-14 border-b border-primary-custom/10 bg-background/80 flex items-center justify-between px-6 backdrop-blur-md">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3">
                         <select
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-transparent border-none text-[11px] font-bold text-slate-100 focus:ring-0 cursor-pointer outline-none min-w-[100px] h-6 p-0"
+                            className="bg-card-custom border border-card-border px-4 py-2 rounded-xl text-sm font-bold text-foreground focus:ring-2 focus:ring-primary-custom/20 cursor-pointer outline-none min-w-[140px] shadow-sm transition-all hover:border-primary-custom/40"
                         >
                             {availableLanguages.map((lang) => (
-                                <option key={lang} value={lang} className="bg-[#1e1e1e] text-white py-2 px-4 uppercase">{lang}</option>
+                                <option key={lang} value={lang} className="bg-background text-foreground py-2 px-4 uppercase">{lang}</option>
                             ))}
                         </select>
                     </div>
-                    <button className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors">
-                        <RefreshCcw size={14} />
-                    </button>
+                    <div className="flex items-center gap-2 text-sm font-bold text-muted-custom bg-muted-custom/5 px-4 py-2 rounded-xl border border-muted-custom/10">
+                        <Clock size={16} className="text-primary-custom" />
+                        <span className="font-mono">{formatTime(elapsedTime)}</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors">
-                        <Info size={16} />
+                <div className="flex items-center gap-3">
+                    <button className="p-2.5 text-muted-custom hover:text-foreground hover:bg-muted-custom/10 rounded-xl transition-all border border-transparent hover:border-muted-custom/20">
+                        <Settings size={18} />
+                    </button>
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className={`p-2.5 rounded-xl transition-all border border-transparent shadow-sm ${isExpanded
+                            ? "bg-primary-custom text-white shadow-primary-custom/20"
+                            : "text-muted-custom hover:text-foreground hover:bg-muted-custom/10 hover:border-muted-custom/20"
+                            }`}
+                    >
+                        <Maximize2 size={18} />
                     </button>
                 </div>
             </div>
 
             {/* Editor Area */}
-            <div className="flex-1 overflow-hidden relative border-t border-white/5">
+            <div className="flex-1 overflow-hidden relative border-t border-primary-custom/5">
                 <Editor
                     height="100%"
                     language={getMonacoLang(language)}
                     theme="vs-dark"
                     value={code}
-                    onChange={(value) => setCode(value || "")}
+                    onChange={(value) => {
+                        setCode(value || "");
+                        if (!hasTyped && value) setHasTyped(true);
+                    }}
                     options={{
-                        fontSize: 14,
+                        fontSize: 16,
                         fontFamily: "'Fira Code', 'Courier New', monospace",
                         minimap: { enabled: false },
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
-                        lineHeight: 24,
-                        padding: { top: 16 },
+                        lineHeight: 28,
+                        padding: { top: 24, bottom: 24 },
                         selectionHighlight: true,
+                        smoothScrolling: true,
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: 'on',
                         scrollbar: {
-                            verticalScrollbarSize: 8,
-                            horizontalScrollbarSize: 8,
+                            verticalScrollbarSize: 10,
+                            horizontalScrollbarSize: 10,
                         },
                     }}
                 />

@@ -4,21 +4,31 @@ import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
     try {
-        const { program, semester, interests } = req.body;
+        const { fullName, program, semester, interests, bio, handle, avatar, theme } = req.body;
         const userId = req.user?.id;
 
         if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
+        const updateData: any = {
+            fullName,
+            program,
+            semester,
+            interests: Array.isArray(interests) ? interests : [],
+            bio,
+            handle,
+            avatar,
+            theme,
+            onboardingCompleted: Boolean(program && semester),
+        };
+
+        // Remove undefined fields to avoid overwriting with null/undefined
+        Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
         const user = await User.findByIdAndUpdate(
             userId,
-            {
-                program,
-                semester,
-                interests: Array.isArray(interests) ? interests : [],
-                onboardingCompleted: Boolean(program && semester),
-            },
+            updateData,
             { new: true, runValidators: true }
         ).select("-password");
 
@@ -83,9 +93,9 @@ const ROOM_NAME_ALIASES: Record<string, ChatRoomName> = {
     "web ecosystem": ChatRoomName.DL,
 };
 
-const normalizeRoomName = (rawRoomName: string): ChatRoomName | null => {
-    const normalized = decodeURIComponent(rawRoomName).trim().toLowerCase();
-    return ROOM_NAME_ALIASES[normalized] ?? null;
+const normalizeRoomName = (rawRoomName: string): string => {
+    const normalized = decodeURIComponent(rawRoomName).trim();
+    return ROOM_NAME_ALIASES[normalized.toLowerCase()] ?? normalized;
 };
 
 export const getDashboardData = async (req: AuthRequest, res: Response) => {
@@ -187,46 +197,17 @@ export const getCommunityFeed = async (req: AuthRequest, res: Response) => {
             trendingTags: ["#javascript", "#rust", "#algorithms", "#internship", "#react_tips", "#python"],
             posts: [
                 {
-                    id: "p1",
-                    author: {
-                        name: "Sarah Jenkins",
-                        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuAes5h4fmh72X8ydxiowrLL-ybzOL38IODt3PqyfCRPSo-ARtBXANbfbKzMb-bN7y3CFm5AxwBoPDb-R7_UJFcDB1Z_mh4iADbuaLxu1R7QfXupK-do-lkCAvWnI2h6LCQ_0kHPFRm-ybbZiBJ2who5yOndYpLqUkFm4xBNOsZc5ZW0XhNw_t2DXhtQ2_e7VdFEvsrI2kplh3Kgp5GkNs3xDPfIKOGP2zPKGo0qtltg8J-4YM3WUDqkJujrv748MIRE6mCRuI_qD5G4",
-                    },
-                    time: "2h ago",
-                    type: "Snippet",
-                    content: "Just optimized my binary search tree traversal. Check out this cleaner way to handle recursive cases! 🚀",
-                    code: "function traverse(node) {\n  if (!node) return;\n  // Process left child first\n  traverse(node.left);\n  console.log(node.value);\n  // Then process right\n  traverse(node.right);\n}",
-                    likes: 142,
-                    comments: 24,
                 },
                 {
-                    id: "p2",
-                    author: {
-                        name: "Emily Chen",
-                        avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBiHXl0P06fpJnbhQctvcP96mrHRjEHG_v5CCxmj1EesAwjaLDW7psQM_Qs9fuwyz59btEc9Avof9pJuR0ZXeBznXEQsE4sWcCMcd5mWt7C_HTvvQcGT_wqQkFD1Vq58M_SRSbFWUuSTuM-7Gs8DrYf5FlHS5f4--8cY6WgUVy2gLF2LplRYIppQloKsxbArJ6NE3FKC3nf0vUibSHrJUR5lh7ZlcWXF4IQXYS1KxNpXecFAycr3WcuPWjuGQ5MrQjK4aHHHBRZKLoi",
-                    },
-                    time: "5h ago",
-                    type: "Win",
-                    content: "Finally landed the Summer SWE Intern role at a top fintech firm! 💳 Thanks everyone for the help!",
-                    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAiVRIzUad66d9ef4seusla2H8r0wawxNaTwkt8Lv3nGBo45XkHsryONe_eIoecB0DNcKnz99p_MU91D5aJcfbKLbNpHupf77TX3oW10irkz60K9L9wD3TUV1pP1tnTVgm2kSka_es_xUQzl4zdEFn4Y4W-r4yLjyAZQXLjDUZvstM9KHLDAg-wLIyqI__mDXFXKPvfxGAm8U-lmNHjIGL7l3F7rZFfoY1lsBelc5MQWIfk2lIbMWrMOm6a6vwkBlCD2o-85dqEGlGx",
-                    likes: 892,
-                    comments: 156,
+
                 }
             ],
             leaderboard: [
                 {
-                    rank: 1,
-                    name: "Marcus Zhao",
-                    streak: "🔥 42 day streak",
-                    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCfpcVKWjO4AEFrvRQbTlN2oFj7Cg9JZIGigtJzhKAjVEVG4qtYijisaj3cfaD0tJ23nms7jQi3WiRtD-WrjQZp8Cb9oRV1f7TOWJoXypeK5IFQL6HgIcoflooNNfDvsjFRiLCMNTQ8ftdkBYmoznaZQizRJGzXc9gsvfnW_X7OziwtMw6_WlfcaiDyHLWTrZXkDUwWiz_BWN5femIxz4bnoGrtD9e5qdcAsJ3XZek9lMAh2GE7wSCJ6SLaJG6iqFopyOsBtPfmp4Yy",
-                    badges: [{ icon: "pest_control", color: "text-blue-400" }, { icon: "military_tech", color: "text-yellow-500" }]
+
                 },
                 {
-                    rank: 2,
-                    name: "Lena Schmidt",
-                    streak: "🔥 28 day streak",
-                    avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuC_dN-P2YZa5kDQqH7CYbZO5NGTikg84BA26wobBYF0FIiC0gEtBILB2A1JXSvMhQ5zxEYAZrgJp4vGQF0KeAOnxbwRzAc7qjqDqPzRNt2i9gK2Zdc1lPfAXls80p3RcoC0VeAZFrtq40z1TN2CGkYK4SVDSqgtGD4pmudN227jpEHQSBUFxhFhmRqHMjMqsuFI9uWWQ7LkucLSxrxhuU2KyvQF4E7grbt8WRkc0zbRCBsmnQ-FP12G1aSn484wh84bbG6_GCdv2MMN",
-                    badges: [{ icon: "school", color: "text-[#8b5cf6]" }]
+
                 }
             ],
             events: [
@@ -286,8 +267,8 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
             trendingRooms,
             communityRooms,
             masters: [
-                { name: "Marcus Zhao", subtitle: "ML Expert • 42 streak", rank: "Top" },
-                { name: "Lena Schmidt", subtitle: "Web3 Guru • 28 streak", rank: "#2" }
+                {},
+                {}
             ],
             liveActivity: []
         };
@@ -306,7 +287,7 @@ export const getCommunitySnippets = async (req: AuthRequest, res: Response) => {
 
         const user = await User.findById(userId).populate({
             path: "savedPosts",
-            populate: { path: "author", select: "fullName" }
+            populate: { path: "author", select: "fullName avatar" }
         });
 
         if (!user) {
@@ -355,11 +336,13 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         }
 
         const normalizedRoomName = normalizeRoomName(roomName);
+        console.log(`[getChatMessages] raw roomName: "${roomName}", decoded: "${decodeURIComponent(roomName)}", normalized: "${normalizedRoomName}"`);
         if (!normalizedRoomName) {
             return res.status(404).json({ message: "Chat room not found" });
         }
 
         const room = await ChatRoom.findOne({ name: normalizedRoomName });
+        console.log(`[getChatMessages] Room DB search result:`, room);
 
         if (!room) {
             return res.status(404).json({ message: "Chat room not found" });
@@ -368,7 +351,7 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         const messages = await Message.find({ roomId: room._id, isDeleted: false })
             .sort({ createdAt: -1 })
             .limit(50)
-            .populate("senderId", "fullName email");
+            .populate("senderId", "fullName email avatar");
 
         // Reverse to get chronological order for the client
         return res.status(200).json(messages.reverse());
@@ -401,7 +384,7 @@ export const getChatRoomMembers = async (req: AuthRequest, res: Response) => {
         // Fetch user details for these IDs
         const members = await User.find(
             { _id: { $in: memberIds } },
-            "fullName email"
+            "fullName email avatar"
         ).lean();
 
         return res.status(200).json(members);

@@ -49,6 +49,7 @@ export const signup = async (req: Request, res: Response) => {
       id: (user._id as any).toString(),
       email: user.email,
       fullName: user.fullName,
+      avatar: user.avatar,
     });
 
     res.cookie("token", token, {
@@ -107,6 +108,7 @@ export const signin = async (req: Request, res: Response) => {
       id: (user._id as any).toString(),
       email: user.email,
       fullName: user.fullName,
+      avatar: user.avatar,
     })
 
     res.cookie("token", token, {
@@ -126,6 +128,10 @@ export const signin = async (req: Request, res: Response) => {
         program: user.program,
         semester: user.semester,
         interests: user.interests,
+        handle: user.handle,
+        avatar: user.avatar,
+        bio: user.bio,
+        theme: user.theme,
         onboardingCompleted: user.onboardingCompleted,
       },
     });
@@ -166,6 +172,11 @@ export const me = async (req: Request, res: Response) => {
         fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
+        handle: user.handle,
+        avatar: user.avatar,
+        bio: user.bio,
+        theme: user.theme,
+        onboardingCompleted: user.onboardingCompleted,
       },
     });
 

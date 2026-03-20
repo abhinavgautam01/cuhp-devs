@@ -60,6 +60,26 @@ export const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    handle: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
+    avatar: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    theme: {
+      type: String,
+      enum: ["light", "dark", "cyber-orange", "rose-pine-dawn", "nord-light", "solarized-light", "vaporwave", "gruvbox-light", "vesper-light"],
+      default: "dark",
+    },
     savedPosts: [{
       type: Schema.Types.ObjectId,
       ref: "Post",

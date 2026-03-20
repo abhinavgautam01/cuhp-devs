@@ -84,8 +84,15 @@ async function fetchDashboardData(): Promise<DashboardData> {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export default function Dashboard() {
-    const [activeNav, setActiveNav] = useState("dashboard");
+interface DashboardProps {
+    isCollapsed?: boolean;
+    onToggle?: () => void;
+    user?: Partial<User>;
+    activeNav: string;
+    setActiveNav: (nav: string) => void;
+}
+
+export default function Dashboard({ isCollapsed, onToggle, user: userOverride, activeNav, setActiveNav }: DashboardProps) {
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -112,10 +119,10 @@ export default function Dashboard() {
     // Loading State
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#101322] flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center transition-colors duration-300">
                 <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-[#1337ec] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-slate-600 dark:text-slate-400 font-medium">Loading your dashboard...</p>
+                    <div className="w-16 h-16 border-4 border-primary-custom border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-slate-500 font-medium tracking-wide">Loading your dashboard...</p>
                 </div>
             </div>
         );
@@ -124,16 +131,16 @@ export default function Dashboard() {
     // Error State
     if (error || !dashboardData) {
         return (
-            <div className="min-h-screen bg-[#101322] flex items-center justify-center">
-                <div className="text-center max-w-md p-8 bg-slate-900 rounded-2xl shadow-lg">
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center max-w-md p-8 bg-background border border-primary-custom/10 rounded-2xl shadow-lg">
                     <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <AlertCircle className="text-red-600" size={32} />
                     </div>
                     <h2 className="text-xl font-bold mb-2">Failed to Load Dashboard</h2>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
+                    <p className="text-slate-500 mb-6">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-6 py-2 bg-[#1337ec] text-white rounded-lg font-medium hover:bg-[#1337ec]/90 transition-all"
+                        className="px-6 py-2 bg-primary-custom text-white rounded-lg font-medium hover:brightness-110 transition-all"
                     >
                         Retry
                     </button>
@@ -142,21 +149,26 @@ export default function Dashboard() {
         );
     }
 
-    const { user, badges, feedItems, events, stats } = dashboardData;
-    const xpPercentage = (user.xp / user.xpTarget) * 100;
+    const user = userOverride ? { ...dashboardData.user, ...userOverride } : dashboardData.user;
+    const { badges, feedItems, events, stats } = dashboardData;
+    const xp = user.xp ?? 0;
+    const xpTarget = user.xpTarget ?? 1000;
+    const xpPercentage = (xp / xpTarget) * 100;
 
     return (
         <>
-            <div className="bg-[#101322] text-slate-100 min-h-screen flex">
+            <div className="bg-background text-foreground min-h-screen flex transition-colors duration-300">
                 {/* Sidebar */}
                 <Sidebar
                     user={user}
                     activeNav={activeNav}
                     setActiveNav={setActiveNav}
+                    isCollapsed={isCollapsed}
+                    onToggle={onToggle}
                 />
 
                 {/* Main Content */}
-                <main className="flex-1 flex flex-col lg:flex-row h-screen overflow-y-auto">
+                <main className="flex-1 flex flex-col lg:flex-row h-screen overflow-y-auto scrollbar-hide">
                     {/* Center Feed */}
                     <section className="flex-1 p-6 space-y-8 max-w-4xl mx-auto w-full">
                         {/* Welcome Header */}
@@ -181,10 +193,10 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <button className="p-2 bg-slate-800 rounded-xl border border-[#1337ec]/10 hover:border-[#1337ec] transition-colors">
+                                <button className="p-2 bg-background/50 rounded-xl border border-primary-custom/10 hover:border-primary-custom transition-colors">
                                     <Bell className="text-slate-400" size={20} />
                                 </button>
-                                <button className="bg-[#1337ec] hover:bg-[#1337ec]/90 text-white px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2">
+                                <button className="bg-primary-custom hover:brightness-110 text-white px-5 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg shadow-primary-custom/20">
                                     <Rocket size={16} />
                                     Daily Challenge
                                 </button>
@@ -193,16 +205,16 @@ export default function Dashboard() {
 
                         {/* Tech Stack Featured Card */}
                         <div className="relative group">
-                            <div className="absolute -inset-0.5 bg-linear-to-r from-[#1337ec] to-blue-400 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000" />
-                            <div className="relative bg-slate-900 border border-[#1337ec]/10 rounded-xl p-6 flex flex-col md:flex-row items-center gap-8">
+                            <div className="absolute -inset-0.5 bg-linear-to-r from-primary-custom to-blue-400 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000" />
+                            <div className="relative bg-background/40 rounded-xl p-6 flex flex-col md:flex-row items-center gap-8 backdrop-blur-sm">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="px-3 py-1 bg-[#1337ec]/20 text-[#1337ec] text-xs font-bold rounded-full uppercase tracking-wider">
+                                        <span className="px-3 py-1 bg-primary-custom/20 text-primary-custom text-xs font-bold rounded-full uppercase tracking-wider">
                                             Tech Stack of the Month
                                         </span>
                                     </div>
                                     <h2 className="text-2xl font-bold mb-4">Mastering Modern Web Architecture</h2>
-                                    <p className="text-slate-400 mb-6">
+                                    <p className="text-slate-400 mb-6 font-medium">
                                         Explore Next.js, GraphQL, and Tailwind CSS. Complete the learning path to earn the &apos;Architech&apos; badge.
                                     </p>
                                     <div className="flex flex-wrap gap-4 mb-6">
@@ -213,20 +225,20 @@ export default function Dashboard() {
                                         ].map((tech) => (
                                             <div
                                                 key={tech.label}
-                                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg"
+                                                className="flex items-center gap-2 px-3 py-1.5 bg-background/60 border border-primary-custom/5 rounded-lg"
                                             >
-                                                <DynamicIcon name={tech.icon} className="text-[#1337ec]" size={16} />
+                                                <DynamicIcon name={tech.icon} className="text-primary-custom" size={16} />
                                                 <span className="text-sm font-medium">{tech.label}</span>
                                             </div>
                                         ))}
                                     </div>
-                                    <button className="w-full md:w-auto px-6 py-2 bg-[#1337ec] text-white rounded-lg font-medium hover:brightness-110 transition-all">
+                                    <button className="w-full md:w-auto px-6 py-2 bg-primary-custom text-white rounded-lg font-medium hover:brightness-110 transition-all shadow-md shadow-primary-custom/10">
                                         Start Path
                                     </button>
                                 </div>
                                 <div className="w-full md:w-48 aspect-square relative flex items-center justify-center">
-                                    <div className="w-32 h-32 bg-[#1337ec]/10 rounded-full flex items-center justify-center animate-pulse">
-                                        <Layers className="text-[#1337ec]" size={64} />
+                                    <div className="w-32 h-32 bg-primary-custom/10 rounded-full flex items-center justify-center animate-pulse">
+                                        <Layers className="text-primary-custom" size={64} />
                                     </div>
                                 </div>
                             </div>
@@ -249,7 +261,7 @@ export default function Dashboard() {
                                     feedItems.map((item) => (
                                         <div
                                             key={item.id}
-                                            className="p-4 bg-slate-900 border border-[#1337ec]/5 rounded-xl flex gap-4 items-start"
+                                            className="p-4 bg-background/40 rounded-xl flex gap-4 items-start backdrop-blur-sm"
                                         >
                                             {item.user ? (
                                                 <img
@@ -258,8 +270,8 @@ export default function Dashboard() {
                                                     className="w-10 h-10 rounded-full"
                                                 />
                                             ) : (
-                                                <div className="w-10 h-10 bg-[#1337ec]/20 rounded-full flex items-center justify-center">
-                                                    <Megaphone className="text-[#1337ec]" size={20} />
+                                                <div className="w-10 h-10 bg-primary-custom/20 rounded-full flex items-center justify-center">
+                                                    <Megaphone className="text-primary-custom" size={20} />
                                                 </div>
                                             )}
 
@@ -268,7 +280,7 @@ export default function Dashboard() {
                                                     {item.user && <span className="font-bold">{item.user.name} </span>}
                                                     {item.content}{" "}
                                                     {item.highlight && (
-                                                        <span className="text-[#1337ec] font-medium">{item.highlight}</span>
+                                                        <span className="text-primary-custom font-medium">{item.highlight}</span>
                                                     )}
                                                 </p>
                                                 <p className="text-xs text-slate-500 mt-1">
@@ -277,7 +289,7 @@ export default function Dashboard() {
 
                                                 {item.type === "achievement" && (
                                                     <div className="mt-3 flex gap-2">
-                                                        <button className="px-3 py-1 text-xs bg-[#1337ec]/10 text-[#1337ec] rounded-full hover:bg-[#1337ec]/20 transition-colors">
+                                                        <button className="px-3 py-1 text-xs bg-primary-custom/10 text-primary-custom rounded-full hover:bg-primary-custom/20 transition-colors">
                                                             Congratulate
                                                         </button>
                                                         <button className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
@@ -287,14 +299,14 @@ export default function Dashboard() {
                                                 )}
 
                                                 {item.image && (
-                                                    <div className="mt-4 rounded-xl overflow-hidden h-32 w-full bg-slate-100 dark:bg-slate-800 relative">
+                                                    <div className="mt-4 rounded-xl overflow-hidden h-32 w-full bg-background/60 border border-primary-custom/5 relative">
                                                         <img
                                                             src={item.image}
                                                             alt="Announcement"
                                                             className="absolute inset-0 w-full h-full object-cover opacity-50"
                                                         />
-                                                        <div className="absolute inset-0 flex items-end p-4 bg-linear-to-t from-black/80 to-transparent">
-                                                            <span className="text-white text-xs font-medium">
+                                                        <div className="absolute inset-0 flex items-end p-4 bg-linear-to-t from-background to-transparent">
+                                                            <span className="text-foreground text-xs font-medium">
                                                                 Join {stats.registeredCount}+ students registered
                                                             </span>
                                                         </div>
@@ -309,30 +321,30 @@ export default function Dashboard() {
                     </section>
 
                     {/* Right Sidebar */}
-                    <section className="w-full lg:w-80 bg-slate-900/50 p-6 border-l border-[#1337ec]/10 overflow-y-auto space-y-8 scrollbar-hide">
+                    <section className="w-full lg:w-80 bg-background/20 p-6 border-l border-primary-custom/10 overflow-y-auto space-y-8 scrollbar-hide backdrop-blur-md">
                         {/* Stats Widget */}
-                        <div className="bg-slate-900 p-6 rounded-2xl border border-[#1337ec]/10 shadow-sm">
+                        <div className="bg-background/60 p-6 rounded-2xl shadow-sm backdrop-blur-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-lg">Your Progress</h3>
                                 <div className="streak-gradient px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-gray-500/20">
                                     <Flame className="text-white" size={18} />
-                                    <span className="text-white font-bold text-sm">{user.streakDays} Days</span>
+                                    <span className="text-white font-bold text-sm">{user.streakDays ?? 0} Days</span>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div>
                                     <div className="flex justify-between text-xs mb-1.5">
-                                        <span className="text-slate-500 font-medium uppercase tracking-wider">
-                                            Level {user.level} Developer
+                                        <span className="text-muted-custom font-medium uppercase tracking-wider">
+                                            Level {user.level ?? 1} Developer
                                         </span>
-                                        <span className="text-[#1337ec] font-bold">
-                                            {user.xp.toLocaleString()} / {user.xpTarget.toLocaleString()} XP
+                                        <span className="text-primary-custom font-bold">
+                                            {(user.xp ?? 0).toLocaleString()} / {(user.xpTarget ?? 1000).toLocaleString()} XP
                                         </span>
                                     </div>
-                                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="w-full h-2 bg-background rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-[#1337ec] rounded-full transition-all duration-500"
+                                            className="h-full bg-primary-custom rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(var(--primary),0.4)]"
                                             style={{ width: `${xpPercentage}%` }}
                                         />
                                     </div>
@@ -340,7 +352,7 @@ export default function Dashboard() {
                             </div>
 
                             <div className="mt-8">
-                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+                                <p className="text-xs font-bold text-muted-custom uppercase tracking-widest mb-4">
                                     Recent Badges
                                 </p>
                                 <div className="grid grid-cols-4 gap-3">
@@ -360,7 +372,7 @@ export default function Dashboard() {
                                         </div>
                                     ))}
                                     {badges.length > 3 && (
-                                        <div className="aspect-square rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+                                        <div className="aspect-square rounded-lg bg-background/50 border border-primary-custom/10 flex items-center justify-center text-muted-custom">
                                             <MoreHorizontal size={14} />
                                         </div>
                                     )}
@@ -372,32 +384,32 @@ export default function Dashboard() {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold">Upcoming</h3>
-                                <Calendar className="text-slate-400 cursor-pointer" size={20} />
+                                <Calendar className="text-muted-custom cursor-pointer" size={20} />
                             </div>
 
                             <div className="space-y-3">
                                 {events.length === 0 ? (
-                                    <div className="p-4 text-center text-slate-500 dark:text-slate-400 text-sm">
+                                    <div className="p-4 text-center text-muted-custom text-sm">
                                         No upcoming events
                                     </div>
                                 ) : (
                                     events.map((event, index) => (
                                         <div
                                             key={event.id}
-                                            className={`p-3 bg-slate-900 border-l-4 rounded-r-xl border border-[#1337ec]/5 flex items-center gap-4 ${event.isHighlighted
-                                                ? "border-[#1337ec]"
+                                            className={`p-3 bg-background/30 border-l-4 rounded-r-xl flex items-center gap-4 ${event.isHighlighted
+                                                ? "border-primary-custom shadow-md shadow-primary-custom/5"
                                                 : "border-slate-300 dark:border-slate-700"
                                                 } ${index >= 2 ? "opacity-75" : ""}`}
                                         >
-                                            <div className="flex flex-col items-center justify-center w-12 border-r border-slate-800 pr-3">
-                                                <span className={`text-xs font-bold ${event.isHighlighted ? "text-[#1337ec]" : "text-slate-400"}`}>
+                                            <div className="flex flex-col items-center justify-center w-12 border-r border-slate-700/20 pr-3">
+                                                <span className={`text-xs font-bold ${event.isHighlighted ? "text-primary-custom" : "text-muted-custom"}`}>
                                                     {event.month}
                                                 </span>
                                                 <span className="text-xl font-black">{event.date}</span>
                                             </div>
                                             <div className="flex-1 overflow-hidden">
                                                 <p className="text-sm font-bold truncate">{event.title}</p>
-                                                <p className="text-xs text-slate-500">
+                                                <p className="text-xs text-muted-custom">
                                                     {event.time} • {event.location}
                                                 </p>
                                             </div>
@@ -408,13 +420,13 @@ export default function Dashboard() {
                         </div>
 
                         {/* Upgrade Promo */}
-                        <div className="p-4 bg-[#1337ec] rounded-2xl text-white relative overflow-hidden group">
+                        <div className="p-4 bg-primary-custom rounded-2xl text-white relative overflow-hidden group shadow-lg shadow-primary-custom/20">
                             <div className="relative z-10">
                                 <h4 className="font-bold mb-1">Upgrade to Nexus+</h4>
                                 <p className="text-xs text-blue-100 mb-4">
                                     Get access to premium courses and mentorship.
                                 </p>
-                                <button className="w-full py-2 bg-white text-[#1337ec] rounded-lg text-xs font-bold transition-transform active:scale-95">
+                                <button className="w-full py-2 bg-white text-primary-custom rounded-lg text-xs font-bold transition-transform active:scale-95 hover:bg-blue-50">
                                     Upgrade Now
                                 </button>
                             </div>

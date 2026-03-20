@@ -28,12 +28,12 @@ export function PracticeFilters({ onSearch, onCategoryChange, activeCategory }: 
                 </div>
 
                 <div className="relative w-full md:w-96 group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-neon transition-colors" size={20} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-custom transition-colors" size={20} />
                     <input
                         type="text"
                         placeholder="Search by problem name or tag..."
                         onChange={(e) => onSearch(e.target.value)}
-                        className="w-full bg-slate-900 border border-primary/10 rounded-2xl py-3 pl-12 pr-4 text-slate-100 focus:outline-none focus:ring-2 focus:ring-accent-neon/30 focus:border-accent-neon transition-all"
+                        className="w-full bg-background/50 border border-primary-custom/10 rounded-2xl py-3 pl-12 pr-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-custom/30 focus:border-primary-custom transition-all backdrop-blur-sm"
                     />
                 </div>
             </div>
@@ -45,8 +45,8 @@ export function PracticeFilters({ onSearch, onCategoryChange, activeCategory }: 
                             key={cat}
                             onClick={() => onCategoryChange(cat)}
                             className={`px-6 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${activeCategory === cat
-                                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                : "bg-slate-900 border border-primary/10 text-slate-400 hover:border-primary/40"
+                                ? "bg-primary-custom text-white shadow-lg shadow-primary-custom/20"
+                                : "bg-background/40 border border-primary-custom/10 text-slate-400 hover:border-primary-custom/40"
                                 }`}
                         >
                             {cat}

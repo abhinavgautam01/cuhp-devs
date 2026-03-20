@@ -18,7 +18,6 @@ if (!cached) {
 
 export async function connectDB() {
   const MONGO_URI = process.env.DATABASE_URL;
-  console.log("Connecting to MongoDB...", process.env.DATABASE_URL);
   if (!MONGO_URI) {
     throw new Error("MONGO_URI is not set");
   }

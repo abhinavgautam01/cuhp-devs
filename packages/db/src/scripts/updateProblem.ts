@@ -3,9 +3,7 @@ import fs from "fs/promises";
 import { Problem, DefaultCode, Language } from "@repo/db";
 import { LANGUAGE_MAPPING } from "@repo/common";
 
-const PROBLEMS_PATH = path.resolve(
-  process.env.PROBLEMS_PATH || "apps/problems"
-);
+const PROBLEMS_PATH = path.resolve("D:/Projects/cuhp-devs/apps/problems");
 
 async function readFileSafe(filePath: string) {
   try {

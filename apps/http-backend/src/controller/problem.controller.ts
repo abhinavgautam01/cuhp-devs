@@ -1,8 +1,33 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-import { Problem, DefaultCode, Language } from "@repo/db";
+import { Problem, DefaultCode, Language, TestCase } from "@repo/db";
 import { generateBoilerplates } from "@repo/boilerplate-generator";
+
+const dedupeTestcases = <T extends { input?: string; output?: string }>(
+  testcases: T[]
+) => {
+  const seen = new Set<string>();
+  const normalizeValue = (value?: string) =>
+    (value ?? "").replace(/\r\n/g, "\n").replace(/\s+/g, " ").trim();
+
+  return testcases.filter((tc) => {
+    const normalizedInput = normalizeValue(tc.input);
+    const normalizedOutput = normalizeValue(tc.output);
+
+    if (!normalizedInput && !normalizedOutput) {
+      return false;
+    }
+
+    const key = `${normalizedInput}::${normalizedOutput}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
 
 export const getProblems = async (_: Request, res: Response) => {
   try {
@@ -35,6 +60,15 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
     let defaultCodes = await DefaultCode.find({
       problemId: problem._id,
     }).lean();
+
+    const testcaseDocs = await TestCase.find({
+      problemId: problem._id,
+      isSample: true,
+    })
+      .sort({ order: 1 })
+      .select("input output")
+      .lean();
+    const sampleTestCases = dedupeTestcases(testcaseDocs);
 
     // 🌍 load languages
     const languages = await Language.find().lean() as any[];
@@ -108,7 +142,13 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json({
-      problem,
+      problem: {
+        ...problem,
+        sampleTestCases:
+          sampleTestCases.length > 0
+            ? sampleTestCases
+            : problem.sampleTestCases ?? [],
+      },
       defaultCode: formattedDefaultCode,
     });
 

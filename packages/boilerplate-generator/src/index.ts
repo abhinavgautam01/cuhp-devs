@@ -77,6 +77,44 @@ const mapPythonType = (type: string) =>
           ? "bool"
           : "Any";
 
+const getRustInputParser = (type: string) =>
+  type === "int"
+    ? `iter.next().unwrap().parse().unwrap()`
+    : type === "string"
+      ? `iter.next().unwrap().to_string()`
+      : type === "bool"
+        ? `iter.next().unwrap().parse().unwrap()`
+        : `iter.next().unwrap().parse().unwrap()`;
+
+const getPythonInputParser = (type: string, idx: number) =>
+  type === "int"
+    ? `int(input_data[${idx}])`
+    : type === "string"
+      ? `input_data[${idx}]`
+      : type === "bool"
+        ? `input_data[${idx}].lower() == "true"`
+        : `input_data[${idx}]`;
+
+const getJsInputParser = (type: string, idx: number) =>
+  type === "int"
+    ? `Number(input[${idx}])`
+    : type === "string"
+      ? `input[${idx}]`
+      : type === "bool"
+        ? `input[${idx}].toLowerCase() === "true"`
+        : `input[${idx}]`;
+
+const getCppOutputStatement = (type: string) =>
+  type === "bool" ? "cout << boolalpha << result;" : "cout << result;";
+
+const getRustOutputStatement = (type: string) =>
+  type === "bool"
+    ? `println!("{}", if result { "true" } else { "false" });`
+    : `println!("{}", result);`;
+
+const getPythonOutputStatement = (type: string) =>
+  type === "bool" ? "print(str(result).lower())" : "print(result)";
+
 /* ----------------------------- FUNCTION BOILERPLATES ----------------------------- */
 
 function generateCppBoilerplate(parsed: any) {
@@ -150,7 +188,7 @@ ${parsed.inputs
       .join("\n")}
 
     auto result = ${parsed.functionName}(${args});
-    cout << result;
+    ${getCppOutputStatement(parsed.output.type)}
     return 0;
 }`;
 }
@@ -170,12 +208,12 @@ fn main() {
 ${parsed.inputs
       .map(
         (i: any) =>
-          `    let ${i.name}: i32 = iter.next().unwrap().parse().unwrap();`,
+          `    let ${i.name}: ${mapRustType(i.type)} = ${getRustInputParser(i.type)};`,
       )
       .join("\n")}
 
     let result = ${parsed.functionName}(${args});
-    println!("{}", result);
+    ${getRustOutputStatement(parsed.output.type)}
 }`;
 }
 
@@ -185,14 +223,17 @@ function generatePythonFullBoilerplate(parsed: any) {
   return `## USER_CODE_HERE ##
 
 import sys
-input_data = list(map(int, sys.stdin.read().strip().split()))
+input_data = sys.stdin.read().strip().split()
 
 ${parsed.inputs
-      .map((i: any, idx: number) => `${i.name} = input_data[${idx}]`)
+      .map(
+        (i: any, idx: number) =>
+          `${i.name} = ${getPythonInputParser(i.type, idx)}`,
+      )
       .join("\n")}
 
 result = ${parsed.functionName}(${args})
-print(result)
+${getPythonOutputStatement(parsed.output.type)}
 `;
 }
 
@@ -205,7 +246,9 @@ const fs = require("fs");
 const input = fs.readFileSync(0, "utf-8").trim().split(/\\s+/);
 
 ${parsed.inputs
-      .map((i: any, idx: number) => `const ${i.name} = Number(input[${idx}]);`)
+      .map(
+        (i: any, idx: number) => `const ${i.name} = ${getJsInputParser(i.type, idx)};`,
+      )
       .join("\n")}
 
 const result = ${parsed.functionName}(${args});
