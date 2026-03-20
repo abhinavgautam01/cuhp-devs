@@ -3,9 +3,7 @@ import fs from "fs/promises";
 import { Problem, DefaultCode, Language } from "@repo/db";
 import { LANGUAGE_MAPPING } from "@repo/common";
 
-const PROBLEMS_PATH = path.resolve(
-  process.env.PROBLEMS_PATH || "apps/problems"
-);
+const PROBLEMS_PATH = path.resolve("D:/Projects/cuhp-devs/apps/problems");
 
 async function readFileSafe(filePath: string) {
   try {
@@ -24,21 +22,26 @@ export async function updateProblem(slug: string) {
 
   if (!problemMd) throw new Error("Problem.md not found");
 
+  const titleMatch = problemMd.match(/^# (.*)/);
+  const title = titleMatch?.[1]?.trim() ?? slug;
+  // Clean up title from markdown if needed or use slug as fallback
+
   const problem = await Problem.findOneAndUpdate(
     { slug },
     {
-      title: slug,
+      title,
       slug,
       description: problemMd,
       hidden: false,
     },
     { upsert: true, returnDocument: "after" }
   );
+  if (!problem) throw new Error("Failed to sync problem to database");
 
   const languages = await Language.find();
 
   const languageMap = new Map(
-    languages.map((l) => [l.name, l._id])
+    languages.map((l) => [l.name.toLowerCase(), l._id])
   );
 
   await Promise.all(
@@ -52,7 +55,7 @@ export async function updateProblem(slug: string) {
       const code = await readFileSafe(filePath);
       if (!code) return;
 
-      const languageId = languageMap.get(langName);
+      const languageId = languageMap.get(langName.toLowerCase());
       if (!languageId) return;
 
       await DefaultCode.findOneAndUpdate(

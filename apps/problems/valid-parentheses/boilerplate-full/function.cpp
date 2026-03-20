@@ -10,6 +10,6 @@ int main() {
     string s; cin >> s;
 
     auto result = isValid(s);
-    cout << result;
+    cout << boolalpha << result;
     return 0;
 }

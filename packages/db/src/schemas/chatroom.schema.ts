@@ -1,6 +1,5 @@
 import { Schema } from "mongoose";
 import { IChatRoom } from "../interfaces/chat.room.interface";
-import { ChatRoomName } from "../enums/index";
 
 export const ChatRoomSchema = new Schema<IChatRoom>(
   {
@@ -8,7 +7,11 @@ export const ChatRoomSchema = new Schema<IChatRoom>(
       type: String,
       required: true,
       unique: true,
-      enum: Object.values(ChatRoomName),
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
     },
   },
   { timestamps: true }

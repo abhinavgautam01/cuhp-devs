@@ -1,6 +1,6 @@
 export const LANGUAGE_MAPPING = {
   cpp: "C++",
-  js: "JavaScript",
+  js: "Javascript",
   py: "Python",
   rs: "Rust",
 };

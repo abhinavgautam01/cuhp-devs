@@ -1,10 +1,7 @@
-
+"use client"
 
 import { useState } from "react";
-import { FaArrowRight, FaRegCalendar } from "react-icons/fa";
-import { GiGraduateCap } from "react-icons/gi";
-import { GoInfo } from "react-icons/go";
-import { MdOutlineExpandMore } from "react-icons/md";
+import { FaArrowRight, FaRegCalendar, GiGraduateCap, GoInfo, MdOutlineExpandMore } from "../icons";
 import { motion } from "framer-motion";
 
 export interface OnboardingStepOneData {
@@ -31,13 +28,13 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
 
   //TODO: Save to Database
 
-  
+
   const programSemesterMap: Record<string, number> = {
     "B.Tech Computer Science": 8,
     MCA: 4,
   };
 
-  
+
   const getSemesters = () => {
     const count = programSemesterMap[formData.program];
     if (!count) return [];
@@ -56,7 +53,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#101322] text-slate-100 font-display relative overflow-hidden">
-      
+
       {/* Background Pattern */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
@@ -109,7 +106,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
+
           {/* Program Selection */}
           <div className="space-y-4">
             <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 ml-1">
@@ -117,7 +114,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
             </label>
 
             <div className="relative group rounded-xl border-2 border-white/10 bg-white/5 transition-all duration-300 focus-within:border-blue-600 focus-within:shadow-[0_0_15px_rgba(37,99,235,0.2)] overflow-hidden">
-              
+
               <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500">
                 <GiGraduateCap />
               </div>
@@ -155,7 +152,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
             </label>
 
             <div className="relative group rounded-xl border-2 border-white/10 bg-white/5 transition-all duration-300 focus-within:border-blue-600 focus-within:shadow-[0_0_15px_rgba(37,99,235,0.2)] overflow-hidden">
-              
+
               <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500">
                 <FaRegCalendar />
               </div>
@@ -208,14 +205,13 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
             type="button"
             onClick={handleNext}
             disabled={!isFormComplete}
-            className={`${
-              isFormComplete
+            className={`${isFormComplete
                 ? "bg-blue-600 hover:bg-blue-500"
                 : "bg-gray-600 cursor-not-allowed"
-            } text-white font-bold py-3 px-10 rounded-lg shadow-[0_4px_20px_rgba(37,99,235,0.3)] flex items-center gap-2 transition-all disabled:opacity-60`}
+              } text-white font-bold py-3 px-10 rounded-lg shadow-[0_4px_20px_rgba(37,99,235,0.3)] flex items-center gap-2 transition-all disabled:opacity-60`}
           >
             Next: Tech Interests
-            <FaArrowRight className="group-hover:translate-x-1 transition-transform"/>
+            <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </footer>

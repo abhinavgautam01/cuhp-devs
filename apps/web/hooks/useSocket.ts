@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4001";
@@ -13,6 +13,7 @@ export const useSocket = (token: string | null): {
     sendMessage: (roomName: string, content: string) => void;
 } => {
     const socketRef = useRef<Socket | null>(null);
+    const hasLoggedConnectErrorRef = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
@@ -20,13 +21,17 @@ export const useSocket = (token: string | null): {
 
         const socket = io(SOCKET_URL, {
             auth: { token },
-            withCredentials: true,
+            transports: ["polling", "websocket"],
+            timeout: 10000,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
         });
 
         socketRef.current = socket;
 
         socket.on("connect", () => {
             setIsConnected(true);
+            hasLoggedConnectErrorRef.current = false;
             console.log("Socket connected:", socket.id);
         });
 
@@ -36,7 +41,10 @@ export const useSocket = (token: string | null): {
         });
 
         socket.on("connect_error", (err) => {
-            console.error("Socket connection error:", err.message);
+            if (!hasLoggedConnectErrorRef.current) {
+                console.warn("Socket connection error:", err.message);
+                hasLoggedConnectErrorRef.current = true;
+            }
         });
 
         return () => {
@@ -45,23 +53,30 @@ export const useSocket = (token: string | null): {
         };
     }, [token]);
 
-    const joinRoom = (roomName: string) => {
+    const joinRoom = useCallback((roomName: string) => {
         if (socketRef.current) {
+            console.log(`[useSocket] Joining room: ${roomName}`);
             socketRef.current.emit("join-room", { roomName });
+        } else {
+            console.warn("[useSocket] Cannot join room: socket is null");
         }
-    };
+    }, []);
 
-    const leaveRoom = (roomName: string) => {
+    const leaveRoom = useCallback((roomName: string) => {
         if (socketRef.current) {
+            console.log(`[useSocket] Leaving room: ${roomName}`);
             socketRef.current.emit("leave-room", { roomName });
         }
-    };
+    }, []);
 
-    const sendMessage = (roomName: string, content: string) => {
+    const sendMessage = useCallback((roomName: string, content: string) => {
         if (socketRef.current) {
+            console.log(`[useSocket] Sending message to ${roomName}`);
             socketRef.current.emit("send-message", { roomName, content });
+        } else {
+            console.warn("[useSocket] Cannot send message: socket is null");
         }
-    };
+    }, []);
 
     return {
         socket: socketRef.current,

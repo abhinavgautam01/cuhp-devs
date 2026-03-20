@@ -1,12 +1,40 @@
 import { Request, Response } from "express";
-import { Problem, DefaultCode, Language } from "@repo/db";
+import fs from "fs";
+import path from "path";
+import { Problem, DefaultCode, Language, TestCase } from "@repo/db";
+import { generateBoilerplates } from "@repo/boilerplate-generator";
+
+const dedupeTestcases = <T extends { input?: string; output?: string }>(
+  testcases: T[]
+) => {
+  const seen = new Set<string>();
+  const normalizeValue = (value?: string) =>
+    (value ?? "").replace(/\r\n/g, "\n").replace(/\s+/g, " ").trim();
+
+  return testcases.filter((tc) => {
+    const normalizedInput = normalizeValue(tc.input);
+    const normalizedOutput = normalizeValue(tc.output);
+
+    if (!normalizedInput && !normalizedOutput) {
+      return false;
+    }
+
+    const key = `${normalizedInput}::${normalizedOutput}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+};
 
 export const getProblems = async (_: Request, res: Response) => {
   try {
     const problems = await Problem.find({
       hidden: { $ne: true }, // ✅ include false + undefined
     })
-      .select("title slug difficulty solved")
+      .select("title slug difficulty solved description")
       .lean();
 
     return res.status(200).json(problems);
@@ -29,23 +57,84 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
     }
 
     // 🔥 load default code for this problem
-    const defaultCodes = await DefaultCode.find({
+    let defaultCodes = await DefaultCode.find({
       problemId: problem._id,
     }).lean();
 
+    const testcaseDocs = await TestCase.find({
+      problemId: problem._id,
+      isSample: true,
+    })
+      .sort({ order: 1 })
+      .select("input output")
+      .lean();
+    const sampleTestCases = dedupeTestcases(testcaseDocs);
+
     // 🌍 load languages
-    const languages = await Language.find().lean();
+    const languages = await Language.find().lean() as any[];
 
     // 🧠 build map languageId → name
     const langMap = new Map(
-      languages.map((l) => [l._id.toString(), l.name])
+      languages.map((l: any) => [l._id.toString(), l.name])
     );
+
+    // 🚀 if missing default code, generate it on the fly
+    if (defaultCodes.length === 0) {
+      try {
+        const structurePath = path.join(__dirname, "..", "..", "..", "problems", (slug as string), "Structure.md");
+        console.log(`[ProblemController] Checking structure at: ${structurePath}`);
+
+        if (fs.existsSync(structurePath)) {
+          const structureData = fs.readFileSync(structurePath, "utf-8");
+          const generated = generateBoilerplates(structureData);
+          console.log(`[ProblemController] Generated languages: ${Object.keys(generated).join(", ")}`);
+          console.log(`[ProblemController] Available DB languages: ${languages.map(l => l.name).join(", ")}`);
+
+          const newDefaultCodes = [];
+          for (const [genName, code] of Object.entries(generated)) {
+            if (genName.endsWith("Full")) continue;
+
+            const matchOptions: Record<string, string[]> = {
+              cpp: ["c++", "cpp"],
+              javascript: ["javascript", "js"],
+              python: ["python", "py"],
+              rust: ["rust", "rs"]
+            };
+
+            const searchOptions = (matchOptions[genName] || [genName]).map(s => s.toLowerCase());
+
+            const lang = languages.find((l: any) => {
+              const ln = l.name.toLowerCase();
+              return searchOptions.some(opt => ln === opt || ln.includes(opt) || opt.includes(ln));
+            });
+
+            if (lang) {
+              console.log(`[ProblemController] Found matching lang for ${genName}: ${lang.name}`);
+              const dc = await DefaultCode.findOneAndUpdate(
+                { problemId: problem._id, languageId: lang._id },
+                { code: code as string },
+                { upsert: true, returnDocument: "after" }
+              ).lean();
+              if (dc) newDefaultCodes.push(dc);
+            } else {
+              console.warn(`[ProblemController] No matching lang found for ${genName} (searched options: ${searchOptions.join(", ")})`);
+            }
+          }
+          defaultCodes = newDefaultCodes;
+        } else {
+          console.error(`[ProblemController] Structure file not found for slug: ${slug}`);
+        }
+      } catch (genErr) {
+        console.error("Failed to generate boilerplates on the fly:", genErr);
+      }
+    }
 
     // 🎯 format for frontend
     const formattedDefaultCode: Record<string, string> = {};
 
     for (const dc of defaultCodes) {
-      const langName = langMap.get(dc.languageId.toString());
+      const languageId = (dc.languageId as any).toString();
+      const langName = langMap.get(languageId);
 
       if (langName) {
         formattedDefaultCode[langName.toLowerCase()] = dc.code;
@@ -53,7 +142,13 @@ export const getProblemBySlug = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json({
-      problem,
+      problem: {
+        ...problem,
+        sampleTestCases:
+          sampleTestCases.length > 0
+            ? sampleTestCases
+            : problem.sampleTestCases ?? [],
+      },
       defaultCode: formattedDefaultCode,
     });
 

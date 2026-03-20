@@ -1,7 +1,7 @@
 
 
 import { ReactNode } from "react";
-import { FaTerminal, FaDatabase, FaCode } from "react-icons/fa";
+import { FaTerminal, FaDatabase, FaCode } from "../icons";
 
 interface Avatar {
   src: string;
@@ -15,13 +15,13 @@ interface LeftPanelProps {
   studentCount?: number;
 }
 
-export function LeftPanel({ 
-  avatars = [], 
+export function LeftPanel({
+  avatars = [],
   className,
   showAvatars = true,
   studentCount = 2000
 }: LeftPanelProps): ReactNode {
- return (
+  return (
     <div className={`hidden lg:flex w-1/2 relative overflow-hidden bg-[#101322] ${className}`}>
       {/* Subtle gradient background */}
       <div
@@ -77,12 +77,12 @@ export function LeftPanel({
         {/* Logo at top */}
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 bg-blue-600 rounded-lg flex items-center justify-center">
-            <svg 
-              viewBox="0 0 24 24" 
+            <svg
+              viewBox="0 0 24 24"
               className="w-6 h-6 text-white"
               fill="currentColor"
             >
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10H7V9h5v3zm5 0h-5V9h5v3z"/>
+              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 10H7V9h5v3zm5 0h-5V9h5v3z" />
             </svg>
           </div>
           <span className="text-white text-2xl font-bold tracking-tight uppercase">CS Portal</span>

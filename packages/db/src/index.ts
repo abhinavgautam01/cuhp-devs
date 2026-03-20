@@ -1,5 +1,5 @@
-export { connectDB } from "./connection";
+export { connectDB } from "./connection.js";
 
-export * from "./models";
-export * from "./interfaces";
-export * from "./enums";
+export * from "./models/index.js";
+export * from "./interfaces/index.js";
+export * from "./enums/index.js";

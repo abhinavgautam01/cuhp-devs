@@ -3,7 +3,7 @@ import path from "path";
 
 /* ----------------------------- PARSER ----------------------------- */
 
-function parseStructure(data: string) {
+export function parseStructure(data: string) {
   const lines = data.split("\n").map((l) => l.trim());
 
   const result = {
@@ -77,6 +77,44 @@ const mapPythonType = (type: string) =>
           ? "bool"
           : "Any";
 
+const getRustInputParser = (type: string) =>
+  type === "int"
+    ? `iter.next().unwrap().parse().unwrap()`
+    : type === "string"
+      ? `iter.next().unwrap().to_string()`
+      : type === "bool"
+        ? `iter.next().unwrap().parse().unwrap()`
+        : `iter.next().unwrap().parse().unwrap()`;
+
+const getPythonInputParser = (type: string, idx: number) =>
+  type === "int"
+    ? `int(input_data[${idx}])`
+    : type === "string"
+      ? `input_data[${idx}]`
+      : type === "bool"
+        ? `input_data[${idx}].lower() == "true"`
+        : `input_data[${idx}]`;
+
+const getJsInputParser = (type: string, idx: number) =>
+  type === "int"
+    ? `Number(input[${idx}])`
+    : type === "string"
+      ? `input[${idx}]`
+      : type === "bool"
+        ? `input[${idx}].toLowerCase() === "true"`
+        : `input[${idx}]`;
+
+const getCppOutputStatement = (type: string) =>
+  type === "bool" ? "cout << boolalpha << result;" : "cout << result;";
+
+const getRustOutputStatement = (type: string) =>
+  type === "bool"
+    ? `println!("{}", if result { "true" } else { "false" });`
+    : `println!("{}", result);`;
+
+const getPythonOutputStatement = (type: string) =>
+  type === "bool" ? "print(str(result).lower())" : "print(result)";
+
 /* ----------------------------- FUNCTION BOILERPLATES ----------------------------- */
 
 function generateCppBoilerplate(parsed: any) {
@@ -146,11 +184,11 @@ int main() {
     cin.tie(NULL);
 
 ${parsed.inputs
-  .map((i: any) => `    ${mapCppType(i.type)} ${i.name}; cin >> ${i.name};`)
-  .join("\n")}
+      .map((i: any) => `    ${mapCppType(i.type)} ${i.name}; cin >> ${i.name};`)
+      .join("\n")}
 
     auto result = ${parsed.functionName}(${args});
-    cout << result;
+    ${getCppOutputStatement(parsed.output.type)}
     return 0;
 }`;
 }
@@ -168,14 +206,14 @@ fn main() {
     let mut iter = input.split_whitespace();
 
 ${parsed.inputs
-  .map(
-    (i: any) =>
-      `    let ${i.name}: i32 = iter.next().unwrap().parse().unwrap();`,
-  )
-  .join("\n")}
+      .map(
+        (i: any) =>
+          `    let ${i.name}: ${mapRustType(i.type)} = ${getRustInputParser(i.type)};`,
+      )
+      .join("\n")}
 
     let result = ${parsed.functionName}(${args});
-    println!("{}", result);
+    ${getRustOutputStatement(parsed.output.type)}
 }`;
 }
 
@@ -185,14 +223,17 @@ function generatePythonFullBoilerplate(parsed: any) {
   return `## USER_CODE_HERE ##
 
 import sys
-input_data = list(map(int, sys.stdin.read().strip().split()))
+input_data = sys.stdin.read().strip().split()
 
 ${parsed.inputs
-  .map((i: any, idx: number) => `${i.name} = input_data[${idx}]`)
-  .join("\n")}
+      .map(
+        (i: any, idx: number) =>
+          `${i.name} = ${getPythonInputParser(i.type, idx)}`,
+      )
+      .join("\n")}
 
 result = ${parsed.functionName}(${args})
-print(result)
+${getPythonOutputStatement(parsed.output.type)}
 `;
 }
 
@@ -205,8 +246,10 @@ const fs = require("fs");
 const input = fs.readFileSync(0, "utf-8").trim().split(/\\s+/);
 
 ${parsed.inputs
-  .map((i: any, idx: number) => `const ${i.name} = Number(input[${idx}]);`)
-  .join("\n")}
+      .map(
+        (i: any, idx: number) => `const ${i.name} = ${getJsInputParser(i.type, idx)};`,
+      )
+      .join("\n")}
 
 const result = ${parsed.functionName}(${args});
 console.log(result);
@@ -215,7 +258,27 @@ console.log(result);
 
 /* ----------------------------- GENERATOR CORE ----------------------------- */
 
-function generateForSlug(slug: string) {
+export function generateBoilerplates(structureData: string) {
+  const parsed = parseStructure(structureData);
+  return {
+    cpp: generateCppBoilerplate(parsed),
+    rust: generateRustBoilerplate(parsed),
+    python: generatePythonBoilerplate(parsed),
+    javascript: generateJsBoilerplate(parsed),
+    cppFull: generateCppFullBoilerplate(parsed),
+    rustFull: generateRustFullFullBoilerplate(parsed),
+    pythonFull: generatePythonFullBoilerplate(parsed),
+    javascriptFull: generateJsFullBoilerplate(parsed),
+  };
+}
+
+// Keep the old function helper for CLI/compatibility if needed, 
+// but refactor to use generateBoilerplates
+function generateRustFullFullBoilerplate(parsed: any) {
+  return generateRustFullBoilerplate(parsed);
+}
+
+export function generateForSlug(slug: string) {
   const basePath = path.join(process.cwd(), "..", "problems", slug);
   const structurePath = path.join(basePath, "Structure.md");
 
@@ -224,7 +287,8 @@ function generateForSlug(slug: string) {
     return;
   }
 
-  const parsed = parseStructure(fs.readFileSync(structurePath, "utf-8"));
+  const structureData = fs.readFileSync(structurePath, "utf-8");
+  const codes = generateBoilerplates(structureData);
 
   const boilerplateDir = path.join(basePath, "boilerplate");
   const boilerplateFullDir = path.join(basePath, "boilerplate-full");
@@ -232,63 +296,41 @@ function generateForSlug(slug: string) {
   fs.mkdirSync(boilerplateDir, { recursive: true });
   fs.mkdirSync(boilerplateFullDir, { recursive: true });
 
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.cpp"),
-    generateCppBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.rs"),
-    generateRustBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.py"),
-    generatePythonBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateDir, "function.js"),
-    generateJsBoilerplate(parsed),
-  );
+  fs.writeFileSync(path.join(boilerplateDir, "function.cpp"), codes.cpp);
+  fs.writeFileSync(path.join(boilerplateDir, "function.rs"), codes.rust);
+  fs.writeFileSync(path.join(boilerplateDir, "function.py"), codes.python);
+  fs.writeFileSync(path.join(boilerplateDir, "function.js"), codes.javascript);
 
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.cpp"),
-    generateCppFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.rs"),
-    generateRustFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.py"),
-    generatePythonFullBoilerplate(parsed),
-  );
-  fs.writeFileSync(
-    path.join(boilerplateFullDir, "function.js"),
-    generateJsFullBoilerplate(parsed),
-  );
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.cpp"), codes.cppFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.rs"), codes.rustFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.py"), codes.pythonFull);
+  fs.writeFileSync(path.join(boilerplateFullDir, "function.js"), codes.javascriptFull);
 
   console.log(`✅ Generated for ${slug}`);
 }
 
 /* ----------------------------- ENTRY ----------------------------- */
 
-const arg = process.argv[2];
-const problemsRoot = path.join(process.cwd(), "..", "problems");
+if (require.main === module) {
+  const arg = process.argv[2];
+  const problemsRoot = path.join(process.cwd(), "..", "problems");
 
-if (!arg) {
-  console.log("Provide problem slug or 'all'");
-  process.exit(1);
-}
-
-if (arg === "all") {
-  const slugs = fs
-    .readdirSync(problemsRoot)
-    .filter((f) => fs.statSync(path.join(problemsRoot, f)).isDirectory());
-
-  for (const slug of slugs) {
-    generateForSlug(slug);
+  if (!arg) {
+    console.log("Provide problem slug or 'all'");
+    process.exit(1);
   }
 
-  console.log("🔥 All problems generated");
-} else {
-  generateForSlug(arg);
+  if (arg === "all") {
+    const slugs = fs
+      .readdirSync(problemsRoot)
+      .filter((f) => fs.statSync(path.join(problemsRoot, f)).isDirectory());
+
+    for (const slug of slugs) {
+      generateForSlug(slug);
+    }
+
+    console.log("🔥 All problems generated");
+  } else {
+    generateForSlug(arg);
+  }
 }

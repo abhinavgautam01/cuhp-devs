@@ -1,0 +1,22 @@
+{
+    "extends": "./packages/typescript-config/base.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@repo/db": [
+                "./packages/db/src/index.ts"
+            ],
+            "@repo/common/*": [
+                "./packages/common/src/*"
+            ],
+            "@repo/boilerplate-generator": [
+                "./packages/boilerplate-generator/src/index.ts"
+            ]
+        }
+    },
+    "include": [
+        "tmp_check_langs.ts",
+        "packages/**/*",
+        "apps/**/*"
+    ]
+}

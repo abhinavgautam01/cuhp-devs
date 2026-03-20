@@ -1,10 +1,7 @@
-
+"use client"
 
 import { useState, useCallback, ChangeEvent, FormEvent } from "react";
-import { MdEmail } from "react-icons/md";
-import { RiLockPasswordLine } from "react-icons/ri";
-import { FaArrowRight, FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, RiLockPasswordLine, FaArrowRight, FaGithub, FaEye, FaEyeSlash, FcGoogle } from "../icons";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,7 +42,7 @@ function validateForm(fields: FormFields): FormErrors {
 
 const INITIAL_FIELDS: FormFields = { identifier: "", password: "", remember: false };
 
-export function SignInForm({ 
+export function SignInForm({
   className = "",
   onSubmit: onSubmitProp,
   onOAuth: onOAuthProp
@@ -90,8 +87,8 @@ export function SignInForm({
           console.info("Sign in with:", fields);
         }
       } catch (error) {
-        setErrors({ 
-          general: error instanceof Error ? error.message : "Invalid credentials. Please check your details and try again." 
+        setErrors({
+          general: error instanceof Error ? error.message : "Invalid credentials. Please check your details and try again."
         });
       } finally {
         setIsLoading(false);
@@ -117,8 +114,8 @@ export function SignInForm({
     w-full pl-10 pr-4 py-3 border bg-[#0a1233] text-slate-100 
     placeholder:text-slate-500 rounded-lg outline-none transition-all
     disabled:opacity-50 disabled:cursor-not-allowed
-    ${hasError 
-      ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500' 
+    ${hasError
+      ? 'border-red-500/50 focus:ring-2 focus:ring-red-500/30 focus:border-red-500'
       : 'border-blue-700/30 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500'
     }
   `;
@@ -126,8 +123,8 @@ export function SignInForm({
   return (
     <div className={`w-full text-slate-100 ${className}`}>
       {/* Tab Toggle */}
-   
-      
+
+
 
       {/* Header */}
       <div>
@@ -154,15 +151,15 @@ export function SignInForm({
       <form className="space-y-6 mt-8" onSubmit={handleSubmit} noValidate>
         {/* Student ID / Email */}
         <div>
-          <label 
+          <label
             htmlFor="identifier"
             className="text-xs font-semibold uppercase tracking-widest text-slate-500"
           >
             Student ID or Email
           </label>
           <div className="relative mt-2">
-            <MdEmail 
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl pointer-events-none" 
+            <MdEmail
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl pointer-events-none"
               aria-hidden="true"
             />
             <input
@@ -180,9 +177,9 @@ export function SignInForm({
             />
           </div>
           {errors.identifier && (
-            <p 
-              id="identifier-error" 
-              role="alert" 
+            <p
+              id="identifier-error"
+              role="alert"
               className="mt-1.5 text-xs text-red-400 flex items-center gap-1"
             >
               <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -196,14 +193,14 @@ export function SignInForm({
         {/* Password */}
         <div>
           <div className="flex justify-between">
-            <label 
+            <label
               htmlFor="password"
               className="text-xs font-semibold uppercase text-slate-500"
             >
               Password
             </label>
-            <a 
-              href="/forgot-password" 
+            <a
+              href="/forgot-password"
               className="text-xs font-semibold text-blue-500 hover:underline transition-colors"
             >
               Forgot password?
@@ -211,8 +208,8 @@ export function SignInForm({
           </div>
 
           <div className="relative mt-2">
-            <RiLockPasswordLine 
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl pointer-events-none" 
+            <RiLockPasswordLine
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl pointer-events-none"
               aria-hidden="true"
             />
             <input
@@ -240,9 +237,9 @@ export function SignInForm({
             </button>
           </div>
           {errors.password && (
-            <p 
-              id="password-error" 
-              role="alert" 
+            <p
+              id="password-error"
+              role="alert"
               className="mt-1.5 text-xs text-red-400 flex items-center gap-1"
             >
               <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
@@ -255,14 +252,14 @@ export function SignInForm({
 
         {/* Remember Checkbox */}
         <div className="flex items-center gap-2">
-          <input 
+          <input
             id="remember"
             name="remember"
-            type="checkbox" 
+            type="checkbox"
             checked={fields.remember}
             onChange={handleChange}
             disabled={isLoading}
-            className="accent-blue-600 w-4 h-4 rounded disabled:opacity-50" 
+            className="accent-blue-600 w-4 h-4 rounded disabled:opacity-50"
           />
           <label htmlFor="remember" className="text-sm text-slate-400 cursor-pointer select-none">
             Keep me signed in
@@ -270,7 +267,7 @@ export function SignInForm({
         </div>
 
         {/* Submit Button */}
-        <button 
+        <button
           type="submit"
           disabled={isLoading}
           className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100"
@@ -303,7 +300,7 @@ export function SignInForm({
 
       {/* OAuth Buttons */}
       <div className="grid grid-cols-2 gap-4 mt-6">
-        <button 
+        <button
           type="button"
           onClick={() => handleOAuth("google")}
           disabled={isLoading}
@@ -313,7 +310,7 @@ export function SignInForm({
           <span className="text-sm font-medium">Google SSO</span>
         </button>
 
-        <button 
+        <button
           type="button"
           onClick={() => handleOAuth("github")}
           disabled={isLoading}

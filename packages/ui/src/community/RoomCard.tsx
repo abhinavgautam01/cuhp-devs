@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Users, Zap, Star, Activity, ArrowRight } from "../icons";
 
 interface RoomCardProps {
     room: {
@@ -29,84 +31,82 @@ const BADGE_ACCENT: Record<string, string> = {
 };
 
 export function RoomCard({ room }: RoomCardProps) {
-    const badgeClass = BADGE_STYLES[room.badge] ?? "from-[#1337ec]/20 to-blue-500/20 text-[#1337ec] border-[#1337ec]/30";
-    const accentClass = BADGE_ACCENT[room.badge] ?? "from-[#1337ec] via-blue-500 to-transparent";
+    const badgeClass = BADGE_STYLES[room.badge] ?? "from-primary-custom/30 to-blue-500/30 text-foreground border-primary-custom/10";
+    const accentClass = BADGE_ACCENT[room.badge] ?? "from-primary-custom via-blue-500 to-transparent";
+
+    // Mapping some common icon names to Lucide icons
+    const IconComponent = room.badge === "HOT" ? Zap : room.badge === "TOP" ? Star : room.badge === "LIVE" ? Activity : Users;
 
     return (
-        <div className="bg-white/[0.03] backdrop-blur-2xl rounded-2xl border border-white/10 overflow-hidden relative group transition-all duration-500 hover:-translate-y-2 hover:border-[#1337ec]/50 hover:shadow-[0_20px_50px_rgba(19,55,236,0.15)]">
-            {/* Top shimmer strip */}
-            <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accentClass} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+        <motion.div
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="group relative overflow-hidden rounded-2xl border border-card-border bg-card-custom backdrop-blur-xl p-6 transition-all hover:border-primary-custom/40 hover:shadow-[0_20px_50px_rgba(var(--primary),0.15)] flex flex-col h-full"
+        >
+            {/* Top right badge */}
+            <div className="absolute top-0 right-0 p-4">
+                <span className={`flex items-center gap-1 px-2 py-1 bg-gradient-to-r ${badgeClass} rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-card-border`}>
+                    <IconComponent size={10} className="shrink-0" />
+                    {room.badge === "HOT" ? "Hot Room" : room.badge}
+                </span>
+            </div>
 
-            {/* Inner highlights for depth */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-            {/* Background glow */}
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#1337ec]/10 rounded-full blur-[80px] -mr-24 -mt-24 group-hover:bg-[#1337ec]/20 transition-all duration-500 pointer-events-none" />
-
-            <div className="p-6 relative z-10">
-                {/* Header row */}
-                <div className="flex justify-between items-start mb-5">
-                    <div className="w-12 h-12 bg-[#1337ec]/10 rounded-xl flex items-center justify-center text-[#1337ec] group-hover:bg-[#1337ec]/20 transition-colors">
-                        <span className="material-icons-round text-2xl">{room.icon}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {/* Live pulse */}
-                        <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-400">
-                            <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
-                            LIVE
-                        </span>
-                        <span className={`px-3 py-1 bg-gradient-to-r ${badgeClass} text-[10px] font-bold uppercase tracking-widest rounded-full border`}>
-                            {room.badge}
-                        </span>
-                    </div>
+            <div className="flex gap-5 items-start mb-6">
+                {/* Icon Container */}
+                <div className="w-14 h-14 rounded-xl bg-primary-custom/10 border border-primary-custom/20 flex items-center justify-center text-primary-custom shadow-inner shrink-0 group-hover:scale-110 transition-transform duration-500">
+                    <Users size={28} />
                 </div>
 
-                {/* Text */}
-                <h3 className="text-lg font-bold mb-2 group-hover:text-[#1337ec] transition-colors">{room.title}</h3>
-                <p className="text-white/40 text-xs leading-relaxed mb-4 line-clamp-2">{room.description}</p>
-
-                {/* Tag row */}
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                    {["#study", `#${room.title.toLowerCase().replace(/\s+/g, "-")}`].map((tag) => (
-                        <span key={tag} className="text-[10px] text-[#1337ec]/60 bg-[#1337ec]/5 px-2 py-0.5 rounded-md font-medium">
-                            {tag}
-                        </span>
-                    ))}
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold mb-1 truncate group-hover:text-primary-custom transition-colors">{room.title}</h3>
+                    <p className="text-sm text-muted-custom line-clamp-2 leading-relaxed">{room.description}</p>
                 </div>
+            </div>
 
-                {/* Footer */}
+            {/* Members & Tags Footer Area */}
+            <div className="mt-auto space-y-6">
                 <div className="flex items-center justify-between">
-                    {/* Avatar stack */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                         <div className="flex -space-x-2">
                             {room.avatars.slice(0, 3).map((avatar, i) => (
                                 <img
                                     key={i}
                                     alt="Member"
-                                    className="w-7 h-7 rounded-full border-2 border-white/10 object-cover ring-2 ring-transparent group-hover:ring-[#1337ec]/30 transition-all duration-500"
+                                    className="w-6 h-6 rounded-full border-2 border-background object-cover"
                                     src={avatar}
                                 />
                             ))}
-                            {Number(room.members) > 3 && (
-                                <div className="w-7 h-7 rounded-full border-2 border-white/10 bg-[#1337ec]/20 flex items-center justify-center text-[10px] font-bold text-[#1337ec]">
+                            {Number(room.members.replace(/[^0-9]/g, '')) > 3 && (
+                                <div className="w-6 h-6 rounded-full bg-primary-custom/40 border-2 border-background flex items-center justify-center text-[8px] font-bold text-primary-foreground-custom">
                                     +{room.members}
                                 </div>
                             )}
                         </div>
-                        <span className="text-[10px] text-white/30 font-medium">{room.members} members</span>
+                        <div className="flex items-center gap-1.5">
+                            <Users size={12} className="text-muted-custom/40" />
+                            <span className="text-xs font-medium text-muted-custom">{room.members} Members</span>
+                        </div>
                     </div>
 
-                    {/* Join button */}
-                    <Link
-                        href={`/community/chat-rooms/${encodeURIComponent(room.title)}`}
-                        className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1337ec] text-white text-xs font-bold rounded-xl shadow-[0_8px_20px_rgba(19,55,236,0.3)] hover:shadow-[0_12px_25px_rgba(19,55,236,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group/btn relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity" />
-                        <span className="relative z-10">Join Room</span>
-                        <span className="relative z-10 inline-block transition-transform duration-300 group-hover/btn:translate-x-1 text-sm">→</span>
-                    </Link>
+                    {/* Tag (Optional simple display) */}
+                    <div className="hidden md:flex gap-1.5">
+                        <span className="text-[10px] text-primary-custom/60 bg-primary-custom/5 px-2 py-0.5 rounded-md font-medium">
+                            #study
+                        </span>
+                    </div>
                 </div>
+
+                {/* Enter Room Button */}
+                <Link
+                    href={`/community/chat-rooms/${encodeURIComponent(room.title)}`}
+                    className="w-full py-2.5 bg-primary-custom rounded-lg font-bold text-sm text-center text-primary-foreground-custom shadow-lg shadow-primary-custom/20 transition-all hover:shadow-primary-custom/40 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group/btn"
+                >
+                    Enter Room
+                    <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
+                </Link>
             </div>
-        </div>
+
+            {/* Background decorative glow */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-custom/5 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary-custom/10 transition-all" />
+        </motion.div>
     );
 }

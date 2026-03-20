@@ -18,14 +18,13 @@ if (!cached) {
 
 export async function connectDB() {
   const MONGO_URI = process.env.DATABASE_URL;
-
   if (!MONGO_URI) {
     throw new Error("MONGO_URI is not set");
   }
 
   if (cached!.conn) return cached!.conn;
 
-  if (!cached!.promise) {
+  if (!cached?.promise) {
     cached!.promise = mongoose.connect(MONGO_URI);
   }
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { LayoutGrid, List, Plus } from "../icons";
 import { SnippetCard } from "./SnippetCard";
 import { SnippetsSidebar } from "./SnippetsSidebar";
 
@@ -25,15 +28,15 @@ export default function SavedSnippets({ data }: SavedSnippetsProps) {
             <h2 className="text-xl font-bold">Your Snippets</h2>
             <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
               <button className="p-1.5 rounded-md bg-[#1337ec] text-white">
-                <span className="material-icons-round text-sm">grid_view</span>
+                <LayoutGrid size={14} />
               </button>
               <button className="p-1.5 rounded-md text-white/40 hover:text-white transition-all">
-                <span className="material-icons-round text-sm">list</span>
+                <List size={14} />
               </button>
             </div>
           </div>
           <button className="flex items-center gap-2 bg-[#1337ec] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-[#1337ec]/20 hover:scale-105 transition-transform">
-            <span className="material-icons-round text-sm">add</span> New Snippet
+            <Plus size={14} /> New Snippet
           </button>
         </div>
 

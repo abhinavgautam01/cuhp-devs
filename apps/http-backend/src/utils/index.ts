@@ -3,6 +3,8 @@ import jwt, { SignOptions } from "jsonwebtoken";
 interface JwtPayload {
   id: string;
   email: string;
+  fullName: string;
+  avatar?: string;
 }
 
 const getJwtConfig = () => {

@@ -4,9 +4,7 @@ import path from "path";
 import { connectDB } from "@repo/db";
 import { updateProblem } from "./updateProblem";
 
-const PROBLEMS_PATH = path.resolve(
-  process.env.PROBLEMS_PATH || "apps/problems"
-);
+const PROBLEMS_PATH = path.resolve("D:/Projects/cuhp-devs/apps/problems");
 
 async function getAllProblemSlugs() {
   const entries = await fs.readdir(PROBLEMS_PATH, {

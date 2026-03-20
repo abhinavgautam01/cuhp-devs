@@ -2,16 +2,115 @@
 @source "../../../packages/ui/src";
 
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-custom: var(--primary);
+  --color-primary-foreground-custom: var(--primary-foreground);
+  --color-primary-hover-custom: var(--primary-hover);
+  --color-muted-custom: var(--muted);
+  --color-card-custom: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: #f6f6f8;
+  --foreground: #0f172a;
+  --primary: #1337ec;
+  --primary-hover: #0a26b0;
+  --primary-foreground: #ffffff;
+  --muted: #64748b;
+  --card-bg: #ffffff;
+  --card-border: rgba(15, 23, 42, 0.08);
+}
+
+.dark {
+  --background: #0a0c16;
+  --foreground: #f8fafc;
+  --primary: #1337ec;
+  --primary-hover: #1e40af;
+  --primary-foreground: #ffffff;
+  --muted: #94a3b8;
+  --card-bg: rgba(10, 12, 22, 0.8);
+  --card-border: rgba(19, 55, 236, 0.1);
+}
+
+.cyber-orange {
+  --background: #1a0f00;
+  --foreground: #fff7ed;
+  --primary: #ff6b00;
+  --primary-hover: #cc5500;
+  --primary-foreground: #ffffff;
+  --muted: #fb923c;
+  --card-bg: rgba(26, 15, 0, 0.8);
+  --card-border: rgba(255, 107, 0, 0.2);
+}
+
+.rose-pine-dawn {
+  --background: #faf4ed;
+  --foreground: #575279;
+  --primary: #d7827e;
+  --primary-hover: #c46c68;
+  --primary-foreground: #ffffff;
+  --muted: #9893a5;
+  --card-bg: #fffaf3;
+  --card-border: rgba(215, 130, 126, 0.2);
+}
+
+.nord-light {
+  --background: #e5e9f0;
+  --foreground: #20242c;
+  --primary: #5e81ac;
+  --primary-hover: #4c6688;
+  --primary-foreground: #ffffff;
+  --muted: #434c5e;
+  --card-bg: #eceff4;
+  --card-border: rgba(94, 129, 172, 0.2);
+}
+
+.solarized-light {
+  --background: #fdf6e3;
+  --foreground: #657b83;
+  --primary: #268bd2;
+  --primary-hover: #1f70a9;
+  --primary-foreground: #ffffff;
+  --muted: #93a1a1;
+  --card-bg: #eee8d5;
+  --card-border: rgba(38, 139, 210, 0.2);
+}
+
+.vaporwave {
+  --background: #2d1b4e;
+  --foreground: #f8fafc;
+  --primary: #01cdfe;
+  --primary-hover: #01a3ca;
+  --primary-foreground: #1a0f2e;
+  --muted: #ff71ce;
+  --card-bg: rgba(45, 27, 78, 0.8);
+  --card-border: rgba(1, 205, 254, 0.3);
+}
+
+.gruvbox-light {
+  --background: #fbf1c7;
+  --foreground: #3c3836;
+  --primary: #af3a03;
+  --primary-hover: #8e2e02;
+  --primary-foreground: #fbf1c7;
+  --muted: #7c6f64;
+  --card-bg: #f9f5d7;
+  --card-border: rgba(175, 58, 3, 0.2);
+}
+
+.vesper-light {
+  --background: #ffffff;
+  --foreground: #080808;
+  --primary: #404040;
+  --primary-hover: #222222;
+  --primary-foreground: #ffffff;
+  --muted: #707070;
+  --card-bg: #f5f5f5;
+  --card-border: rgba(0, 0, 0, 0.1);
 }
 
 html,
@@ -19,8 +118,25 @@ body {
   font-family: 'Space Grotesk', sans-serif;
   max-width: 100vw;
   overflow-x: hidden;
-  background: rgba(59, 130, 246, 0.2);
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .circuit-bg {
@@ -44,18 +160,45 @@ body {
   scrollbar-width: none;
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(19, 55, 236, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(19, 55, 236, 0.4);
+}
+
 
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
