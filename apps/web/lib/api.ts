@@ -48,6 +48,19 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
     if (!response.ok) {
         const errorData = (await response.json().catch(() => ({}))) as ApiErrorPayload;
+
+        // Auto-logout on session expiration or missing token
+        if (response.status === 401) {
+            if (typeof window !== "undefined") {
+                // Clear persistent auth state to prevent redirect loops
+              
+                
+                // Only redirect if not already on sign-in page
+                window.location.href = "/signin";
+                
+            }
+        }
+
         const error = new Error(buildApiErrorMessage(errorData, response.status)) as any;
         error.status = response.status;
         error.errorData = errorData;
