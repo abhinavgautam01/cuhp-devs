@@ -35,7 +35,7 @@ const DEFAULT_USER: User = {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest-user",
 };
 
-export function Sidebar({ user, activeNav, setActiveNav }: SidebarProps) {
+export function Sidebar({ user, activeNav, setActiveNav, onProfileClick }: SidebarProps) {
     const [isHovered, setIsHovered] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const safeUser: User = user ?? DEFAULT_USER;

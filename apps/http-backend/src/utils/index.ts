@@ -10,7 +10,7 @@ interface JwtPayload {
 const getJwtConfig = () => {
   const secret = process.env.JWT_SECRET;
   const expiresIn =
-    (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) || "7d";
+    (process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"]) || "4d";
 
   if (!secret) {
     throw new Error("JWT_SECRET is not defined");

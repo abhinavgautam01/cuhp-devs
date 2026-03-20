@@ -3,6 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 type ApiErrorPayload = {
     message?: string;
     errors?: Record<string, string[] | undefined>;
+    code?: string;
 };
 
 function buildApiErrorMessage(errorData: ApiErrorPayload, status: number) {
@@ -45,6 +46,20 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
     if (!response.ok) {
         const errorData = (await response.json().catch(() => ({}))) as ApiErrorPayload;
+
+        // Auto-logout on session expiration or missing token
+        if (response.status === 401) {
+            if (typeof window !== "undefined") {
+                // Clear persistent auth state to prevent redirect loops
+                localStorage.removeItem("auth-storage");
+                
+                // Only redirect if not already on sign-in page
+                if (!window.location.pathname.includes("/signin")) {
+                    window.location.href = "/signin";
+                }
+            }
+        }
+
         throw new Error(buildApiErrorMessage(errorData, response.status));
     }
 

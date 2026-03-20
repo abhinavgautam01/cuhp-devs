@@ -129,26 +129,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
         );
     }
 
-    // Error State
-    if (error || !dashboardData) {
-        return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center max-w-md p-8 bg-background border border-primary-custom/10 rounded-2xl shadow-lg">
-                    <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <AlertCircle className="text-red-600" size={32} />
-                    </div>
-                    <h2 className="text-xl font-bold mb-2">Failed to Load Dashboard</h2>
-                    <p className="text-slate-500 mb-6">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-2 bg-primary-custom text-white rounded-lg font-medium hover:brightness-110 transition-all"
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (!dashboardData) return null;
 
     const user = userOverride ? { ...dashboardData.user, ...userOverride } : dashboardData.user;
     const { badges, feedItems, events, stats } = dashboardData;

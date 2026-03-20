@@ -22,8 +22,17 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
             const decoded = verifyToken(token);
             req.user = decoded;
             next();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Token verification failed:", error);
+            
+            if (error.name === 'TokenExpiredError') {
+                res.clearCookie('token');
+                return res.status(401).json({ 
+                    message: "Session expired, please login again",
+                    code: "TOKEN_EXPIRED"
+                });
+            }
+            
             return res.status(401).json({ message: "Not authorized, token failed" });
         }
     } catch (error) {
