@@ -20,6 +20,7 @@ import { DynamicIcon } from "../components/Icon";
 
 interface User {
     name: string;
+    handle?: string;
     role: string;
     avatar: string;
     program?: string;

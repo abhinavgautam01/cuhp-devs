@@ -24,6 +24,7 @@ const DEFAULT_SIDEBAR_USER = {
     name: "Guest User",
     role: "Student",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=guest-user",
+    handle: "guest",
 };
 
 export default async function PracticePage({
@@ -43,6 +44,7 @@ export default async function PracticePage({
                 name: resolvedName,
                 role: "Student",
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(resolvedName)}`,
+                handle: profile.handle || DEFAULT_SIDEBAR_USER.handle,
             };
         }
 

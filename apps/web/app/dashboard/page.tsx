@@ -17,6 +17,7 @@ export default function DashboardPage() {
     // Simple user object for the UI component
     const user = {
         name: storeUser?.fullName || "Developer",
+        handle: storeUser?.handle,
         role: "Student",
         avatar: storeUser?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Dev"
     };

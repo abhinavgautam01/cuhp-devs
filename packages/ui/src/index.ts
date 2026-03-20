@@ -18,5 +18,6 @@ export * from "./practice/PracticeFilters";
 export * from "./practice/ProblemInterface";
 export * from "./components/Icon";
 export * from "./icons";
+export { default as ProfileOverview } from "./profile-overview/page";
 
 

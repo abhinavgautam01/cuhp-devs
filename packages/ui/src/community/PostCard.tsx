@@ -50,19 +50,20 @@ export function PostCard({ post, onLike, onBookmark, currentUserId, userAvatar, 
     const postId = post.id || post._id || "";
     const likes = Array.isArray(post.likes) ? post.likes : [];
     const isLiked = currentUserId ? likes.some(id => String(id) === String(currentUserId)) : false;
+    const author = post.author || { fullName: "Anonymous", avatar: "", _id: "" };
     const createdAtLabel = formatPostDate(post.createdAt);
 
     return (
         <article className="bg-card-custom backdrop-blur-md rounded-xl overflow-hidden border border-card-border shadow-lg shadow-black/10 transition-all group/card">
             <div className="p-4 flex gap-4">
                 <img
-                    alt={post.author.fullName}
+                    alt={author.fullName}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-primary-custom/5"
-                    src={((currentUserId && (post.author as any)._id === currentUserId) ? userAvatar : post.author.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.fullName}`}
+                    src={((currentUserId && (author as any)._id === currentUserId) ? userAvatar : author.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${author.fullName}`}
                 />
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-sm text-foreground">{post.author.fullName}</h4>
+                        <h4 className="font-bold text-sm text-foreground">{author.fullName}</h4>
                         {createdAtLabel ? <span className="text-xs text-muted-custom">&bull; {createdAtLabel}</span> : null}
                         <span className={`ml-auto flex items-center gap-1 px-2 py-0.5 ${post.type === "Snippet" ? "bg-blue-500/10 text-blue-400" :
                             post.type === "Win" ? "bg-yellow-500/10 text-yellow-500" :
