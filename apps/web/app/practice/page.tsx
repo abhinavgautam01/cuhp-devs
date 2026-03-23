@@ -3,7 +3,7 @@ import { SidebarWrapper } from "../../components/SidebarWrapper";
 import { ProblemCard } from "@repo/ui/practice/ProblemCard";
 import { PracticeFiltersWrapper } from "../../components/practice/PracticeFiltersWrapper";
 import { Metadata } from "next";
-import { Flame, Bell, SearchX, ChevronDown } from "../../lib/icons";
+import { Flame, SearchX, ChevronDown } from "../../lib/icons";
 
 export const metadata: Metadata = {
     title: "Practice: Coding Challenges",
@@ -101,9 +101,6 @@ export default async function PracticePage({
                             </div>
                             <span className="text-xs font-bold text-primary-custom">0/1</span>
                         </div>
-                        <button className="p-2 text-slate-400 hover:text-white transition-colors">
-                            <Bell size={20} />
-                        </button>
                     </div>
                 </div>
 

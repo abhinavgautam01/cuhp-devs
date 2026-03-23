@@ -14,6 +14,7 @@ import {
     MoreHorizontal
 } from "../icons";
 import { DynamicIcon } from "../components/Icon";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -39,18 +40,29 @@ interface Badge {
     label: string;
 }
 
+type ActivityType = "post" | "solved" | "streak" | "achievement" | "announcement" | "share";
+
 interface FeedItem {
     id: string;
-    type: "achievement" | "announcement" | "share";
+    type: ActivityType;
     user?: {
+        id?: string;
         name: string;
         avatar: string;
     };
     content: string;
+    time: string; // Keep time for compatibility or update to timestamp
     highlight?: string;
-    time: string;
     meta?: string;
     image?: string;
+    
+    // Type-specific fields
+    postPreview?: string;z
+    postType?: "Snippet" | "Question" | "Win";
+    problemName?: string;
+    difficulty?: "easy" | "medium" | "hard";
+    streakCount?: number;
+    isCurrentUser?: boolean;
 }
 
 interface Event {
@@ -73,6 +85,237 @@ interface DashboardData {
         activeStudents: number;
         registeredCount: number;
     };
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatRelativeTime(dateInput: string | Date): string {
+    const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    if (Number.isNaN(date.getTime())) return "recently";
+
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+
+    return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+    }).format(date);
+}
+
+// ─── Sub-Components ─────────────────────────────────────────────────────────────
+
+function ActivityItem({ item }: { item: FeedItem }) {
+    const relativeTime = formatRelativeTime(item.time);
+    
+    const renderContent = () => {
+        switch (item.type) {
+            case "post":
+                const postTypeColors = {
+                    Snippet: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+                    Question: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+                    Win: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                };
+                return (
+                    <div className="space-y-3">
+                        <p className="text-sm text-foreground/90">
+                            <span className="font-bold hover:underline cursor-pointer">{item.user?.name}</span>
+                            {" "}
+                            {item.content.replace(item.user?.name || "User", "").trim()}
+                        </p>
+                        <div className="flex items-center gap-3">
+                            {item.postType && (
+                                <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${postTypeColors[item.postType] || postTypeColors.Snippet}`}>
+                                    {item.postType}
+                                </span>
+                            )}
+                        </div>
+                        {item.postPreview && (
+                            <div className="p-3 bg-background/50 rounded-lg border border-primary-custom/5 text-xs text-slate-500 line-clamp-2 italic">
+                                "{item.postPreview}"
+                            </div>
+                        )}
+                    </div>
+                );
+            case "solved":
+                const difficultyColors = {
+                    easy: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                    medium: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+                    hard: "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                };
+                return (
+                    <div className="space-y-3">
+                        <p className="text-sm text-foreground/90">
+                            <span className="font-bold hover:underline cursor-pointer">{item.user?.name}</span>
+                            {" solved "}
+                            <span className="font-semibold text-primary-custom">{item.problemName}</span>
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${difficultyColors[item.difficulty || "easy"]}`}>
+                                {item.difficulty || "Easy"}
+                            </span>
+                            <button className="px-4 py-1.5 text-xs bg-background/60 border border-primary-custom/20 text-primary-custom rounded-full hover:bg-primary-custom/5 transition-all font-medium">
+                                View Solution
+                            </button>
+                        </div>
+                    </div>
+                );
+            case "streak":
+                return (
+                    <div className="space-y-2">
+                        <p className="text-sm text-foreground/90">
+                            <span className="font-bold hover:underline cursor-pointer">{item.user?.name}</span>
+                            {" is on a "}
+                            <span className="font-bold text-orange-500">{item.streakCount}-day</span>
+                            {" streak 🔥"}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                            <Flame size={14} className="text-orange-500 animate-pulse" />
+                            <span>Keep it up!</span>
+                        </div>
+                    </div>
+                );
+            default:
+                // Fallback for achievement, announcement, share
+                return (
+                    <div className="space-y-2">
+                        <p className="text-sm">
+                            {item.user && <span className="font-bold hover:underline cursor-pointer">{item.user.name} </span>}
+                            {item.content}{" "}
+                            {item.highlight && (
+                                <span className="text-primary-custom font-medium">{item.highlight}</span>
+                            )}
+                        </p>
+                        {item.type === "achievement" && (
+                            <div className="flex gap-2">
+                                <button className="px-3 py-1 text-xs bg-primary-custom/10 text-primary-custom rounded-full hover:bg-primary-custom/20 transition-colors">
+                                    Congratulate
+                                </button>
+                            </div>
+                        )}
+                        {item.image && (
+                            <div className="mt-2 rounded-xl overflow-hidden h-24 w-full bg-background/60 border border-primary-custom/5 relative">
+                                <img src={item.image} alt="Meta" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                            </div>
+                        )}
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+            className={`p-4 bg-background/40 group hover:bg-background/60 rounded-2xl border transition-all duration-300 flex gap-4 items-start backdrop-blur-sm ${
+                item.isCurrentUser ? "border-primary-custom/30 shadow-sm shadow-primary-custom/5" : "border-primary-custom/5"
+            }`}
+        >
+            <div className="relative">
+                <img
+                    src={item.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.user?.name}`}
+                    alt={item.user?.name}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-primary-custom/5"
+                />
+                {item.type === "streak" && (
+                    <div className="absolute -top-1 -right-1 bg-orange-500 rounded-full p-0.5 border-2 border-background">
+                        <Flame size={8} className="text-white" />
+                    </div>
+                )}
+            </div>
+            <div className="flex-1">
+                {renderContent()}
+                <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+                    <span>{relativeTime}</span>
+                    {item.meta && (
+                        <>
+                            <span>•</span>
+                            <span>{item.meta}</span>
+                        </>
+                    )}
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
+function ActivityFeed({ items }: { items: FeedItem[] }) {
+    const [filter, setFilter] = useState<ActivityType | "all">("all");
+
+    const filteredItems = items.filter(item => {
+        if (filter === "all") return true;
+        return item.type === filter;
+    });
+
+    const tabs: { id: ActivityType | "all"; label: string }[] = [
+        { id: "all", label: "All" },
+        { id: "post", label: "Posts" },
+        { id: "solved", label: "Solved" },
+        { id: "streak", label: "Streaks" },
+    ];
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold">Activity Feed</h3>
+                <div className="flex bg-background/50 p-1 rounded-xl border border-primary-custom/10 backdrop-blur-md relative">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setFilter(tab.id)}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all relative z-10 ${
+                                filter === tab.id
+                                    ? "text-white"
+                                    : "text-slate-500 hover:text-primary-custom"
+                            }`}
+                        >
+                            {filter === tab.id && (
+                                <motion.div
+                                    layoutId="activeTab"
+                                    className="absolute inset-0 bg-primary-custom rounded-lg shadow-lg shadow-primary-custom/20"
+                                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                />
+                            )}
+                            <span className="relative z-20">{tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-4 min-h-[400px]">
+                <AnimatePresence mode="popLayout">
+                    {filteredItems.length === 0 ? (
+                        <motion.div
+                            key="empty"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="p-12 text-center bg-background/20 rounded-2xl border border-dashed border-primary-custom/10"
+                        >
+                            <FileText className="mx-auto mb-3 opacity-20 text-primary-custom" size={40} />
+                            <p className="text-slate-500 font-medium">No activity in this category yet</p>
+                        </motion.div>
+                    ) : (
+                        filteredItems.map(item => (
+                            <ActivityItem key={item.id} item={item} />
+                        ))
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
 }
 
 // ─── API Functions ─────────────────────────────────────────────────────────────
@@ -227,79 +470,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
                         </div>
 
                         {/* Activity Feed */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-bold">Activity Feed</h3>
-                                <button className="text-sm text-[#1337ec] font-medium hover:underline">View All</button>
-                            </div>
-
-                            <div className="space-y-4">
-                                {feedItems.length === 0 ? (
-                                    <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-                                        <FileText className="mx-auto mb-2 opacity-20" size={48} />
-                                        <p>No recent activity</p>
-                                    </div>
-                                ) : (
-                                    feedItems.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="p-4 bg-background/40 rounded-xl flex gap-4 items-start backdrop-blur-sm"
-                                        >
-                                            {item.user ? (
-                                                <img
-                                                    src={item.user.avatar}
-                                                    alt={item.user.name}
-                                                    className="w-10 h-10 rounded-full"
-                                                />
-                                            ) : (
-                                                <div className="w-10 h-10 bg-primary-custom/20 rounded-full flex items-center justify-center">
-                                                    <Megaphone className="text-primary-custom" size={20} />
-                                                </div>
-                                            )}
-
-                                            <div className="flex-1">
-                                                <p className="text-sm">
-                                                    {item.user && <span className="font-bold">{item.user.name} </span>}
-                                                    {item.content}{" "}
-                                                    {item.highlight && (
-                                                        <span className="text-primary-custom font-medium">{item.highlight}</span>
-                                                    )}
-                                                </p>
-                                                <p className="text-xs text-slate-500 mt-1">
-                                                    {item.time} • {item.meta}
-                                                </p>
-
-                                                {item.type === "achievement" && (
-                                                    <div className="mt-3 flex gap-2">
-                                                        <button className="px-3 py-1 text-xs bg-primary-custom/10 text-primary-custom rounded-full hover:bg-primary-custom/20 transition-colors">
-                                                            Congratulate
-                                                        </button>
-                                                        <button className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
-                                                            Discuss
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {item.image && (
-                                                    <div className="mt-4 rounded-xl overflow-hidden h-32 w-full bg-background/60 border border-primary-custom/5 relative">
-                                                        <img
-                                                            src={item.image}
-                                                            alt="Announcement"
-                                                            className="absolute inset-0 w-full h-full object-cover opacity-50"
-                                                        />
-                                                        <div className="absolute inset-0 flex items-end p-4 bg-linear-to-t from-background to-transparent">
-                                                            <span className="text-foreground text-xs font-medium">
-                                                                Join {stats.registeredCount}+ students registered
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
+                        <ActivityFeed items={feedItems} />
                     </section>
 
                     {/* Right Sidebar */}
@@ -402,7 +573,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
                         </div>
 
                         {/* Upgrade Promo */}
-                        <div className="p-4 bg-primary-custom rounded-2xl text-white relative overflow-hidden group shadow-lg shadow-primary-custom/20">
+                        {/* <div className="p-4 bg-primary-custom rounded-2xl text-white relative overflow-hidden group shadow-lg shadow-primary-custom/20">
                             <div className="relative z-10">
                                 <h4 className="font-bold mb-1">Upgrade to Nexus+</h4>
                                 <p className="text-xs text-blue-100 mb-4">
@@ -413,7 +584,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
                                 </button>
                             </div>
                             <DynamicIcon name="workspace_premium" className="absolute -bottom-4 -right-4 text-white/10 group-hover:rotate-12 transition-transform duration-500" size={72} />
-                        </div>
+                        </div> */}
 
 
                     </section>
