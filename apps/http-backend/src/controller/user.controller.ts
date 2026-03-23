@@ -144,52 +144,62 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
                 xpTarget: 100,
                 streakDays: 0,
             },
-            badges: [
-                { id: "1", icon: "school", color: "#1337ec", label: "Freshman" },
-                { id: "2", icon: "code", color: "#10b981", label: "First Code" },
-                { id: "3", icon: "local_fire_department", color: "#f59e0b", label: "Hot Streak" },
-            ],
-            feedItems: [
-                {
-                    id: "f1",
-                    type: "announcement",
-                    content: "Welcome to the new semester! Check out your updated curriculum.",
-                    time: "2h ago",
-                    meta: "University",
-                    highlight: "New Curriculum",
-                },
-                {
-                    id: "f2",
-                    type: "achievement",
+            badges: [],
+            feedItems: await (async () => {
+                // Fetch recent accepted submissions
+                const submissions = await Submission.find({ status: "Accepted" })
+                    .sort({ createdAt: -1 })
+                    .limit(10)
+                    .populate("userId", "fullName avatar")
+                    .populate("problemId", "title difficulty");
+
+                // Fetch recent posts
+                const posts = await Post.find({})
+                    .sort({ createdAt: -1 })
+                    .limit(10)
+                    .populate("author", "fullName avatar");
+
+                // Map to FeedItems
+                const submissionItems: any[] = submissions.map(s => ({
+                    id: s._id.toString(),
+                    type: "solved",
                     user: {
-                        name: "System",
-                        avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=system",
+                        id: (s.userId as any)?._id.toString(),
+                        name: (s.userId as any)?.fullName || "Unknown User",
+                        avatar: (s.userId as any)?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
                     },
-                    content: "You've successfully set up your academic profile!",
-                    time: "Just now",
-                    meta: "Profile",
-                    highlight: "Onboarding Complete",
-                }
-            ],
-            events: [
-                {
-                    id: "e1",
-                    title: "Intro to Web Architecture",
-                    date: "24",
-                    month: "FEB",
-                    time: "10:00 AM",
-                    location: "Lab A",
-                    isHighlighted: true,
-                },
-                {
-                    id: "e2",
-                    title: "Coding Club Meetup",
-                    date: "26",
-                    month: "FEB",
-                    time: "4:00 PM",
-                    location: "Online",
-                }
-            ],
+                    problemName: (s.problemId as any)?.title || "Problem",
+                    difficulty: ((s.problemId as any)?.difficulty || "Easy").toLowerCase(),
+                    content: `${(s.userId as any)?.fullName || "User"} solved ${(s.problemId as any)?.title || "a problem"}`,
+                    time: (s as any).createdAt.toISOString(),
+                    meta: "Practice"
+                }));
+
+                const postItems: any[] = posts.map(p => ({
+                    id: p._id.toString(),
+                    type: "post",
+                    user: {
+                        id: (p.author as any)?._id.toString(),
+                        name: (p.author as any)?.fullName || "Unknown User",
+                        avatar: (p.author as any)?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                    },
+                    content: p.type === "Win" 
+                        ? `${(p.author as any)?.fullName || "User"} shared a new achievement!` 
+                        : p.type === "Question"
+                        ? `${(p.author as any)?.fullName || "User"} asked a new question.`
+                        : `${(p.author as any)?.fullName || "User"} shared a new post.`,
+                    postPreview: p.content.substring(0, 100),
+                    postType: p.type, // "Snippet", "Question", "Win"
+                    time: (p as any).createdAt.toISOString(),
+                    meta: "Community"
+                }));
+
+                // Combine and sort
+                return [...submissionItems, ...postItems]
+                    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+                    .slice(0, 15);
+            })(),
+            events: [],
             stats: {
                 topPercentile: 0,
                 activeStudents: 124,
