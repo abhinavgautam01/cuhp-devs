@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { TrendingUp, Trophy } from "../icons";
+import { TrendingUp, Trophy, CheckCircle2 } from "../icons";
 import { DynamicIcon } from "../components/Icon";
 
 interface ProblemCardProps {
@@ -14,6 +14,7 @@ interface ProblemCardProps {
         successRate?: string;
         tags?: string[];
         isDaily?: boolean;
+        isSolved?: boolean;
     };
     onSolve?: (slug: string) => void;
     href?: string;
@@ -48,6 +49,12 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
     return (
         <div className={`group relative bg-background/40 backdrop-blur-sm shadow-sm hover:shadow-xl hover:-translate-y-1 ${problem.isDaily ? 'hover:shadow-primary-custom/10' : 'hover:shadow-black/5'} rounded-2xl p-6 transition-all duration-300 flex flex-col border border-primary-custom/5 hover:border-primary-custom/20`}>
 
+            {/* Solved Badge - Top Right Corner */}
+            {problem.isSolved && (
+                <div className="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full p-2 shadow-lg z-10">
+                    <CheckCircle2 size={20} />
+                </div>
+            )}
 
             <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-xl ${problem.isDaily ? 'bg-primary-custom/15' : 'bg-primary-custom/10'}`}>
@@ -64,8 +71,13 @@ export function ProblemCard({ problem, onSolve, href }: ProblemCardProps) {
                 </div>
             </div>
 
-            <h3 className={`text-lg font-bold mb-2 transition-colors group-hover:text-primary-custom`}>
+            <h3 className={`text-lg font-bold mb-2 transition-colors group-hover:text-primary-custom ${problem.isSolved ? 'text-emerald-500' : ''}`}>
                 {problem.title}
+                {problem.isSolved && (
+                    <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500">
+                        SOLVED
+                    </span>
+                )}
             </h3>
 
             <p className="text-sm text-slate-400 mb-6 flex-1 line-clamp-2">

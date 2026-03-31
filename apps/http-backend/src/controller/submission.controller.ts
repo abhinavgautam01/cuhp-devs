@@ -5,6 +5,7 @@ import {
   SubmissionResult,
   TestCase,
   Language,
+  User,
 } from "@repo/db";
 
 import { verifyToken } from "../utils";
@@ -19,7 +20,7 @@ export const createSubmission = async (req: Request, res: Response) => {
     }
 
     const { id: userId } = verifyToken(token);
-    const { problemSlug, code, language } = req.body;
+    const { problemSlug, code, language, status: reqStatus } = req.body;
 
     if (!problemSlug || !code || !language) {
       return res.status(400).json({ message: "Missing fields" });
@@ -31,9 +32,26 @@ export const createSubmission = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Problem not found" });
     }
 
-    const lang = await Language.findOne({ name: language });
+    // Robust language lookup: check name and aliases (case-insensitive)
+    let lang = await Language.findOne({ 
+      $or: [
+        { name: { $regex: new RegExp(`^${language}$`, "i") } },
+        { aliases: { $regex: new RegExp(`^${language}$`, "i") } }
+      ]
+    });
+
+    // Fallback: substring match if exact match fails
+    if (!lang) {
+      lang = await Language.findOne({
+        $or: [
+          { name: { $regex: new RegExp(language, "i") } },
+          { aliases: { $regex: new RegExp(language, "i") } }
+        ]
+      });
+    }
 
     if (!lang) {
+      console.error(`Invalid language requested: "${language}"`);
       return res.status(400).json({ message: "Invalid language" });
     }
 
@@ -51,13 +69,17 @@ export const createSubmission = async (req: Request, res: Response) => {
     // Build executable code
     const finalCode = buildExecutableCode(problem.slug, lang.runtime, code);
 
+    // Initial status - if request says "Accepted" (already verified client-side/runner), we use it.
+    // Otherwise fallback to PENDING for official worker execution.
+    const initialStatus = reqStatus === "Accepted" ? SubmissionResult.ACCEPTED : SubmissionResult.PENDING;
+
     // Create submission
     const submission = await Submission.create({
       userId,
       problemId: problem._id,
       code,
       language,
-      status: SubmissionResult.PENDING,
+      status: initialStatus,
 
       // store execution metadata for worker
       runtime: lang.runtime,
@@ -68,9 +90,65 @@ export const createSubmission = async (req: Request, res: Response) => {
       expectedOutputs: testcases.map((tc) => tc.output),
     });
 
+    let newStreak = 0;
+    let alreadySolved = false;
+    let isNewSolve = false;
+
+    // STREAK LOGIC - Only increment for first-time unique problem solves
+    if (initialStatus === SubmissionResult.ACCEPTED) {
+      const user = await User.findById(userId);
+      if (user) {
+        // Check if user has already solved this problem
+        const problemIdStr = problem._id.toString();
+        alreadySolved = user.solvedProblems.some(
+          (solvedId) => solvedId.toString() === problemIdStr
+        );
+
+        if (!alreadySolved) {
+          // This is a new solve! Add to solvedProblems array
+          user.solvedProblems.push(problem._id);
+          isNewSolve = true;
+
+          // Only increment streak for first-time solves
+          const now = new Date();
+          const lastUpdate = user.lastStreakUpdate;
+          
+          if (!lastUpdate) {
+            // First time ever
+            user.streak = 1;
+          } else {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const lastDate = new Date(lastUpdate);
+            lastDate.setHours(0, 0, 0, 0);
+            
+            const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+            
+            if (diffInDays === 1) {
+              // Consecutive day
+              user.streak += 1;
+            } else if (diffInDays > 1) {
+              // Missed a day, restart from 1
+              user.streak = 1;
+            }
+            // if diffInDays === 0, it's the same day, don't increment
+          }
+          
+          user.lastStreakUpdate = now;
+        }
+        
+        await user.save();
+        newStreak = user.streak;
+      }
+    }
+
     return res.status(201).json({
       message: "Submission created",
       submissionId: submission._id,
+      streak: newStreak,
+      alreadySolved,
+      isNewSolve
     });
 
   } catch (err) {

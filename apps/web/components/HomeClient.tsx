@@ -23,9 +23,9 @@ export default function HomeClient() {
                     <ParticleLogo
                         width={2000}
                         height={1500}
-                        logoSrc=""
-                        logoWidth={500}
-                        logoHeight={500}
+                        logoSrc="/Eagle3.png"
+                        logoWidth={700}
+                        logoHeight={700}
                         primaryText="CUHP"
                         secondaryText="DEVS"
                         primaryFontSize={400}

@@ -4,6 +4,7 @@ import { ProblemCard } from "@repo/ui/practice/ProblemCard";
 import { PracticeFiltersWrapper } from "../../components/practice/PracticeFiltersWrapper";
 import { Metadata } from "next";
 import { Flame, SearchX, ChevronDown } from "../../lib/icons";
+import { PracticeHeader } from "../../components/practice/PracticeHeader";
 
 export const metadata: Metadata = {
     title: "Practice: Coding Challenges",
@@ -18,6 +19,7 @@ interface Problem {
     description: string;
     solved?: number;
     tags?: string[];
+    isSolved?: boolean;
 }
 
 const DEFAULT_SIDEBAR_USER = {
@@ -34,10 +36,11 @@ export default async function PracticePage({
 }) {
     let sidebarUser = DEFAULT_SIDEBAR_USER;
     let problems: Problem[] = [];
+    let currentStreak = 0;
+    let hasSolvedToday = false;
 
     try {
-        // Fetch user for sidebar
-        const profile = await serverApiFetch("/user/profile").catch(() => null);
+        const profile = await serverApiFetch("/user/profile").catch(() => null) as any;
         if (profile) {
             const resolvedName = profile.fullName || profile.name || DEFAULT_SIDEBAR_USER.name;
             sidebarUser = {
@@ -48,8 +51,26 @@ export default async function PracticePage({
             };
         }
 
+        // Identify current streak (with server-side validation)
+        currentStreak = profile?.streak || 0;
+        if (profile?.lastStreakUpdate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const lastDate = new Date(profile.lastStreakUpdate);
+            lastDate.setHours(0, 0, 0, 0);
+            const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+            if (diffInDays > 1) currentStreak = 0;
+        }
+
         // Fetch problems
         problems = await serverApiFetch("/problems") as Problem[];
+        
+        // Check if user solved any problem today
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const submissionsToday = await serverApiFetch(`/user/submissions?since=${startOfToday.getTime()}`).catch(() => []) as any[];
+        hasSolvedToday = submissionsToday.some(s => s.status === "Accepted");
+
         console.log(`[PracticePage] Fetched ${problems.length} problems`);
     } catch (error) {
         console.error("Failed to fetch initial data for Practice page:", error);
@@ -67,42 +88,24 @@ export default async function PracticePage({
         );
     }
 
-    // Category mapping logic if backend tags are resolved
-    // For now, we simulate basic category filtering if tags matched strings
     if (category && category !== "All Topics") {
-        // Since tags are ObjectIds in DB right now, we can't easily filter by "Arrays & Strings" 
-        // unless we hardcode some slugs or the backend provides string tags.
-        // For demonstration, we just show all if filtering mismatch for now.
+        // Simple string matching for categories/tags
+        filteredProblems = filteredProblems.filter(p => 
+            p.tags?.some(tag => tag.toLowerCase() === category.toLowerCase())
+        );
     }
 
     // Identify a "daily" problem (random or first one)
     const dailyProblem = filteredProblems.length > 0 ? { ...filteredProblems[0], isDaily: true } : null;
     const otherProblems = filteredProblems.slice(1);
 
-    return (
-        <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
-            <SidebarWrapper user={sidebarUser} />
+  return (
+    <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
+        <SidebarWrapper user={sidebarUser} />
 
-            <main className="flex-1 flex flex-col min-w-0">
-                {/* Header Section */}
-                <div className="bg-background/80 backdrop-blur-md border-b border-primary-custom/10 px-8 py-3 flex items-center justify-between z-10">
-                    <div className="flex items-center gap-4">
-                        <div className=" px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-gray-500/20">
-                            <Flame className="text-white" size={18} />
-                            <span className="text-white font-bold text-sm">0-Day Streak</span>
-                        </div>
-                        <p className="text-sm text-slate-400 hidden sm:block">Solve your daily problem to maintain your ranking!</p>
-                    </div>
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Goal</span>
-                            <div className="w-24 h-1.5 bg-background border border-primary-custom/5 rounded-full overflow-hidden">
-                                <div className="w-2/3 h-full bg-primary-custom rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]"></div>
-                            </div>
-                            <span className="text-xs font-bold text-primary-custom">0/1</span>
-                        </div>
-                    </div>
-                </div>
+        <main className="flex-1 flex flex-col min-w-0">
+            {/* Header Section */}
+            <PracticeHeader />
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto p-8 space-y-12 scrollbar-hide">

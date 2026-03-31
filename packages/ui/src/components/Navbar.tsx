@@ -20,34 +20,21 @@ export default function Navbar() {
     const isActive = (href: string) => pathname === href;
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-none backdrop-blur-md border-b border-cyan-500/20">
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/50">
             <div className="max-w-400 mx-auto px-6 lg:px-12">
                 <div className="flex items-center justify-between h-20">
 
                     {/* Logo Section */}
                     <Link href="/" className="flex items-center gap-4 group">
                         <div className="relative">
-                            <div className="w-12 h-12 relative z-10">
-                                <svg viewBox="0 0 100 100" className="w-full h-full transition-transform duration-500 group-hover:scale-110">
-                                    <defs>
-                                        <linearGradient id="phoenixGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#ef4444" />
-                                            <stop offset="100%" stopColor="#eab308" />
-                                        </linearGradient>
-                                    </defs>
-                                    <path
-                                        d="M50 10 L35 40 L20 50 L35 55 L30 75 L45 65 L50 85 L55 65 L70 75 L65 55 L80 50 L65 40 Z"
-                                        fill="url(#phoenixGradient)"
-                                        className="drop-shadow-[0_0_12px_rgba(239,68,68,0.8)]"
-                                    />
-                                </svg>
+                            <div className="w-40 h-25 relative z-10">
+                                <img
+                                    src="/Eagle2.svg"
+                                    alt="CUHP DEVS"
+                                    className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                                />
                             </div>
-                            <div className="absolute inset-0 bg-red-600/20 blur-2xl rounded-full group-hover:bg-red-600/40 transition-colors" />
-                        </div>
-
-                        <div className="flex flex-col">
-                            <span className="text-white text-xl font-black tracking-tighter">CUHP</span>
-                            <span className="text-[10px] text-cyan-400 font-bold tracking-[0.3em] uppercase">DEVS</span>
+                            <div className="absolute inset-0 bg-orange-500/5 blur-xl rounded-full group-hover:bg-orange-500/10 transition-colors" />
                         </div>
                     </Link>
 

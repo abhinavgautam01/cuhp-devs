@@ -75,6 +75,14 @@ export const THEMES = [
         border: "border-black/10",
         text: "text-black",
     },
+    {
+        id: "github-dark",
+        name: "GitHub Dark",
+        desc: "Developer Pro",
+        bg: "bg-[#0d1117]",
+        border: "border-[#30363d]",
+        text: "text-[#c9d1d9]",
+    },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];

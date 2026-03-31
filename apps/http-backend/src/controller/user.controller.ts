@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post } from "@repo/db/index.js";
+import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post, SubmissionResult } from "@repo/db/index.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -130,6 +130,28 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
 
         //This is Mock dashboard data based on user profile
         // In a real app, this would be fetched from various collections
+        // Calculate if streak is still active
+        let liveStreak = user.streak || 0;
+        if (user.lastStreakUpdate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const lastDate = new Date(user.lastStreakUpdate);
+            lastDate.setHours(0, 0, 0, 0);
+            
+            const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+            // If missed more than 1 day, the streak is broken (0).
+            // (Note: if diffInDays is 1, it's "yesterday", streak is still active until today ends)
+            if (diffInDays > 1) {
+                liveStreak = 0;
+            }
+        }
+
+        // Fetch XP/Points (simulated calculation for now - solved * 100)
+        const solvedCount = await Submission.countDocuments({ userId, status: SubmissionResult.ACCEPTED });
+        const xp = solvedCount * 100;
+        const level = Math.floor(xp / 1000) + 1;
+        const xpTarget = level * 1000;
+
         const dashboardData = {
             user: {
                 name: user.fullName,
@@ -139,41 +161,58 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
                 program: user.program || "Not selected",
                 semester: user.semester || "Not selected",
                 interests: user.interests || [],
-                level: 0,
-                xp: 0,
-                xpTarget: 100,
-                streakDays: 0,
+                level: level,
+                xp: xp,
+                xpTarget: xpTarget,
+                streakDays: liveStreak,
             },
             badges: [],
             feedItems: await (async () => {
-                // Fetch recent accepted submissions
-                const submissions = await Submission.find({ status: "Accepted" })
-                    .sort({ createdAt: -1 })
-                    .limit(10)
-                    .populate("userId", "fullName avatar")
-                    .populate("problemId", "title difficulty");
+                // Fetch recent accepted submissions (deduplicated by user-problem combination)
+                const submissions = await Submission.aggregate([
+                    { $match: { status: SubmissionResult.ACCEPTED } },
+                    { $sort: { createdAt: -1 } },
+                    { $group: { 
+                        _id: { userId: "$userId", problemId: "$problemId" },
+                        latestSubmission: { $first: "$$ROOT" }
+                    }},
+                    { $replaceRoot: { newRoot: "$latestSubmission" } },
+                    { $sort: { createdAt: -1 } },
+                    { $limit: 15 },
+                    { $lookup: { from: "users", localField: "userId", foreignField: "_id", as: "userId" } },
+                    { $lookup: { from: "problems", localField: "problemId", foreignField: "_id", as: "problemId" } },
+                    { $unwind: { path: "$userId", preserveNullAndEmptyArrays: true } },
+                    { $unwind: { path: "$problemId", preserveNullAndEmptyArrays: true } }
+                ]);
+                
+                console.log(`Dashboard API - Found ${submissions.length} unique accepted submissions`);
 
                 // Fetch recent posts
                 const posts = await Post.find({})
                     .sort({ createdAt: -1 })
                     .limit(10)
                     .populate("author", "fullName avatar");
+                    
+                console.log(`Dashboard API - Found ${posts.length} posts`);
 
                 // Map to FeedItems
                 const submissionItems: any[] = submissions.map(s => ({
                     id: s._id.toString(),
                     type: "solved",
                     user: {
-                        id: (s.userId as any)?._id.toString(),
-                        name: (s.userId as any)?.fullName || "Unknown User",
-                        avatar: (s.userId as any)?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                        id: s.userId?._id?.toString() || s.userId?.toString(),
+                        name: s.userId?.fullName || "Unknown User",
+                        avatar: s.userId?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
                     },
-                    problemName: (s.problemId as any)?.title || "Problem",
-                    difficulty: ((s.problemId as any)?.difficulty || "Easy").toLowerCase(),
-                    content: `${(s.userId as any)?.fullName || "User"} solved ${(s.problemId as any)?.title || "a problem"}`,
-                    time: (s as any).createdAt.toISOString(),
+                    problemName: s.problemId?.title || "Problem",
+                    problemSlug: s.problemId?.slug || "",
+                    difficulty: (s.problemId?.difficulty || "EASY").toLowerCase(),
+                    content: `${s.userId?.fullName || "User"} solved ${s.problemId?.title || "a problem"}`,
+                    time: s.createdAt?.toISOString ? s.createdAt.toISOString() : new Date(s.createdAt).toISOString(),
                     meta: "Practice"
                 }));
+                
+                console.log(`Dashboard API - Mapped ${submissionItems.length} submission items`);
 
                 const postItems: any[] = posts.map(p => ({
                     id: p._id.toString(),
@@ -193,11 +232,18 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
                     time: (p as any).createdAt.toISOString(),
                     meta: "Community"
                 }));
+                
+                console.log(`Dashboard API - Mapped ${postItems.length} post items`);
 
                 // Combine and sort
-                return [...submissionItems, ...postItems]
+                const combinedItems = [...submissionItems, ...postItems]
                     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
                     .slice(0, 15);
+                    
+                console.log(`Dashboard API - Combined ${combinedItems.length} feed items`);
+                console.log(`Dashboard API - User streak: ${liveStreak}, XP: ${xp}, Level: ${level}`);
+
+                return combinedItems;
             })(),
             events: [],
             stats: {
@@ -219,23 +265,12 @@ export const getCommunityFeed = async (req: AuthRequest, res: Response) => {
         const feedData = {
             trendingTags: ["#javascript", "#rust", "#algorithms", "#internship", "#react_tips", "#python"],
             posts: [
-                {
-                },
-                {
-
-                }
             ],
             leaderboard: [
-                {
-
-                },
-                {
-
-                }
+            
             ],
             events: [
-                { id: "ev1", month: "Nov", day: "12", title: "Mock Interview Night", time: "6:00 PM • CS Hall" },
-                { id: "ev2", month: "Nov", day: "15", title: "Rust Workshop", time: "4:30 PM • Zoom" }
+           
             ]
         };
         return res.status(200).json(feedData);
@@ -434,7 +469,7 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
         // 1. Solved Problems Count 
         const solvedSubmissions = await Submission.distinct("problemId", { 
             userId, 
-            status: "Accepted" 
+            status: SubmissionResult.ACCEPTED 
         });
 
         // 2. Total Points (Solved count * 10 for now)
@@ -442,13 +477,14 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
 
         // 3. Department Rank (Based on solved problems)
         const allUserSolves = await Submission.aggregate([
-            { $match: { status: "Accepted" } },
+            { $match: { status: SubmissionResult.ACCEPTED } },
             { $group: { _id: "$userId", count: { $addToSet: "$problemId" } } },
             { $project: { _id: 1, solveCount: { $size: "$count" } } },
             { $sort: { solveCount: -1 } }
         ]);
         
-        const rank = allUserSolves.findIndex(u => u._id.toString() === userId.toString()) + 1 || allUserSolves.length + 1;
+        const userIndex = allUserSolves.findIndex(u => u._id?.toString() === userId.toString());
+        const rank = userIndex !== -1 ? userIndex + 1 : allUserSolves.length + 1;
 
         // 4. Activity Heatmap (Start from March 2026)
         const startDate = new Date(2026, 2, 1);
@@ -463,40 +499,21 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
         ]);
 
         // 5. Current Streak
-        const allSubmissions = await Submission.find({ userId })
-            .sort({ createdAt: -1 })
-            .select("createdAt");
         
-        let currentStreak = 0;
-        const latestSubmission = allSubmissions[0];
-        if (latestSubmission) {
+        let currentStreak = user.streak || 0;
+        if (user.lastStreakUpdate) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
-            let lastDate = new Date(latestSubmission.createdAt);
+            const lastDate = new Date(user.lastStreakUpdate);
             lastDate.setHours(0, 0, 0, 0);
-            
             const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
-            
-            if (diffInDays <= 1) {
-                currentStreak = 1;
-                const uniqueDates = Array.from(new Set(allSubmissions.map(s => {
-                    const d = new Date(s.createdAt);
-                    d.setHours(0, 0, 0, 0);
-                    return d.getTime();
-                }))).sort((a, b) => (b as number) - (a as number));
-
-                for (let i = 0; i < uniqueDates.length - 1; i++) {
-                    const current = uniqueDates[i] as number;
-                    const next = uniqueDates[i+1] as number;
-                    if (current - next === 1000 * 3600 * 24) {
-                        currentStreak++;
-                    } else {
-                        break;
-                    }
-                }
+            if (diffInDays > 1) {
+                currentStreak = 0; // Broken streak
             }
         }
+            
+            
+            
 
         // 6. Submissions Today
         const startOfToday = new Date();
@@ -527,10 +544,17 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
             ...recentPosts.map(p => ({
                 id: p._id,
                 type: "post",
-                content: `Shared a post: ${ p.content.substring(0, 50) }...`,
+                content: `Shared a post: ${ (p.content || "").substring(0, 50) }...`,
                 time: (p as any).createdAt
             }))
-        ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 10);
+        ]
+        .filter(item => item.time != null)
+        .sort((a, b) => {
+            const timeA = a.time instanceof Date ? a.time.getTime() : new Date(a.time).getTime();
+            const timeB = b.time instanceof Date ? b.time.getTime() : new Date(b.time).getTime();
+            return timeB - timeA;
+        })
+        .slice(0, 10);
 
                 // 8. Total XP (Solved count * 100)
                 const totalXp = solvedSubmissions.length * 100;
@@ -570,9 +594,9 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
                         recentActivity
                     }
                 });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Get profile by handle error:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error", error: error.message, stack: error.stack });
     }
 };
 
@@ -604,5 +628,56 @@ export const searchUsers = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Search error:", error);
         return res.status(500).json({ message: "Error searching users" });
+    }
+};
+
+/**
+ * Get user submissions since a specific timestamp
+ * Query param: ?since=<timestamp in milliseconds>
+ */
+export const getUserSubmissions = async (req: AuthRequest, res: Response) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        const { since } = req.query;
+        const sinceTimestamp = since ? parseInt(since as string, 10) : 0;
+
+        if (isNaN(sinceTimestamp)) {
+            return res.status(400).json({ message: "Invalid 'since' parameter. Must be a valid timestamp." });
+        }
+
+        const sinceDate = new Date(sinceTimestamp);
+
+        // Fetch submissions since the given timestamp
+        const submissions = await Submission.find({
+            userId,
+            createdAt: { $gte: sinceDate }
+        })
+        .populate("problemId", "title slug difficulty")
+        .sort({ createdAt: -1 })
+        .lean();
+
+        // Format response
+        const formattedSubmissions = submissions.map(sub => ({
+            id: sub._id,
+            problemId: (sub.problemId as any)?._id,
+            problemTitle: (sub.problemId as any)?.title || "Unknown",
+            problemSlug: (sub.problemId as any)?.slug || "",
+            difficulty: (sub.problemId as any)?.difficulty || "EASY",
+            language: sub.language,
+            status: sub.status,
+            createdAt: (sub as any).createdAt,
+            testcasesPassed: sub.testcasesPassed,
+            totalTestcases: sub.totalTestcases
+        }));
+
+        return res.status(200).json(formattedSubmissions);
+
+    } catch (error) {
+        console.error("Get user submissions error:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
