@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Flame, Send, Play, RefreshCcw } from "../icons";
+import { ArrowLeft, Flame, Send, Play, RefreshCcw, CheckCircle2, Trophy, Star } from "../icons";
+import { apiFetch } from "../../../../apps/web/lib/api";
 
 import { DescriptionPanel } from "./DescriptionPanel";
 import { EditorPanel } from "./EditorPanel";
@@ -29,6 +30,7 @@ interface ProblemData {
     output: string;
     explanation?: string;
   }>;
+  isSolved?: boolean;
 }
 
 interface ProblemInterfaceProps {
@@ -38,9 +40,10 @@ interface ProblemInterfaceProps {
     avatar: string;
     streak: number;
   };
+  onSuccess?: (newStreak: number) => void;
 }
 
-export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, user }) => {
+export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, user, onSuccess }) => {
   const router = useRouter();
   const availableLanguages = Object.keys(problem.defaultCode);
   const defaultLanguage = availableLanguages[0] || "python";
@@ -51,6 +54,10 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
   const [resetKey, setResetKey] = useState(0);
   const [output, setOutput] = useState<any | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [currentStreak, setCurrentStreak] = useState(user?.streak || 0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAlreadySolved, setIsAlreadySolved] = useState(false);
 
   // Resizing logic
   const [leftWidth, setLeftWidth] = useState(480);
@@ -105,6 +112,12 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
   }, [resize, stopResizing]);
 
   useEffect(() => {
+    if (user?.streak !== undefined) {
+      setCurrentStreak(user.streak);
+    }
+  }, [user?.streak]);
+
+  useEffect(() => {
     const nextLanguage = Object.keys(problem.defaultCode)[0] || "python";
     setLanguage(nextLanguage);
     setCode(problem.defaultCode[nextLanguage] ?? FALLBACK_CODE);
@@ -127,11 +140,8 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
       setIsRunning(true);
       setOutput([{ testcase: 0, status: 'Running', stdout: "Running..." }]);
 
-      const res = await fetch("http://localhost:3001/runCode", {
+      const data = await apiFetch("/runCode", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           problemSlug: problem.slug,
           language,
@@ -139,19 +149,182 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
         }),
       });
 
-      const data = await res.json();
-
       if (data.results) {
         setOutput(data.results);
+        return data.results;
       } else if (data.message) {
-        setOutput([{ testcase: 0, status: 'Error', stderr: data.message }]);
+        const errResult = [{ testcase: 0, status: 'Error', stderr: data.message }];
+        setOutput(errResult);
+        return errResult;
       }
     } catch (err) {
-      setOutput([{ testcase: 0, status: 'Error', stderr: "Execution Error" }]);
+      const errResult = [{ testcase: 0, status: 'Error', stderr: "Execution Error" }];
+      setOutput(errResult);
+      return errResult;
     } finally {
       setIsRunning(false);
     }
   };
+
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      const results = await runCode();
+
+      if (!results || results.length === 0) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Check if all test cases passed
+      const allPassed = results.every((res: any) => res.status === 'Accepted');
+
+      if (allPassed) {
+        // Call submission API to persist
+        const data = await apiFetch("/submissions", {
+          method: "POST",
+          body: JSON.stringify({
+            problemSlug: problem.slug,
+            language,
+            code,
+            status: "Accepted"
+          }),
+        });
+
+        // Check if this is a new solve or already solved
+        if (data.alreadySolved) {
+          // Show "already solved" state
+          setIsAlreadySolved(true);
+          setIsCelebrating(true);
+        } else if (data.isNewSolve) {
+          // This is a new solve! Show celebration
+          setIsAlreadySolved(false);
+          setIsCelebrating(true);
+          
+          if (typeof data.streak === 'number') {
+            setCurrentStreak(data.streak);
+            onSuccess?.(data.streak);
+          }
+        }
+
+        // Hide modal after 7 seconds (slightly longer for already-solved message)
+        setTimeout(() => setIsCelebrating(false), 7000);
+      }
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      const message = err.message || "Failed to submit. Please try again.";
+      setOutput([{ testcase: 0, status: 'Error', stderr: `Submission Error: ${message}` }]);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleShowSolution = async () => {
+    try {
+      const data = await apiFetch(`/problems/${problem.slug}/solution`);
+      
+      // Close the celebration modal
+      setIsCelebrating(false);
+      
+      // Display solution in a nice format (you can enhance this with a modal later)
+      alert(`Solution for ${data.problemTitle}:\n\n${data.note}\n\nOnce solutions are added to the database, they will appear here with full explanations and code examples.`);
+      
+    } catch (err: any) {
+      console.error("Failed to fetch solution:", err);
+      alert("Failed to load solution. " + (err.message || "Please try again."));
+    }
+  };
+
+  const Celebration = () => (
+    <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center overflow-hidden">
+      {!isAlreadySolved && [...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ scale: 0, opacity: 1, x: 0, y: 0 }}
+          animate={{
+            scale: [0, 1, 0.5],
+            opacity: [0, 1, 0],
+            x: (Math.random() - 0.5) * window.innerWidth,
+            y: (Math.random() - 0.5) * window.innerHeight,
+            rotate: Math.random() * 360,
+          }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            repeat: Infinity,
+            repeatDelay: Math.random() * 2
+          }}
+          className="absolute"
+        >
+          {i % 3 === 0 ? <Star className="text-amber-400" size={24} /> :
+            i % 3 === 1 ? <Trophy className="text-yellow-500" size={32} /> :
+              <CheckCircle2 className="text-emerald-500" size={20} />}
+        </motion.div>
+      ))}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        className="bg-background/80 backdrop-blur-xl border-4 border-primary-custom/20 p-12 rounded-[3rem] shadow-2xl flex flex-col items-center gap-6 pointer-events-auto"
+      >
+        {isAlreadySolved ? (
+          // Already Solved State
+          <>
+            <div className="relative">
+              <CheckCircle2 size={100} className="text-emerald-500" />
+            </div>
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-black mb-2 text-foreground">Problem Already Solved!</h2>
+              <p className="text-lg text-slate-400 max-w-md">
+                You've already solved this problem. No additional streak or points earned.
+              </p>
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={handleShowSolution}
+                  className="px-6 py-3 bg-primary-custom/10 hover:bg-primary-custom/20 border border-primary-custom/30 rounded-xl font-bold text-foreground transition-all"
+                >
+                  Show Solution
+                </button>
+                <button
+                  onClick={() => setIsCelebrating(false)}
+                  className="px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl font-bold text-emerald-500 transition-all"
+                >
+                  Attempt Again
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          // New Solve State (Original Celebration)
+          <>
+            <div className="relative">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+              >
+                <Trophy size={120} className="text-yellow-500" />
+              </motion.div>
+              <motion.div
+                className="absolute -top-4 -right-4 bg-emerald-500 text-white rounded-full p-3 shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <CheckCircle2 size={32} />
+              </motion.div>
+            </div>
+            <div className="text-center">
+              <h2 className="text-4xl font-black mb-2 bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">EXCELLENT!</h2>
+              <p className="text-xl font-bold text-foreground">All Test Cases Passed</p>
+              <div className="mt-6 flex items-center gap-3 justify-center">
+                <Flame className="text-amber-500" size={32} />
+                <span className="text-3xl font-black text-amber-500">{currentStreak}-DAY STREAK</span>
+              </div>
+            </div>
+          </>
+        )}
+      </motion.div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden transition-colors duration-300">
@@ -168,7 +341,15 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
           <div className="flex items-center gap-3">
             <span className="text-slate-500 text-sm font-medium">Problems</span>
             <span className="text-slate-700 text-lg">/</span>
-            <span className="text-sm font-bold text-foreground">{problem.title}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-foreground">{problem.title}</span>
+              {problem.isSolved && (
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+                  <CheckCircle2 className="text-emerald-500" size={14} />
+                  <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Solved</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -176,7 +357,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
           {user && (
             <div className="flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/20 rounded-full shadow-sm">
               <Flame className="text-amber-500" size={16} />
-              <span className="text-xs font-black text-amber-500 uppercase tracking-widest">{user.streak} Day Streak</span>
+              <span className="text-xs font-black text-amber-500 uppercase tracking-widest">{currentStreak} Day Streak</span>
             </div>
           )}
           <div className="flex items-center gap-3">
@@ -279,11 +460,18 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
                 {isRunning ? "Running..." : "Run Code"}
               </button>
             </div>
-            <button className="px-8 py-2 bg-primary-custom hover:brightness-110 text-white rounded-lg text-sm font-bold shadow-lg shadow-primary-custom/20 transition-all transform active:scale-95 flex items-center gap-2">
-              <Send size={16} />
-              Submit
+            <button
+              onClick={handleSubmit}
+              disabled={isRunning || isSubmitting}
+              className="px-8 py-2 bg-primary-custom hover:brightness-110 text-white rounded-lg text-sm font-bold shadow-lg shadow-primary-custom/20 transition-all transform active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center gap-2 group"
+            >
+              <Send size={16} className={isSubmitting ? "animate-pulse" : "group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"} />
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
+          <AnimatePresence>
+            {isCelebrating && <Celebration />}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>

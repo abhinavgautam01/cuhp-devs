@@ -8,7 +8,8 @@ interface User {
     handle?: string;
     avatar?: string;
     bio?: string;
-    theme?: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light";
+    theme?: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light" | "github-dark";
+    streakDays?: number;
     onboardingCompleted: boolean;
     program?: string;
     semester?: string;
@@ -19,11 +20,12 @@ interface User {
 interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
-    theme: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light";
+    theme: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light" | "github-dark";
     isSidebarCollapsed: boolean;
     setUser: (user: any | null) => void;
-    setTheme: (theme: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light") => void;
+    setTheme: (theme: "light" | "dark" | "cyber-orange" | "rose-pine-dawn" | "nord-light" | "solarized-light" | "vaporwave" | "gruvbox-light" | "vesper-light" | "github-dark") => void;
     toggleSidebarCollapsed: () => void;
+    updateStreak: (streak: number) => void;
     logout: () => void;
 }
 
@@ -38,6 +40,12 @@ export const useAuthStore = create<AuthState>()(
                 if (user && !user.id && user._id) {
                     user.id = String(user._id);
                 }
+                
+                // Map backend 'streak' to frontend 'streakDays'
+                if (user && typeof user.streak === 'number') {
+                    user.streakDays = user.streak;
+                }
+
                 set({
                     user,
                     isAuthenticated: !!user,
@@ -46,6 +54,9 @@ export const useAuthStore = create<AuthState>()(
             },
             setTheme: (theme) => set({ theme }),
             toggleSidebarCollapsed: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
+            updateStreak: (streak: number) => set((state) => ({
+                user: state.user ? { ...state.user, streakDays: streak } : null
+            })),
             logout: () => set({ user: null, isAuthenticated: false }),
         }),
         {

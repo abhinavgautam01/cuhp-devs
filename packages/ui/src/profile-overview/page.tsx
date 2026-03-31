@@ -195,6 +195,12 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
 
+    // Filter out submissions that are already shown in "Submissions Today" to avoid duplicates
+    const submissionTodayIds = new Set(user.submissionsToday.map(sub => sub.id));
+    const filteredRecentActivity = user.recentActivity.filter(activity => 
+        activity.type !== 'submission' || !submissionTodayIds.has(activity.id)
+    );
+
     useEffect(() => {
         const fetchResults = async () => {
              if (searchQuery.trim().length > 1) {
@@ -516,8 +522,8 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                         </h3>
                         
                         <div className="space-y-6 relative ml-4 border-l-2 border-muted-custom/10 pl-6">
-                            {user.recentActivity.length > 0 ? (
-                                user.recentActivity.map((activity) => (
+                            {filteredRecentActivity.length > 0 ? (
+                                filteredRecentActivity.map((activity) => (
                                     <div key={activity.id} className="relative">
                                         <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-card-custom border-2 border-primary-custom z-10" />
                                         <div className="flex flex-col gap-1">

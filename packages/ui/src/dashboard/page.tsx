@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "../components/Sidebar";
 import {
     AlertCircle,
@@ -57,9 +58,10 @@ interface FeedItem {
     image?: string;
     
     // Type-specific fields
-    postPreview?: string;z
+    postPreview?: string;
     postType?: "Snippet" | "Question" | "Win";
     problemName?: string;
+    problemSlug?: string;
     difficulty?: "easy" | "medium" | "hard";
     streakCount?: number;
     isCurrentUser?: boolean;
@@ -115,7 +117,7 @@ function formatRelativeTime(dateInput: string | Date): string {
 
 // ─── Sub-Components ─────────────────────────────────────────────────────────────
 
-function ActivityItem({ item }: { item: FeedItem }) {
+function ActivityItem({ item, router }: { item: FeedItem; router: any }) {
     const relativeTime = formatRelativeTime(item.time);
     
     const renderContent = () => {
@@ -155,18 +157,26 @@ function ActivityItem({ item }: { item: FeedItem }) {
                 };
                 return (
                     <div className="space-y-3">
-                        <p className="text-sm text-foreground/90">
-                            <span className="font-bold hover:underline cursor-pointer">{item.user?.name}</span>
-                            {" solved "}
-                            <span className="font-semibold text-primary-custom">{item.problemName}</span>
-                        </p>
-                        <div className="flex items-center gap-3">
-                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${difficultyColors[item.difficulty || "easy"]}`}>
-                                {item.difficulty || "Easy"}
-                            </span>
-                            <button className="px-4 py-1.5 text-xs bg-background/60 border border-primary-custom/20 text-primary-custom rounded-full hover:bg-primary-custom/5 transition-all font-medium">
-                                View Solution
-                            </button>
+                        <div className="flex-1">
+                            <p className="text-sm text-foreground/90">
+                                <span className="font-bold hover:underline cursor-pointer">{item.user?.name}</span>
+                                {" solved "}
+                                <span className="font-semibold text-primary-custom hover:underline cursor-pointer">{item.problemName}</span>
+                            </p>
+                            <div className="flex items-center gap-3 mt-2">
+                                <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${difficultyColors[item.difficulty || "easy"]}`}>
+                                    {item.difficulty || "Easy"}
+                                </span>
+                                {item.meta && (
+                                    <span className="text-xs text-muted-custom">{item.meta}</span>
+                                )}
+                                <button 
+                                    onClick={() => router.push(`/problem/${item.problemSlug}`)}
+                                    className="px-4 py-1.5 text-xs bg-background/60 border border-primary-custom/20 text-primary-custom rounded-full hover:bg-primary-custom/5 transition-all font-medium"
+                                >
+                                    View Problem
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );
@@ -251,7 +261,7 @@ function ActivityItem({ item }: { item: FeedItem }) {
     );
 }
 
-function ActivityFeed({ items }: { items: FeedItem[] }) {
+function ActivityFeed({ items, router }: { items: FeedItem[]; router: any }) {
     const [filter, setFilter] = useState<ActivityType | "all">("all");
 
     const filteredItems = items.filter(item => {
@@ -309,7 +319,7 @@ function ActivityFeed({ items }: { items: FeedItem[] }) {
                         </motion.div>
                     ) : (
                         filteredItems.map(item => (
-                            <ActivityItem key={item.id} item={item} />
+                            <ActivityItem key={item.id} item={item} router={router} />
                         ))
                     )}
                 </AnimatePresence>
@@ -337,11 +347,12 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ isCollapsed, onToggle, user: userOverride, activeNav, setActiveNav }: DashboardProps) {
+    const router = useRouter();
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch dashboard data on mount
+    // Fetch dashboard data on mount and poll every 30 seconds
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
@@ -358,6 +369,18 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
         };
 
         loadDashboardData();
+
+        // Poll for updates every 30 seconds
+        const interval = setInterval(async () => {
+            try {
+                const data = await fetchDashboardData();
+                setDashboardData(data);
+            } catch (err) {
+                console.error("Dashboard refresh error:", err);
+            }
+        }, 30000);
+
+        return () => clearInterval(interval);
     }, []);
 
     // Loading State
@@ -470,7 +493,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
                         </div>
 
                         {/* Activity Feed */}
-                        <ActivityFeed items={feedItems} />
+                        <ActivityFeed items={feedItems} router={router} />
                     </section>
 
                     {/* Right Sidebar */}

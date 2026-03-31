@@ -9,7 +9,8 @@ import {
     getChatMessages, 
     getChatRoomMembers,
     getProfileByHandle,
-    searchUsers
+    searchUsers,
+    getUserSubmissions
 } from "../controller/user.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -20,6 +21,7 @@ router.get("/profile", protect, getProfile);
 router.get("/suggest", searchUsers);
 router.get("/profile/handle/:handle", getProfileByHandle);
 router.get("/dashboard", protect, getDashboardData);
+router.get("/submissions", protect, getUserSubmissions);
 router.get("/community/feed", protect, getCommunityFeed);
 router.get("/community/rooms", protect, getCommunityRooms);
 router.get("/community/snippets", protect, getCommunitySnippets);

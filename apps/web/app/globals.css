@@ -113,6 +113,17 @@
   --card-border: rgba(0, 0, 0, 0.1);
 }
 
+.github-dark {
+  --background: #0d1117;
+  --foreground: #c9d1d9;
+  --primary: #2f81f7;
+  --primary-hover: #58a6ff;
+  --primary-foreground: #ffffff;
+  --muted: #8b949e;
+  --card-bg: #161b22;
+  --card-border: #30363d;
+}
+
 html,
 body {
   font-family: 'Space Grotesk', sans-serif;
@@ -201,4 +212,27 @@ html::-webkit-scrollbar {
     opacity: 1;
     transform: translateX(0);
   }
+}
+.streak-gradient {
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 50%, #8b5cf6 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-primary-custom {
+  color: var(--primary);
+}
+
+.bg-primary-custom {
+  background-color: var(--primary);
+}
+
+.border-primary-custom {
+  border-color: var(--primary);
 }

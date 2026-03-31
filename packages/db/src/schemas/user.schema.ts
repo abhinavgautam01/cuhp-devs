@@ -77,12 +77,25 @@ export const UserSchema = new Schema<IUser>(
     },
     theme: {
       type: String,
-      enum: ["light", "dark", "cyber-orange", "rose-pine-dawn", "nord-light", "solarized-light", "vaporwave", "gruvbox-light", "vesper-light"],
+      enum: ["light", "dark", "cyber-orange", "rose-pine-dawn", "nord-light", "solarized-light", "vaporwave", "gruvbox-light", "vesper-light", "github-dark"],
       default: "dark",
     },
     savedPosts: [{
       type: Schema.Types.ObjectId,
       ref: "Post",
+      default: []
+    }],
+    streak: {
+      type: Number,
+      default: 0
+    },
+    lastStreakUpdate: {
+      type: Date,
+      default: null
+    },
+    solvedProblems: [{
+      type: Schema.Types.ObjectId,
+      ref: "Problem",
       default: []
     }]
   },
@@ -90,3 +103,6 @@ export const UserSchema = new Schema<IUser>(
     timestamps: true
   }
 );
+
+// Add index for faster lookups when checking if a problem is solved
+UserSchema.index({ solvedProblems: 1 });

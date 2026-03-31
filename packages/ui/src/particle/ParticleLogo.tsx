@@ -32,11 +32,11 @@ interface ParticleLogoProps {
 }
 
 export default function ParticleLogo({
-    width = 2000,
-    height = 1500,
-    logoSrc = "/logo.png",
-    logoWidth = 400,
-    logoHeight = 400,
+    width = 3000,
+    height = 2000,
+    logoSrc = "/Eagle.png",
+    logoWidth = 1000,
+    logoHeight = 1000,
     primaryText = "CUHP",
     secondaryText = "DEVS",
     primaryFontSize = 1000,
@@ -72,7 +72,7 @@ export default function ParticleLogo({
             // 1. Draw Image Logo
             // Shifting as far left as possible (50px padding)
             const logoX = 50;
-            const logoY = height / 2 - (logoHeight / 2);
+            const logoY = height / 1.9 - (logoHeight / 1.6);
 
             if (img.complete && img.naturalWidth > 0) {
                 ctx.drawImage(img, logoX, logoY, logoWidth, logoHeight);
@@ -80,7 +80,7 @@ export default function ParticleLogo({
                 // Fallback while loading
                 ctx.fillStyle = "#f97316";
                 ctx.beginPath();
-                ctx.moveTo(logoX + logoWidth / 2, logoY);
+                ctx.moveTo(logoX + logoWidth / 1.6, logoY);
                 ctx.lineTo(logoX + logoWidth, logoY + logoHeight);
                 ctx.lineTo(logoX, logoY + logoHeight);
                 ctx.closePath();
@@ -88,9 +88,9 @@ export default function ParticleLogo({
             }
 
             // 2. Draw Text
-            // Anchored immediately after the logo
-            const textX = logoX + logoWidth + 20;
-            const textY = height / 2 + (primaryFontSize / 3.5);
+            // Anchored immediately after the logo, with a negative offset to overlap padding
+            const textX = logoX + logoWidth - (logoWidth * 0.3); 
+            const textY = height / 1.8 + (primaryFontSize / 4);
 
             ctx.font = `bold ${primaryFontSize}px Inter, sans-serif`;
             ctx.fillStyle = "white";
@@ -98,7 +98,7 @@ export default function ParticleLogo({
 
             ctx.font = `bold ${secondaryFontSize}px Inter, sans-serif`;
             ctx.fillStyle = "#eab308";
-            ctx.fillText(secondaryText, textX, textY + secondaryFontSize + 10);
+            ctx.fillText(secondaryText, textX, textY + (secondaryFontSize * 0.8) + 10);
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
