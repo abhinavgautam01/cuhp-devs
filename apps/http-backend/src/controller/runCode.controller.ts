@@ -211,7 +211,7 @@ export const runCode = async (req: Request, res: Response) => {
               lang.runtime,
               lang.version,
               finalCode,
-              tc.input
+              tc.input ?? ""
             );
 
             const compile = pistonResult.compile;
@@ -254,7 +254,7 @@ export const runCode = async (req: Request, res: Response) => {
               testcase: i + 1,
               stdout: run.stdout?.trim(),
               stderr,
-              status: getExecutionStatus(run, tc.output),
+              status: getExecutionStatus(run, tc.output ?? ""),
               time: run.cpu_time,
               memory: run.memory,
             };

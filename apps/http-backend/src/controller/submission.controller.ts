@@ -65,7 +65,7 @@ export const createSubmission = async (req: Request, res: Response) => {
       executableCode: finalCode,
 
       totalTestcases: testcases.length,
-      expectedOutputs: testcases.map((tc) => tc.output),
+      expectedOutputs: testcases.map((tc: any) => tc.output),
     });
 
     return res.status(201).json({

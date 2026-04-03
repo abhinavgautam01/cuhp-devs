@@ -242,7 +242,7 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
         }
 
         const allRooms = await ChatRoom.find({}).lean();
-        const roomMap = new Map(allRooms.map(r => [r.name, r]));
+        const roomMap = new Map<string, any>(allRooms.map((r: any) => [r.name, r]));
 
         const trendingRooms = [
             {
@@ -267,14 +267,14 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
                     "https://lh3.googleusercontent.com/aida-public/AB6AXuCfpcVKWjO4AEFrvRQbTlN2oFj7Cg9JZIGigtJzhKAjVEVG4qtYijisaj3cfaD0tJ23nms7jQi3WiRtD-WrjQZp8Cb9oRV1f7TOWJoXypeK5IFQL6HgIcoflooNNfDvsjFRiLCMNTQ8ftdkBYmoznaZQizRJGzXc9gsvfnW_X7OziwtMw6_WlfcaiDyHLWTrZXkDUwWiz_BWN5femIxz4bnoGrtD9e5qdcAsJ3XZek9lMAh2GE7wSCJ6SLaJG6iqFopyOsBtPfmp4Yy",
                 ]
             }
-        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
+        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id?.toString() || Math.random().toString() }));
 
         const communityRooms = [
             { title: "Machine Learning", members: "0", icon: "smart_toy" },
             { title: "Blockchain", members: "0", icon: "hub" },
             { title: "Data Structures & Algorithms", members: "0", icon: "memory" },
             { title: "Deep Learning", members: "0", icon: "javascript" }
-        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
+        ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id?.toString() || Math.random().toString() }));
 
         const roomsData = {
             trendingRooms,
@@ -438,7 +438,7 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
             { $sort: { solveCount: -1 } }
         ]);
         
-        const rank = allUserSolves.findIndex(u => u._id.toString() === userId.toString()) + 1 || allUserSolves.length + 1;
+        const rank = allUserSolves.findIndex((u: any) => u._id.toString() === userId.toString()) + 1 || allUserSolves.length + 1;
 
         // 4. Activity Heatmap (Start from March 2026)
         const startDate = new Date(2026, 2, 1);
@@ -470,7 +470,7 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
             
             if (diffInDays <= 1) {
                 currentStreak = 1;
-                const uniqueDates = Array.from(new Set(allSubmissions.map(s => {
+                const uniqueDates = Array.from(new Set(allSubmissions.map((s: any) => {
                     const d = new Date(s.createdAt);
                     d.setHours(0, 0, 0, 0);
                     return d.getTime();
@@ -507,14 +507,14 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
             .limit(5);
 
         const recentActivity = [
-            ...recentSubmissions.map(s => ({
+            ...recentSubmissions.map((s: any) => ({
                 id: s._id,
                 type: "submission",
                 content: `Solved problem: ${ (s.problemId as any)?.title || "Unknown" }`,
                 time: (s as any).createdAt,
                 status: s.status
             })),
-            ...recentPosts.map(p => ({
+            ...recentPosts.map((p: any) => ({
                 id: p._id,
                 type: "post",
                 content: `Shared a post: ${ p.content.substring(0, 50) }...`,
@@ -550,7 +550,7 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
                         heatmapData,
                         totalXp,
                         badgesCount,
-                        submissionsToday: submissionsToday.map(s => ({
+                        submissionsToday: submissionsToday.map((s: any) => ({      
                             id: s._id,
                             title: (s.problemId as any)?.title || "Unknown",
                             difficulty: (s.problemId as any)?.difficulty || "Easy",
@@ -582,7 +582,7 @@ export const searchUsers = async (req: Request, res: Response) => {
         .select('fullName handle avatar profile')
         .limit(10);
 
-        const results = users.map(user => ({
+        const results = users.map((user: any) => ({
             _id: user._id,
             fullName: user.fullName,
             handle: user.handle,
