@@ -55,27 +55,34 @@ interface ProfileOverviewProps {
     onSearch?: (query: string) => Promise<{ users: any[] }>;
 }
 
-const StatCard = ({ icon: Icon, label, value, subValue, color }: { 
+const StatCard = ({ icon: Icon, label, value, subValue, color, isStreak, streakCount }: { 
     icon: any; 
     label: string; 
     value: string | number; 
     subValue?: string;
     color: string;
-}) => (
-    <motion.div 
-        whileHover={{ y: -5, scale: 1.02 }}
-        className="bg-card-custom border border-card-border p-5 rounded-2xl flex flex-col gap-3 transition-all duration-300"
-    >
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-            <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div>
-            <p className="text-muted-custom text-sm font-medium">{label}</p>
-            <h3 className="text-2xl font-bold mt-1 text-foreground">{value}</h3>
-            {subValue && <p className="text-xs text-muted-custom mt-1">{subValue}</p>}
-        </div>
-    </motion.div>
-);
+    isStreak?: boolean;
+    streakCount?: number;
+}) => {
+    const hasGlow = isStreak && (streakCount ?? 0) > 1;
+    const iconClass = hasGlow ? 'streak-gradient shadow-lg shadow-amber-500/30' : color;
+    
+    return (
+        <motion.div 
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="bg-card-custom border border-card-border p-5 rounded-2xl flex flex-col gap-3 transition-all duration-300"
+        >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconClass}`}>
+                <Icon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+                <p className="text-muted-custom text-sm font-medium">{label}</p>
+                <h3 className="text-2xl font-bold mt-1 text-foreground">{value}</h3>
+                {subValue && <p className="text-xs text-muted-custom mt-1">{subValue}</p>}
+            </div>
+        </motion.div>
+    );
+};
 
 const Heatmap = ({ data }: { data: { date: string; count: number }[] }) => {
     // Start from March 1, 2026
@@ -435,6 +442,8 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                     value={`${user.currentStreak} Days`} 
                     subValue="Keep it up!"
                     color="bg-orange-500" 
+                    isStreak={true}
+                    streakCount={user.currentStreak}
                 />
                 <StatCard 
                     icon={Code2} 

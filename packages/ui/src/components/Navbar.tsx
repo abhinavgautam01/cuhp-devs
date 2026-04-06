@@ -6,7 +6,11 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Terminal } from "../icons";
 
-export default function Navbar() {
+type NavbarProps = {
+    className?: string;
+};
+
+export default function Navbar({ className = "" }: NavbarProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
@@ -20,7 +24,7 @@ export default function Navbar() {
     const isActive = (href: string) => pathname === href;
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/50">
+        <nav className={`fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/50 ${className}`}>
             <div className="max-w-400 mx-auto px-6 lg:px-12">
                 <div className="flex items-center justify-between h-20">
 
@@ -65,22 +69,19 @@ export default function Navbar() {
                         <div className="relative group mb-10 mr-40 ">
                             {/* The container has a fixed width to prevent layout shift */}
 
-                            {/* Icon State - Centered by default */}
-                            <div className="absolute inset-0 w-10 h-10 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 transition-all duration-500 group-hover:opacity-0 group-hover:scale-75 group-hover:blur-sm">
-                                <Terminal className="text-cyan-400 w-5 h-5" />
-                            </div>
+                          
 
                             {/* Login Button - Slides in/Scales up */}
                             <Link
                                 href="/signin"
-                                className="absolute text-xl w-35 h-8 inset-0 flex items-center justify-center px-4 py-2 text-[10px] f tracking-[0.2em] text-cyan-400 rounded-lg opacity-0 scale-90 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 shadow-[0_0_20px_rgba(37,99,235,0.4)] whitespace-nowrap mt-1"
+                                className="absolute text-xl w-35 h-8 inset-0 flex items-center justify-center  py-2 text-[10px] f tracking-[0.2em] text-cyan-400 rounded-lg scale-90 translate-y-2 transition-all duration-300 group-hover:opacity-100  shadow-[0_0_20px_rgba(37,99,235,0.4)] "
                             >
                                 PORTAL LOGIN
                                 <span className="ml-2 animate-pulse">_</span>
                             </Link>
 
                             {/* Optional: Cyber Decor (Corner borders that appear on hover) */}
-                            <div className="absolute -inset-[1px] border border-cyan-500/0 rounded-lg group-hover:border-cyan-500/50 transition-colors duration-500 pointer-events-none" />
+                            
                         </div>
 
                         {/* Contact Us Button */}

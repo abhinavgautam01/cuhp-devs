@@ -69,9 +69,9 @@ export const createSubmission = async (req: Request, res: Response) => {
     // Build executable code
     const finalCode = buildExecutableCode(problem.slug, lang.runtime, code);
 
-    // Initial status - if request says "Accepted" (already verified client-side/runner), we use it.
+    // Initial status - if request says "Accepted"/"ACCEPTED" (already verified client-side/runner), we use it.
     // Otherwise fallback to PENDING for official worker execution.
-    const initialStatus = reqStatus === "Accepted" ? SubmissionResult.ACCEPTED : SubmissionResult.PENDING;
+    const initialStatus = reqStatus?.toUpperCase() === "ACCEPTED" ? SubmissionResult.ACCEPTED : SubmissionResult.PENDING;
 
     // Create submission
     const submission = await Submission.create({
@@ -97,24 +97,40 @@ export const createSubmission = async (req: Request, res: Response) => {
     // STREAK LOGIC - Only increment for first-time unique problem solves
     if (initialStatus === SubmissionResult.ACCEPTED) {
       const user = await User.findById(userId);
+      console.log("=== STREAK UPDATE DEBUG ===");
+      console.log("User ID:", userId);
+      console.log("User found:", !!user);
+      
       if (user) {
+        console.log("Current user streak:", user.streak);
+        console.log("Last streak update:", user.lastStreakUpdate);
+        console.log("Solved problems count:", user.solvedProblems.length);
+        
         // Check if user has already solved this problem
         const problemIdStr = problem._id.toString();
         alreadySolved = user.solvedProblems.some(
           (solvedId) => solvedId.toString() === problemIdStr
         );
+        
+        console.log("Problem ID:", problemIdStr);
+        console.log("Already solved:", alreadySolved);
 
         if (!alreadySolved) {
           // This is a new solve! Add to solvedProblems array
           user.solvedProblems.push(problem._id);
           isNewSolve = true;
+          console.log("NEW SOLVE! Adding to solvedProblems");
 
           // Only increment streak for first-time solves
           const now = new Date();
           const lastUpdate = user.lastStreakUpdate;
           
+          console.log("Now:", now);
+          console.log("Last update:", lastUpdate);
+          
           if (!lastUpdate) {
             // First time ever
+            console.log("First time ever - setting streak to 1");
             user.streak = 1;
           } else {
             const today = new Date();
@@ -125,22 +141,38 @@ export const createSubmission = async (req: Request, res: Response) => {
             
             const diffInDays = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
             
+            console.log("Today (normalized):", today);
+            console.log("Last date (normalized):", lastDate);
+            console.log("Diff in days:", diffInDays);
+            
             if (diffInDays === 1) {
               // Consecutive day
+              console.log("Consecutive day - incrementing streak");
               user.streak += 1;
             } else if (diffInDays > 1) {
               // Missed a day, restart from 1
+              console.log("Missed days - resetting streak to 1");
               user.streak = 1;
+            } else {
+              console.log("Same day - no streak increment");
             }
             // if diffInDays === 0, it's the same day, don't increment
           }
           
           user.lastStreakUpdate = now;
+          console.log("Updated streak to:", user.streak);
+          console.log("Updated lastStreakUpdate to:", user.lastStreakUpdate);
         }
         
+        console.log("Saving user...");
         await user.save();
+        console.log("User saved successfully");
         newStreak = user.streak;
+        console.log("Final newStreak value:", newStreak);
+      } else {
+        console.log("ERROR: User not found!");
       }
+      console.log("=== END STREAK DEBUG ===");
     }
 
     return res.status(201).json({

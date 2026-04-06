@@ -12,6 +12,7 @@ import {
     Settings
 } from "../icons";
 
+
 interface User {
     name: string;
     role: string;
@@ -85,9 +86,9 @@ export function Sidebar({ user, activeNav, setActiveNav, onProfileClick }: Sideb
             className={`border-r shrink-0 border-primary-custom/10 bg-background/80 backdrop-blur-xl top-0 h-screen flex flex-col py-6 px-4 overflow-hidden`}
         >
             {/* Logo */}
-            <div className={`flex items-center px-2 mb-10 w-full ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                <div className="w-10 h-10 bg-primary-custom rounded-lg flex items-center justify-center shadow-lg shadow-primary-custom/20 shrink-0">
-                    <SquareTerminal className="text-white" />
+            <div className={`flex items-center px-2 mb-10 w-full ${isCollapsed ? "justify-center" : "gap-0"}`}>
+                <div className="flex-shrink-0 flex items-center justify-center">
+                    <img src="/Eagle.svg" alt="CUHP DEVS Logo" className="w-15 h-15 object-contain" />
                 </div>
                 <AnimatePresence>
                     {!isCollapsed && (
@@ -95,9 +96,9 @@ export function Sidebar({ user, activeNav, setActiveNav, onProfileClick }: Sideb
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: "auto" }}
                             exit={{ opacity: 0, width: 0 }}
-                            className="text-xl font-bold tracking-tight whitespace-nowrap overflow-hidden"
+                            className="text-xl font-bold tracking-tight whitespace-nowrap overflow-hidden mt-5"
                         >
-                            CUHP<span className="text-primary-custom">DEVS</span>
+                            CUHP<span className=" mt-5 text-primary-custom">DEVS</span>
                         </motion.span>
                     )}
                 </AnimatePresence>

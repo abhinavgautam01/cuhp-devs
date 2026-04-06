@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post, SubmissionResult } from "@repo/db/index.js";
+import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post, SubmissionResult, Problem } from "@repo/db/index.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -146,9 +146,43 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
             }
         }
 
-        // Fetch XP/Points (simulated calculation for now - solved * 100)
-        const solvedCount = await Submission.countDocuments({ userId, status: SubmissionResult.ACCEPTED });
-        const xp = solvedCount * 100;
+        // Fetch XP/Points based on problem difficulty
+        // EASY = 100 XP, MEDIUM = 200 XP, HARD = 400 XP
+        
+        // Step 1: Get unique problem IDs from accepted submissions
+        const uniqueProblemIds = await Submission.distinct("problemId", { 
+            userId, 
+            status: SubmissionResult.ACCEPTED 
+        });
+
+        console.log("=== DASHBOARD XP CALCULATION DEBUG ===");
+        console.log("User ID:", userId);
+        console.log("Unique problem IDs found:", uniqueProblemIds.length);
+        console.log("Problem IDs:", uniqueProblemIds);
+
+        // Step 2: Fetch the actual problems with their difficulty
+        const problems = await Problem.find({ _id: { $in: uniqueProblemIds } }).select('difficulty');
+        
+        console.log("Problems fetched:", problems.length);
+        console.log("Problems data:", JSON.stringify(problems, null, 2));
+
+        // Step 3: Calculate XP based on difficulty
+        let xp = 0;
+        problems.forEach((problem: any) => {
+            const difficulty = problem.difficulty;
+            console.log(`Processing problem ${problem._id} - Difficulty: ${difficulty}`);
+            if (difficulty === "EASY") xp += 100;
+            else if (difficulty === "MEDIUM") xp += 200;
+            else if (difficulty === "HARD") xp += 400;
+            else {
+                console.log(`WARNING: Unknown difficulty "${difficulty}", defaulting to 100 XP`);
+                xp += 100; // Default to EASY if difficulty is missing
+            }
+        });
+
+        console.log("Total XP calculated:", xp);
+        console.log("=== END DASHBOARD XP DEBUG ===");
+
         const level = Math.floor(xp / 1000) + 1;
         const xpTarget = level * 1000;
 
@@ -466,13 +500,47 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
 
         const userId = user._id;
 
-        // 1. Solved Problems Count 
-        const solvedSubmissions = await Submission.distinct("problemId", { 
+        // 1. Fetch solved problems with difficulty for XP calculation
+        
+        // Step 1: Get unique problem IDs from accepted submissions
+        const uniqueProblemIds = await Submission.distinct("problemId", { 
             userId, 
             status: SubmissionResult.ACCEPTED 
         });
 
-        // 2. Total Points (Solved count * 10 for now)
+        console.log("=== PROFILE XP CALCULATION DEBUG ===");
+        console.log("User handle:", handle);
+        console.log("User ID:", userId);
+        console.log("Unique problem IDs found:", uniqueProblemIds.length);
+        console.log("Problem IDs:", uniqueProblemIds);
+
+        // Step 2: Fetch the actual problems with their difficulty
+        const solvedProblems = await Problem.find({ _id: { $in: uniqueProblemIds } }).select('difficulty');
+        
+        console.log("Problems fetched:", solvedProblems.length);
+        console.log("Problems data:", JSON.stringify(solvedProblems, null, 2));
+
+        // Step 3: Calculate XP based on difficulty: EASY=100, MEDIUM=200, HARD=400
+        let totalXp = 0;
+        solvedProblems.forEach((problem: any) => {
+            const difficulty = problem.difficulty;
+            console.log(`Processing problem ${problem._id} - Difficulty: ${difficulty}`);
+            if (difficulty === "EASY") totalXp += 100;
+            else if (difficulty === "MEDIUM") totalXp += 200;
+            else if (difficulty === "HARD") totalXp += 400;
+            else {
+                console.log(`WARNING: Unknown difficulty "${difficulty}", defaulting to 100 XP`);
+                totalXp += 100; // Default to EASY if difficulty is missing
+            }
+        });
+
+        console.log("Total XP calculated:", totalXp);
+        console.log("=== END PROFILE XP DEBUG ===");
+
+        // Get list of solved problem IDs (for count)
+        const solvedSubmissions = uniqueProblemIds;
+
+        // 2. Total Points (Solved count * 10 for compatibility)
         const totalPoints = solvedSubmissions.length * 10;
 
         // 3. Department Rank (Based on solved problems)
@@ -523,8 +591,11 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
             createdAt: { $gte: startOfToday } 
         }).populate("problemId", "title difficulty");
 
-        // 7. Recent Activity
-        const recentSubmissions = await Submission.find({ userId })
+        // 7. Recent Activity - Only show accepted submissions
+        const recentSubmissions = await Submission.find({ 
+            userId,
+            status: SubmissionResult.ACCEPTED // Only show accepted submissions
+        })
             .sort({ createdAt: -1 })
             .limit(10)
             .populate("problemId", "title");
@@ -556,10 +627,7 @@ export const getProfileByHandle = async (req: AuthRequest, res: Response) => {
         })
         .slice(0, 10);
 
-                // 8. Total XP (Solved count * 100)
-                const totalXp = solvedSubmissions.length * 100;
-
-                // 9. Badges Earned (Based on milestones)
+                // 8. Badges Earned (Based on milestones)
                 let badgesCount = 0;
                 if (solvedSubmissions.length >= 1) badgesCount++; // First Solve
                 if (solvedSubmissions.length >= 5) badgesCount++; // 5 Solves

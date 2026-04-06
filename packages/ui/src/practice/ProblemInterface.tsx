@@ -58,6 +58,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
   const [currentStreak, setCurrentStreak] = useState(user?.streak || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAlreadySolved, setIsAlreadySolved] = useState(false);
+  const streakUpdatedRef = useRef(false); // Track if streak was updated via submission
 
   // Resizing logic
   const [leftWidth, setLeftWidth] = useState(480);
@@ -112,10 +113,31 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
   }, [resize, stopResizing]);
 
   useEffect(() => {
-    if (user?.streak !== undefined) {
+    if (user?.streak !== undefined && !streakUpdatedRef.current) {
       setCurrentStreak(user.streak);
     }
   }, [user?.streak]);
+
+  // Fetch fresh streak data from API on mount only
+  useEffect(() => {
+    const fetchStreakData = async () => {
+      if (!user || streakUpdatedRef.current) return;
+      try {
+        const userData = await apiFetch("/user/dashboard");
+        if (userData?.user?.streakDays !== undefined) {
+          setCurrentStreak(userData.user.streakDays);
+        }
+      } catch (err) {
+        console.error("Failed to fetch streak data:", err);
+        // Fallback to prop value if API fails
+        if (user?.streak !== undefined) {
+          setCurrentStreak(user.streak);
+        }
+      }
+    };
+    fetchStreakData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   useEffect(() => {
     const nextLanguage = Object.keys(problem.defaultCode)[0] || "python";
@@ -187,7 +209,7 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
             problemSlug: problem.slug,
             language,
             code,
-            status: "Accepted"
+            status: "ACCEPTED"
           }),
         });
 
@@ -201,9 +223,12 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
           setIsAlreadySolved(false);
           setIsCelebrating(true);
           
+          console.log("Submission response:", data); // Debug log
           if (typeof data.streak === 'number') {
+            streakUpdatedRef.current = true; // Mark that we've updated streak via submission
             setCurrentStreak(data.streak);
             onSuccess?.(data.streak);
+            console.log("Updated streak to:", data.streak); // Debug log
           }
         }
 
@@ -355,9 +380,9 @@ export const ProblemInterface: React.FC<ProblemInterfaceProps> = ({ problem, use
 
         <div className="flex items-center gap-6">
           {user && (
-            <div className="flex items-center gap-3 px-4 py-1.5 bg-gradient-to-r from-amber-500/10 to-red-500/10 border border-amber-500/20 rounded-full shadow-sm">
-              <Flame className="text-amber-500" size={16} />
-              <span className="text-xs font-black text-amber-500 uppercase tracking-widest">{currentStreak} Day Streak</span>
+            <div className={`flex items-center gap-3 px-4 py-1.5 rounded-full ${currentStreak > 1 ? 'streak-gradient shadow-lg shadow-amber-500/30' : 'bg-slate-600/50'}`}>
+              <Flame className="text-white" size={16} />
+              <span className="text-xs font-black text-white uppercase tracking-widest">{currentStreak} Day Streak</span>
             </div>
           )}
           <div className="flex items-center gap-3">

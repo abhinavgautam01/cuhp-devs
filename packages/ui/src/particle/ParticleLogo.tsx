@@ -45,7 +45,7 @@ export default function ParticleLogo({
     onLoadComplete
 }: ParticleLogoProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const mouseRef = useRef({ x: -100, y: -100, radius: 50 });
+    const mouseRef = useRef({ x: -100, y: -100, radius: 40 });
     const [isAssembled, setIsAssembled] = useState(false);
     const hasCalledComplete = useRef(false);
 
