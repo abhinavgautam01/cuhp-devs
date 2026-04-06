@@ -175,7 +175,7 @@ export default function RibbonCardsSection() {
         const swingWave = Math.sin(scrollProgress * Math.PI * 9 + index * 0.8);
         const swingDirection = swingDirections[index] ?? 1;
         const swingAngle =
-            swingDirection *
+            (swingDirections[index] ?? 1) *
             swingWave *
             (5.5 + Math.abs(offset) * 2.3) *
             (0.25 + spreadProgress * 0.75) *
