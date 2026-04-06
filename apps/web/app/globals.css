@@ -236,3 +236,75 @@ html::-webkit-scrollbar {
 .border-primary-custom {
   border-color: var(--primary);
 }
+
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor-enabled,
+  html.custom-cursor-enabled body,
+  html.custom-cursor-enabled a,
+  html.custom-cursor-enabled button,
+  html.custom-cursor-enabled [role="button"],
+  html.custom-cursor-enabled input,
+  html.custom-cursor-enabled select,
+  html.custom-cursor-enabled textarea,
+  html.custom-cursor-enabled summary,
+  html.custom-cursor-enabled [data-cursor="pointer"] {
+    cursor: none !important;
+  }
+}
+
+.app-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  will-change: transform, width, height, border-color, box-shadow;
+}
+
+.app-cursor.is-visible {
+  opacity: 1;
+}
+
+.app-cursor-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+  mix-blend-mode: difference;
+}
+
+.app-cursor-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+  transition: width 180ms ease, height 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  mix-blend-mode: difference;
+}
+
+.app-cursor-ring.is-hover {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.35);
+}
+
+.app-cursor-dot.is-pressed {
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.65);
+}
+
+.app-cursor-ring.is-pressed {
+  width: 46px;
+  height: 46px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-cursor,
+  .app-cursor-ring {
+    transition: none;
+  }
+}

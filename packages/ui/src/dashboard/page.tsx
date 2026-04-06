@@ -336,7 +336,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
     return apiFetch("/user/dashboard");
 }
 
-// ─── Component ─────────────────────────────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────────────────────
 
 interface DashboardProps {
     isCollapsed?: boolean;
@@ -502,7 +502,7 @@ export default function Dashboard({ isCollapsed, onToggle, user: userOverride, a
                         <div className="bg-background/60 p-6 rounded-2xl shadow-sm backdrop-blur-sm">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-lg">Your Progress</h3>
-                                <div className="streak-gradient px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-gray-500/20">
+                                <div className={`px-3 py-1 rounded-full flex items-center gap-1.5 ${(user.streakDays ?? 0) > 1 ? 'streak-gradient shadow-lg shadow-amber-500/30' : 'bg-slate-600/50'}`}>
                                     <Flame className="text-white" size={18} />
                                     <span className="text-white font-bold text-sm">{user.streakDays ?? 0} Days</span>
                                 </div>

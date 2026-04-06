@@ -8,6 +8,7 @@ import { apiFetch } from "../../lib/api";
 export function PracticeHeader() {
     const { user, isAuthenticated } = useAuthStore();
     const [hasSolvedToday, setHasSolvedToday] = useState(false);
+    const [streakDays, setStreakDays] = useState(0);
 
     useEffect(() => {
         const checkSolved = async () => {
@@ -24,14 +25,30 @@ export function PracticeHeader() {
         checkSolved();
     }, [isAuthenticated]);
 
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (!isAuthenticated) return;
+            try {
+                const userData = await apiFetch("/user/dashboard");
+                setStreakDays(userData.user?.streakDays ?? 0);
+            } catch (err) {
+                console.error("Failed to fetch user data:", err);
+                setStreakDays(user?.streakDays || 0);
+            }
+        };
+        fetchUserData();
+    }, [isAuthenticated, user]);
+
     if (!user) return null;
+
+    const hasGlow = streakDays > 1;
 
     return (
         <div className="bg-background/80 backdrop-blur-md border-b border-primary-custom/10 px-8 py-3 flex items-center justify-between z-10">
             <div className="flex items-center gap-4">
-                <div className="streak-gradient px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-gray-500/20">
+                <div className={`px-4 py-1.5 rounded-full flex items-center gap-2 ${hasGlow ? 'streak-gradient shadow-lg shadow-amber-500/30' : 'bg-slate-600/50'}`}>
                     <Flame className="text-white" size={18} />
-                    <span className="text-white font-bold text-sm">{user.streakDays || 0}-Day Streak</span>
+                    <span className="text-white font-bold text-sm">{streakDays}-Day Streak</span>
                 </div>
                 <p className="text-sm text-slate-400 hidden sm:block">Solve your daily problem to maintain your ranking!</p>
             </div>
