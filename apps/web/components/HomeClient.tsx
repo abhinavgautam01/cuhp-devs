@@ -17,7 +17,6 @@ export default function HomeClient() {
 
     const cardsSectionRef = useRef<HTMLElement | null>(null);
     const lastScrollYRef = useRef(0);
-    const rafRef = useRef<number | null>(null);
     const progressRef = useRef(0);
     const smoothProgressRef = useRef(0);
 
@@ -72,7 +71,7 @@ export default function HomeClient() {
 
         const smoothLoop = () => {
             // Lerp factor: lower = slower/smoother (0.06 = very smooth)
-            currentScrollRef.current = lerp(currentScrollRef.current, targetScrollRef.current, 0.06);
+            currentScrollRef.current = lerp(currentScrollRef.current, targetScrollRef.current, 0.02);
 
             if (Math.abs(currentScrollRef.current - targetScrollRef.current) < 0.1) {
                 currentScrollRef.current = targetScrollRef.current;
@@ -132,8 +131,20 @@ export default function HomeClient() {
         };
     }, []);
 
-    const spreadProgress = clamp(cardsProgress / 0.15, 0, 0.5 );
-    const flipProgress = clamp((cardsProgress - 0.17) / 0.19, 0, 1);
+    // Phase 1 (0 -> ~0.13): cards rise without flipping.
+    // Phase 2 (~0.13 -> ~0.23): cards move down only.
+    // Phase 3 (~0.23+): cards flip.
+    const LIFT_END = 0.1;
+    const DROP_ONLY_WINDOW = 0.1;
+    const FLIP_START = LIFT_END + DROP_ONLY_WINDOW;
+    const SPREAD_WINDOW = 0.15;
+    const DROP_WINDOW = DROP_ONLY_WINDOW;
+    const FLIP_WINDOW = 0.35;
+
+    const spreadProgress = clamp(cardsProgress / SPREAD_WINDOW, 0, 0.8)
+    const moveUpProgress = clamp(cardsProgress / LIFT_END, 0, 1);
+    const moveDownProgress = clamp((cardsProgress - LIFT_END) / DROP_WINDOW, 0, 1);
+    const flipProgress = clamp((cardsProgress - FLIP_START) / FLIP_WINDOW, 0, 1);
 
     return (
         <>
@@ -167,11 +178,10 @@ export default function HomeClient() {
                     </div>
                 </main>
 
-                <section
+                {/* <section
                     className={`w-full flex flex-col items-center justify-center py-2 px-6 transition-all duration-1000 delay-500 ease-out ${
                         heroLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
-                    }`}
-                >
+                    }`}>
                     <div className="relative group">
                         <div className="relative">
                             <img
@@ -188,15 +198,18 @@ export default function HomeClient() {
                         </h2>
                         <div className="h-px w-24 mx-auto bg-linear-to-r from-transparent via-cyan-500 to-transparent" />
                     </div>
-                </section>
+                </section> */}
 
                 <CardAnimationSection
                     heroLoaded={heroLoaded}
                     cardsSectionRef={cardsSectionRef}
                     spreadProgress={spreadProgress}
+                    moveUpProgress={moveUpProgress}
+                    moveDownProgress={moveDownProgress}
                     flipProgress={flipProgress}
                 />
             </div>
         </>
     );
 }
+
