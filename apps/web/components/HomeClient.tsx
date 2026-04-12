@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Footer from "@repo/ui/components/Footer";
 import Navbar from "@repo/ui/components/Navbar";
 import ParticleLogo from "@repo/ui/particle/ParticleLogo";
 import CardAnimationSection from "./CardAnimationSection";
@@ -145,7 +146,6 @@ export default function HomeClient() {
     const moveUpProgress = clamp(cardsProgress / LIFT_END, 0, 1);
     const moveDownProgress = clamp((cardsProgress - LIFT_END) / DROP_WINDOW, 0, 1);
     const flipProgress = clamp((cardsProgress - FLIP_START) / FLIP_WINDOW, 0, 1);
-
     return (
         <>
             <Navbar
@@ -208,8 +208,9 @@ export default function HomeClient() {
                     moveDownProgress={moveDownProgress}
                     flipProgress={flipProgress}
                 />
+
+                <Footer />
             </div>
         </>
     );
 }
-
