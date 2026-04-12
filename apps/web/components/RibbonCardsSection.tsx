@@ -171,6 +171,8 @@ export default function RibbonCardsSection() {
             }
         }
 
+        
+
         const translateXPercent = offset * 54 * spreadProgress;
         const swingWave = Math.sin(scrollProgress * Math.PI * 9 + index * 0.8);
         const swingDirection = swingDirections[index] ?? 1;
