@@ -10,6 +10,25 @@ type ApiErrorPayload = {
     code?: string;
 };
 
+function getPersistedAuthToken(): string | null {
+    if (typeof window === "undefined") {
+        return null;
+    }
+
+    const raw = window.localStorage.getItem("auth-storage");
+    if (!raw) {
+        return null;
+    }
+
+    try {
+        const parsed = JSON.parse(raw) as { state?: { token?: unknown } };
+        const token = parsed?.state?.token;
+        return typeof token === "string" && token.trim() ? token : null;
+    } catch {
+        return null;
+    }
+}
+
 function buildApiErrorMessage(errorData: ApiErrorPayload, status: number) {
     const baseMessage = errorData?.message || `API request failed with status ${status}`;
     const fieldErrors = errorData?.errors;
@@ -30,9 +49,14 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${API_URL}${normalizedEndpoint}`;
     const headers = new Headers(options.headers);
+    const authToken = getPersistedAuthToken();
 
     if (!headers.has("Content-Type") && options.body !== undefined) {
         headers.set("Content-Type", "application/json");
+    }
+
+    if (authToken && !headers.has("Authorization")) {
+        headers.set("Authorization", `Bearer ${authToken}`);
     }
 
     const defaultOptions: RequestInit = {
