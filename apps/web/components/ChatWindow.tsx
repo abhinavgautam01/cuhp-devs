@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
+import { apiFetch } from "../lib/api";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -20,12 +21,6 @@ import {
     Code2,
     ChevronLeft
 } from "../lib/icons";
-
-const HTTP_API_URL = (
-    process.env.NEXT_PUBLIC_HTTP_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:3001"
-).trim().replace(/\/+$/, "");
 
 interface Message {
     _id: string;
@@ -137,9 +132,10 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     }, [messages, typingUsers, mounted]);
 
     useEffect(() => {
+        if (!isConnected) return;
         joinRoom(roomName);
         return () => leaveRoom(roomName);
-    }, [roomName, isConnected]);
+    }, [roomName, isConnected, joinRoom, leaveRoom]);
 
     useEffect(() => {
         if (initialMessages.length > 0) {
@@ -163,13 +159,8 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch(`${HTTP_API_URL}/user/community/rooms/${encodeURIComponent(roomName)}/members`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.json();
+                const data = await apiFetch(`/user/community/rooms/${encodeURIComponent(roomName)}/members`);
+                if (Array.isArray(data)) {
                     setMembers(data);
                 }
             } catch (error) {
@@ -177,10 +168,10 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             }
         };
 
-        if (roomName && token) {
+        if (roomName) {
             fetchMembers();
         }
-    }, [roomName, token]);
+    }, [roomName]);
 
     useEffect(() => {
         if (!socket) return;

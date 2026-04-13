@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ChatWindow } from "./ChatWindow";
 import { useAuthStore } from "../store/useAuthStore";
 import { apiFetch } from "../lib/api";
@@ -23,17 +22,11 @@ interface Message {
 }
 
 export function ChatRoomPageClient({ roomName }: ChatRoomPageClientProps) {
-    const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const token = useAuthStore((state) => state.token);
     const [initialMessages, setInitialMessages] = useState<Message[]>([]);
 
     useEffect(() => {
-        if (!token) {
-            router.replace("/signin");
-            return;
-        }
-
         let isMounted = true;
 
         const loadMessages = async () => {
@@ -52,7 +45,7 @@ export function ChatRoomPageClient({ roomName }: ChatRoomPageClientProps) {
         return () => {
             isMounted = false;
         };
-    }, [roomName, token, router]);
+    }, [roomName]);
 
     const currentUser = useMemo(() => {
         if (!user) return null;
