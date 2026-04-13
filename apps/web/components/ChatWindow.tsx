@@ -486,7 +486,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                         <div className="w-10 h-10 rounded-full bg-white/5 border border-card-border flex items-center justify-center shrink-0 overflow-hidden relative shadow-lg">
                                             {msg.senderId?.fullName ? (
                                                 <img
-                                                    src={((currentUser && msg.senderId?._id === currentUser?.id) ? currentUser.avatar : msg.senderId?.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId?.fullName}`}
+                                                    src={((currentUser && msg.senderId?._id === currentUser?.id) ? currentUser.avatar : msg.senderId?.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((msg.senderId?.fullName || "user").trim().toLowerCase())}`}
                                                     className="w-full h-full object-cover"
                                                     alt="User"
                                                 />
@@ -641,7 +641,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                             <div className="relative">
                                                 <div className="w-9 h-9 rounded-full overflow-hidden border border-card-border group-hover:border-primary-custom/50 transition-colors">
                                                     <img
-                                                        src={((isSelf && currentUser) ? currentUser.avatar : member.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.fullName || member._id}`}
+                                                        src={((isSelf && currentUser) ? currentUser.avatar : member.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((member.fullName || member._id || "user").trim().toLowerCase())}`}
                                                         className="w-full h-full object-cover"
                                                         alt="Member"
                                                     />

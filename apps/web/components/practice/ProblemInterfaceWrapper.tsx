@@ -12,7 +12,7 @@ export function ProblemInterfaceWrapper({ problemData }: ProblemInterfaceWrapper
 
     const formattedUser = user ? {
         name: user.fullName,
-        avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.fullName}`,
+        avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user.fullName || 'user').trim().toLowerCase())}`,
         streak: user.streakDays || 0
     } : undefined;
 

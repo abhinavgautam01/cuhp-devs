@@ -59,7 +59,7 @@ export function PostCard({ post, onLike, onBookmark, currentUserId, userAvatar, 
                 <img
                     alt={author.fullName}
                     className="w-10 h-10 rounded-full object-cover ring-2 ring-primary-custom/5"
-                    src={((currentUserId && (author as any)._id === currentUserId) ? userAvatar : author.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(author.fullName || 'user')}`}
+                    src={((currentUserId && (author as any)._id === currentUserId) ? userAvatar : author.avatar) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((author.fullName || 'user').trim().toLowerCase())}`}
                 />
                 <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">

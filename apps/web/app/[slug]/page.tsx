@@ -42,7 +42,7 @@ export default async function UserProfilePage({
     const sidebarUser = currentUser ? {
         name: currentUser.fullName || currentUser.name || "User",
         role: "Student",
-        avatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.fullName || "user")}`,
+        avatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((currentUser.fullName || "user").trim().toLowerCase())}`,
         handle: currentUser.handle
     } : {
         name: "Guest User",

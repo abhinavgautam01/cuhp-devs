@@ -34,7 +34,7 @@ export default async function ResourcesLayout({ children }: LayoutProps) {
         sidebarUser = {
             name: resolvedName,
             role: "Student",
-            avatar: profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(resolvedName)}`,
+            avatar: profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((resolvedName || 'user').trim().toLowerCase())}`,
             handle: profile?.handle || DEFAULT_SIDEBAR_USER.handle,
         };
     } catch (error) {

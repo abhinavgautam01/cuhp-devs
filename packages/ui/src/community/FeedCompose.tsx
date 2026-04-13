@@ -40,7 +40,7 @@ export function FeedCompose({ onPost, userAvatar, userName }: FeedComposeProps) 
                     <img
                         alt="User avatar"
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-white/5"
-                        src={userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName || "User")}`}
+                        src={userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((userName || "user").trim().toLowerCase())}`}
                     />
                     <div className="flex-1 space-y-4">
                         <textarea

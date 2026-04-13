@@ -262,7 +262,7 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                     <div className="relative">
                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-4 border-card-border shadow-xl bg-background">
                             <img 
-                                src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.fullName || 'user')}`} 
+                                src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user.fullName || 'user').trim().toLowerCase())}`} 
                                 alt={user.fullName} 
                                 className="w-full h-full object-cover" 
                             />
@@ -376,7 +376,7 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-lg overflow-hidden border border-card-border">
                                                             <img 
-                                                                src={result.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(result.fullName || 'user')}`} 
+                                                                src={result.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((result.fullName || 'user').trim().toLowerCase())}`} 
                                                                 alt={result.fullName} 
                                                                 className="w-full h-full object-cover" 
                                                             />

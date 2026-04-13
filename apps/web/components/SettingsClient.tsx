@@ -239,7 +239,7 @@ export function SettingsClient() {
                     role: user?.program || "Developer",
                     avatar:
                         avatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`,
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user?.fullName || 'user').trim().toLowerCase())}`,
                     handle: user?.handle,
                 }}
                 activeNav="settings"
@@ -292,7 +292,7 @@ export function SettingsClient() {
                                         <Image
                                             src={
                                                 avatar ||
-                                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.fullName}`
+                                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user?.fullName || 'user').trim().toLowerCase())}`
                                             }
                                             alt="Profile"
                                             fill
