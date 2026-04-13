@@ -34,7 +34,7 @@ export function SignInClient() {
                 }),
             });
 
-            setUser(response.user);
+            setUser(response.user, response.token || null);
             toast.success("Signed in successfully.");
             router.push("/dashboard");
         } catch (error) {

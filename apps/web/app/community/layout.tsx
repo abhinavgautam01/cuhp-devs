@@ -2,9 +2,6 @@ import { SidebarWrapper } from "../../components/SidebarWrapper";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "../../lib/icons";
-import { serverApiFetch } from "../../lib/server-api";
-
-export const dynamic = "force-dynamic";
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,26 +22,10 @@ const DEFAULT_SIDEBAR_USER = {
 };
 
 export default async function CommunityLayout({ children }: LayoutProps) {
-  let sidebarUser = DEFAULT_SIDEBAR_USER;
-
-  try {
-    const profile = (await serverApiFetch("/user/profile")) as ProfileResponse;
-    const resolvedName = profile?.fullName || profile?.name || DEFAULT_SIDEBAR_USER.name;
-
-    sidebarUser = {
-      name: resolvedName,
-      role: "Student",
-      avatar: profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(resolvedName)}`,
-      handle: profile?.handle || DEFAULT_SIDEBAR_USER.handle,
-    };
-  } catch (error) {
-    console.error("Failed to fetch profile for sidebar:", error);
-  }
-
   return (
     <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
-      <SidebarWrapper user={sidebarUser} />
+      <SidebarWrapper user={DEFAULT_SIDEBAR_USER} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">

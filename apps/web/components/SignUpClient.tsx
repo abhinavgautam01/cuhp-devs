@@ -18,7 +18,7 @@ interface SignUpFields {
 
 export function SignUpClient() {
     const router = useRouter();
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, setUser } = useAuthStore();
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -28,7 +28,7 @@ export function SignUpClient() {
 
     const handleSignUp = async (fields: SignUpFields) => {
         try {
-            await apiFetch("/auth/signup", {
+            const response = await apiFetch("/auth/signup", {
                 method: "POST",
                 body: JSON.stringify({
                     fullName: fields.fullName,
@@ -38,6 +38,7 @@ export function SignUpClient() {
                 }),
             });
 
+            setUser(response.user, response.token || null);
             toast.success("Account created successfully.");
             router.push("/onboarding");
         } catch (error) {

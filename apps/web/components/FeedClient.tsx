@@ -20,7 +20,7 @@ interface FeedClientProps {
 export default function FeedClient({ initialData }: FeedClientProps) {
     const [posts, setPosts] = useState(initialData.posts);
     const [activeTab, setActiveTab] = useState<FeedTab>("Recent");
-    const { user, setUser } = useAuthStore();
+    const { user, token, setUser } = useAuthStore();
     const socketRef = useRef<Socket | null>(null);
     const hasLoggedConnectErrorRef = useRef(false);
 
@@ -31,7 +31,7 @@ export default function FeedClient({ initialData }: FeedClientProps) {
 
         const socket = io(socketUrl, {
             auth: {
-                token: ""
+                token: token || ""
             },
             transports: ["websocket"],
             timeout: 10000,
@@ -66,7 +66,7 @@ export default function FeedClient({ initialData }: FeedClientProps) {
         return () => {
             socket.disconnect();
         };
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         const initAuth = async () => {
@@ -84,6 +84,21 @@ export default function FeedClient({ initialData }: FeedClientProps) {
         initAuth();
     }, [user, setUser]);
 
+    useEffect(() => {
+        const loadPosts = async () => {
+            try {
+                const fetchedPosts = await apiFetch("/posts");
+                if (Array.isArray(fetchedPosts)) {
+                    setPosts(fetchedPosts);
+                }
+            } catch (error) {
+                console.error("Failed to fetch posts:", error);
+            }
+        };
+
+        loadPosts();
+    }, []);
+
     const handlePost = async (data: { content: string; type: string }) => {
         try {
             const response = await apiFetch("/posts", {
@@ -92,7 +107,7 @@ export default function FeedClient({ initialData }: FeedClientProps) {
             });
 
             if (response.post) {
-                setPosts([response.post, ...posts]);
+                setPosts((prevPosts) => [response.post, ...prevPosts]);
                 toast.success("Post shared successfully!");
             }
         } catch (error) {
