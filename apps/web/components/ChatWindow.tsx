@@ -114,6 +114,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     const router = useRouter();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { isConnected, joinRoom, leaveRoom, sendMessage, socket } = useSocket(token);
+    const hasValidUserId = typeof currentUser?.id === "string" && /^[a-f\d]{24}$/i.test(currentUser.id);
 
     useEffect(() => {
         setMounted(true);
@@ -132,10 +133,16 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     }, [messages, typingUsers, mounted]);
 
     useEffect(() => {
-        if (!isConnected) return;
+        if (!isConnected || !hasValidUserId) return;
         joinRoom(roomName);
         return () => leaveRoom(roomName);
-    }, [roomName, isConnected, joinRoom, leaveRoom]);
+    }, [roomName, isConnected, hasValidUserId, joinRoom, leaveRoom]);
+
+    useEffect(() => {
+        // ALWAYS update messages when initialMessages changes (e.g. on room switch)
+        // This ensures the chat is cleared if the next room has no history.
+        setMessages(initialMessages);
+    }, [initialMessages]);
 
     useEffect(() => {
         if (initialMessages.length > 0) {
@@ -238,6 +245,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
 
         const handleOnlineMembers = ({ onlineMembers }: { onlineMembers: any[] }) => {
             if (!onlineMembers) return;
+            console.log("[ChatWindow] Received online members:", onlineMembers);
             setOnlineMemberIds(onlineMembers.filter(m => m?._id).map(m => m._id));
 
             // Sync online members into the members list
@@ -247,23 +255,35 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                     if (!om?._id) return;
                     const existingIndex = combined.findIndex(m => m._id === om._id);
                     const isSelf = om._id === currentUser?.id;
-                    const resolvedName = isSelf ? (currentUser?.name || om.fullName) : om.fullName;
+                    const resolvedName = isSelf ? (currentUser?.fullName || currentUser?.name || om.fullName) : om.fullName;
 
                     if (existingIndex === -1) {
                         combined.push({
                             _id: om._id,
                             fullName: resolvedName || "User",
-                            email: om.email,
-                            avatar: om.avatar
+                            email: om.email || "",
+                            avatar: om.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${om._id}`,
+                            isOnline: true
                         });
                     } else {
                         const existing = combined[existingIndex];
-                        if (existing && resolvedName && !existing.fullName) {
-                            combined[existingIndex] = { ...existing, fullName: resolvedName };
+                        if (existing) {
+                            combined[existingIndex] = { 
+                                ...existing, 
+                                fullName: existing.fullName === "unknown" || !existing.fullName ? (resolvedName || "User") : existing.fullName,
+                                avatar: existing.avatar || om.avatar,
+                                isOnline: true 
+                            };
                         }
                     }
                 });
-                return combined;
+
+                // Also ensure overall consistency: mark ANYONE in onlineMemberIds as online
+                // (This handles users who were in 'members' but aren't in the latest onlineMembers chunk if any)
+                return combined.map(m => ({
+                    ...m,
+                    isOnline: onlineMembers.some(om => om._id === m._id) || m.isOnline
+                }));
             });
         };
 
@@ -286,7 +306,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
 
     const handleSend = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() || !hasValidUserId || !isConnected) return;
 
         const optimisticMsg: Message = {
             _id: `temp-${Date.now()}`,
@@ -548,8 +568,8 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={!input.trim()}
-                                    className={`p-2.5 rounded-xl transition-all duration-500 shadow-lg ${input.trim()
+                                    disabled={!input.trim() || !isConnected || !hasValidUserId}
+                                    className={`p-2.5 rounded-xl transition-all duration-500 shadow-lg ${input.trim() && isConnected && hasValidUserId
                                         ? 'bg-primary-custom text-primary-foreground-custom shadow-primary-custom/20 hover:scale-105 hover:bg-primary-hover-custom'
                                         : 'bg-foreground/5 text-muted-custom/10'
                                         }`}

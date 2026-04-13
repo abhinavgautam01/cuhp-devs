@@ -5,11 +5,13 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { connectDB } from "@repo/db";
+import { validateEnv } from "@repo/common";
 import { setupSocket } from "./socket";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config(); // Local fallback/overrides
 
-dotenv.config();
+validateEnv();
 
 const app = express();
 app.use(cors());

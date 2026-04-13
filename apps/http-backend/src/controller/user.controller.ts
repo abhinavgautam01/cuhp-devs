@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post, SubmissionResult, Problem } from "@repo/db/index.js";
+import { User, ChatRoom, Message, ChatRoomName, IUser, Submission, Post, SubmissionResult, Problem, Activity } from "@repo/db/index.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
@@ -106,8 +106,15 @@ const ROOM_NAME_ALIASES: Record<string, ChatRoomName> = {
 };
 
 const normalizeRoomName = (rawRoomName: string): string => {
-    const normalized = decodeURIComponent(rawRoomName).trim();
-    return ROOM_NAME_ALIASES[normalized.toLowerCase()] ?? normalized;
+    const decoded = decodeURIComponent(rawRoomName).trim();
+    // Replace hyphens with spaces for URL slug support
+    const normalized = decoded.replace(/-/g, " ");
+    
+    // Check aliases
+    const aliasKey = normalized.toLowerCase();
+    const canonicalName = ROOM_NAME_ALIASES[aliasKey];
+    
+    return canonicalName || normalized;
 };
 
 export const getDashboardData = async (req: AuthRequest, res: Response) => {
@@ -323,12 +330,36 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
         const allRooms = await ChatRoom.find({}).lean();
         const roomMap = new Map(allRooms.map(r => [r.name, r]));
 
+        // Fetch user activity from the database
+        const rawActivity = await Activity.find({})
+            .sort({ timestamp: -1 })
+            .limit(10)
+            .lean();
+
+        const liveActivity = rawActivity.map(act => ({
+            user: act.user,
+            action: act.action,
+            room: act.room,
+            time: "Just now" // Front-end can format this
+        }));
+
+        // Dynamic member count simulation (based on unique recent messages)
+        // In a real app with Redis, we'd pull exact online counts.
+        // For now, let's count unique senders in the last 15 minutes as "active".
+        const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+        const activeStats = await Message.aggregate([
+            { $match: { createdAt: { $gte: fifteenMinsAgo } } },
+            { $group: { _id: "$roomId", count: { $addToSet: "$senderId" } } },
+            { $project: { _id: 1, count: { $size: "$count" } } }
+        ]);
+        const activeMap = new Map(activeStats.map(s => [s._id.toString(), s.count]));
+
         const trendingRooms = [
             {
                 title: "Deep Learning",
                 description: "Discussing PyTorch, TensorFlow and Neural Network architectures.",
                 badge: "Hot Room",
-                members: "0", // Will be updated by socket
+                members: (activeMap.get(roomMap.get(ChatRoomName.DL)?._id.toString() || "") || 0).toString(),
                 icon: "neurology",
                 avatars: [
                     "https://lh3.googleusercontent.com/aida-public/AB6AXuD_MRocfAc3G7cAcAopZxpRTMMkXNFumYLVw-XomndRyV5EcHVrdD65-55rfGYIg9iKQQutDwr02e3qB7zJ9OzKXwQupZ5tFbqDUnYYubfQ4T-T2FIrp9YJehyWAr-3jJa7sbeGZLm54o6NJ1kDiI6bx7ji575hLuMPxdcC2Z6qUj2gEqH50i5Org4eFRMTWk1yUi6iI0bRhR7pUdJEd7x1RRkuVu5wrK5eWw_cCaf5vvoRzSSRupJ-qD87iz1dVtL0uKo5B85b2dmr",
@@ -339,7 +370,7 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
                 title: "Data Structures & Algorithms",
                 description: "Memory safety, ownership, and low-level optimization in Rust.",
                 badge: "Featured",
-                members: "0",
+                members: (activeMap.get(roomMap.get(ChatRoomName.DSA)?._id.toString() || "") || 0).toString(),
                 icon: "data_object",
                 avatars: [
                     "https://lh3.googleusercontent.com/aida-public/AB6AXuBiHXl0P06fpJnbhQctvcP96mrHRjEHG_v5CCxmj1EesAwjaLDW7psQM_Qs9fuwyz59btEc9Avof9pJuR0ZXeBznXEQsE4sWcCMcd5mWt7C_HTvvQcGT_wqQkFD1Vq58M_SRSbFWUuSTuM-7Gs8DrYf5FlHS5f4--8cY6WgUVy2gLF2LplRYIppQloKsxbArJ6NE3FKC3nf0vUibSHrJUR5lh7ZlcWXF4IQXYS1KxNpXecFAycr3WcuPWjuGQ5MrQjK4aHHHBRZKLoi",
@@ -349,10 +380,10 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
         ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
 
         const communityRooms = [
-            { title: "Machine Learning", members: "0", icon: "smart_toy" },
-            { title: "Blockchain", members: "0", icon: "hub" },
-            { title: "Data Structures & Algorithms", members: "0", icon: "memory" },
-            { title: "Deep Learning", members: "0", icon: "javascript" }
+            { title: "Machine Learning", members: (activeMap.get(roomMap.get(ChatRoomName.ML)?._id.toString() || "") || 0).toString(), icon: "smart_toy" },
+            { title: "Blockchain", members: (activeMap.get(roomMap.get(ChatRoomName.BLOCKCHAIN)?._id.toString() || "") || 0).toString(), icon: "hub" },
+            { title: "Data Structures & Algorithms", members: (activeMap.get(roomMap.get(ChatRoomName.DSA)?._id.toString() || "") || 0).toString(), icon: "memory" },
+            { title: "Deep Learning", members: (activeMap.get(roomMap.get(ChatRoomName.DL)?._id.toString() || "") || 0).toString(), icon: "javascript" }
         ].map(r => ({ ...r, id: roomMap.get(r.title as ChatRoomName)?._id.toString() || Math.random().toString() }));
 
         const roomsData = {
@@ -362,7 +393,7 @@ export const getCommunityRooms = async (req: AuthRequest, res: Response) => {
                 {},
                 {}
             ],
-            liveActivity: []
+            liveActivity
         };
         return res.status(200).json(roomsData);
     } catch (error) {
@@ -428,22 +459,27 @@ export const getChatMessages = async (req: AuthRequest, res: Response) => {
         }
 
         const normalizedRoomName = normalizeRoomName(roomName);
-        console.log(`[getChatMessages] raw roomName: "${roomName}", decoded: "${decodeURIComponent(roomName)}", normalized: "${normalizedRoomName}"`);
-        if (!normalizedRoomName) {
-            return res.status(404).json({ message: "Chat room not found" });
-        }
+        console.log(`[ChatHistory] Request for room: "${roomName}" -> Normalized: "${normalizedRoomName}"`);
 
-        const room = await ChatRoom.findOne({ name: normalizedRoomName });
+        // Case-insensitive search for robust matching
+        const room = await ChatRoom.findOne({ 
+            name: { $regex: new RegExp(`^${normalizedRoomName}$`, "i") } 
+        });
         console.log(`[getChatMessages] Room DB search result:`, room);
 
         if (!room) {
+            console.warn(`[ChatHistory] Room NOT FOUND in database for "${normalizedRoomName}"`);
             return res.status(404).json({ message: "Chat room not found" });
         }
+
+        console.log(`[ChatHistory] Found room: "${room.name}" ID: ${room._id}`);
 
         const messages = await Message.find({ roomId: room._id, isDeleted: false })
             .sort({ createdAt: -1 })
             .limit(50)
             .populate("senderId", "fullName email avatar");
+
+        console.log(`[ChatHistory] Found ${messages.length} messages for room ID ${room._id}`);
 
         // Reverse to get chronological order for the client
         return res.status(200).json(messages.reverse());
@@ -461,11 +497,9 @@ export const getChatRoomMembers = async (req: AuthRequest, res: Response) => {
         }
 
         const normalizedRoomName = normalizeRoomName(roomName);
-        if (!normalizedRoomName) {
-            return res.status(404).json({ message: "Chat room not found" });
-        }
-
-        const room = await ChatRoom.findOne({ name: normalizedRoomName });
+        const room = await ChatRoom.findOne({ 
+            name: { $regex: new RegExp(`^${normalizedRoomName}$`, "i") } 
+        });
         if (!room) {
             return res.status(404).json({ message: "Chat room not found" });
         }

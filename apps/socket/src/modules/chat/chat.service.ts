@@ -1,4 +1,4 @@
-import { ChatRoom, Message, User } from "@repo/db";
+import { ChatRoom, Message, User, Activity } from "@repo/db";
 
 const ROOM_NAME_ALIASES: Record<string, string> = {
   "machine learning": "Machine Learning",
@@ -13,16 +13,25 @@ const ROOM_NAME_ALIASES: Record<string, string> = {
 };
 
 export const getRoomByName = async (roomName: string) => {
+  // 1. Basic decoding and cleaning
+  const decoded = decodeURIComponent(roomName).trim();
+  
+  // 2. Normalization: spaces instead of hyphens (common for URL slugs)
+  const normalized = decoded.replace(/-/g, " ");
 
-  const normalized = decodeURIComponent(roomName).trim();
-
-  // Check alias
+  // 3. Check specific aliases first
   const aliasKey = normalized.toLowerCase();
   const canonicalName = ROOM_NAME_ALIASES[aliasKey];
 
-  const nameToSearch = canonicalName || normalized;
+  if (canonicalName) {
+    return ChatRoom.findOne({ name: canonicalName });
+  }
 
-  return ChatRoom.findOne({ name: nameToSearch });
+  // 4. Case-insensitive search as a fallback to catch "blockchain" -> "Blockchain"
+  // We use regex for case-insensitive matching if it's not a known alias
+  return ChatRoom.findOne({ 
+    name: { $regex: new RegExp(`^${normalized}$`, "i") } 
+  });
 };
 export const createMessage = async (
   roomId: string,
@@ -65,6 +74,15 @@ export const createRoom = async (roomName: string, userId: string) => {
 
 export const getUserById = async (userId: string) => {
   return User.findById(userId).select("fullName email avatar").lean();
+};
+
+export const logActivityDB = async (user: string, action: string, room?: string) => {
+  try {
+    return await Activity.create({ user, action, room });
+  } catch (error) {
+    console.error("[Socket] Failed to log activity to DB:", error);
+    return null;
+  }
 };
 
 export class RoomManager {

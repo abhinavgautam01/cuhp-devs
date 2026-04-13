@@ -30,13 +30,16 @@ export function ChatRoomPageClient({ roomName }: ChatRoomPageClientProps) {
         let isMounted = true;
 
         const loadMessages = async () => {
+            const url = `/user/community/rooms/${encodeURIComponent(roomName)}/messages`;
+            console.log(`[ChatRoomPageClient] Fetching history from: ${url}`);
             try {
-                const messages = await apiFetch(`/user/community/rooms/${encodeURIComponent(roomName)}/messages`);
+                const messages = await apiFetch(url);
+                console.log(`[ChatRoomPageClient] Received ${Array.isArray(messages) ? messages.length : 'error/null'} messages`);
                 if (isMounted && Array.isArray(messages)) {
                     setInitialMessages(messages);
                 }
             } catch (error) {
-                console.error("Failed to load chat room data:", error);
+                console.error("[ChatRoomPageClient] Failed to load chat room data:", error);
             }
         };
 
