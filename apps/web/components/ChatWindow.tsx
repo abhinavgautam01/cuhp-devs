@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
-import { apiFetch } from "../lib/api";
-import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { apiFetch } from "../lib/api";
 import {
     Send,
     Smile,
@@ -19,7 +19,14 @@ import {
     ShieldCheck,
     Braces,
     Code2,
-    ChevronLeft
+    ChevronLeft,
+    Hash,
+    Users,
+    Shield,
+    Plus,
+    ImageIcon,
+    Bell,
+    ChevronDown
 } from "../lib/icons";
 
 interface Message {
@@ -311,7 +318,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     };
     const handleDeleteMessage = (messageId: string) => {
         if (!socket) return;
-        socket.emit("delete-message", { roomName, messageId });
+        socket.emit("delete-message", { messageId, roomName });
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
