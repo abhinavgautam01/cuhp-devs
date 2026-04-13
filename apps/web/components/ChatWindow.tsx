@@ -5,8 +5,6 @@ import { useSocket } from "../hooks/useSocket";
 import { apiFetch } from "../lib/api";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { apiFetch } from "../lib/api";
 import {
     Send,
     Smile,
