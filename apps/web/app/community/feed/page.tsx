@@ -1,6 +1,8 @@
 import FeedClient from "../../../components/FeedClient";
 import { serverApiFetch } from "../../../lib/server-api";
 
+export const dynamic = "force-dynamic";
+
 export default async function CommunityFeedPage() {
     let initialData = {
         trendingTags: ["react", "nodejs", "webdev"],

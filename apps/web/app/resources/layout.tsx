@@ -4,6 +4,8 @@ import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from 
 import { serverApiFetch } from "../../lib/server-api";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 interface LayoutProps {
     children: ReactNode;
 }

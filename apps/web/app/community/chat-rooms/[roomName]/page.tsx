@@ -3,6 +3,8 @@ import { serverApiFetch } from "../../../../lib/server-api";
 import { ChatWindow } from "../../../../components/ChatWindow";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 interface RoomPageProps {
     params: Promise<{
         roomName: string;
