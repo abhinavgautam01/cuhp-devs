@@ -4,6 +4,10 @@ import { User } from "@repo/db";
 import { signToken, verifyToken } from "../utils";
 import { signinSchema, signupSchema } from "../validators/auth.schema"
 
+const isProduction = process.env.NODE_ENV === "production";
+const authCookieMaxAge = 4 * 24 * 60 * 60 * 1000;
+const authCookieSameSite = isProduction ? "none" : "lax";
+
 export const signup = async (req: Request, res: Response) => {
   try {
     const parsed = signupSchema.safeParse(req.body);
@@ -54,9 +58,9 @@ export const signup = async (req: Request, res: Response) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      maxAge: 4 * 24 * 60 * 60 * 1000,
+      secure: isProduction,
+      sameSite: authCookieSameSite,
+      maxAge: authCookieMaxAge,
     });
 
     return res.status(201).json({
@@ -113,9 +117,9 @@ export const signin = async (req: Request, res: Response) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
+      secure: isProduction,
+      sameSite: authCookieSameSite,
+      maxAge: authCookieMaxAge, // 4 days
     })
 
     return res.status(200).json({
@@ -142,7 +146,11 @@ export const signin = async (req: Request, res: Response) => {
 };
 
 export const logout = async (_: Request, res: Response) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: authCookieSameSite,
+  });
 
   return res.status(200).json({
     message: "Logged out successfully",
