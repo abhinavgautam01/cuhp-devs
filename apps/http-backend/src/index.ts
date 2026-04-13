@@ -14,11 +14,17 @@ import postRoutes from "./routes/post.routes";
 
 const app: Application = express();
 const isProduction = process.env.NODE_ENV === "production";
+const allowedOrigins = (
+  process.env.BACKEND_CORS_ORIGINS ?? "http://localhost:3000"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
@@ -40,8 +46,10 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
-app.listen(3001, () => {
-  console.log("http://localhost:3001");
+const port = Number(process.env.PORT || 3001);
+
+app.listen(port, () => {
+  console.log(`http://localhost:${port}`);
 });
 
 const start = async () => {
