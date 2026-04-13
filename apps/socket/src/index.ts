@@ -42,6 +42,8 @@ void connectDB().catch((error) => {
 
 });
 
-server.listen(4001, () => {
-  console.log("Socket server running on port 4001");
+const port = Number(process.env.PORT || 4001);
+
+server.listen(port, () => {
+  console.log(`Socket server running on port ${port}`);
 });
