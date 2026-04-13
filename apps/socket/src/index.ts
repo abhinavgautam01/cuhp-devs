@@ -7,7 +7,7 @@ import path from "path";
 import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 
-dotenv.config({ path: path.resolve(__dirname, "../http-backend/.env") });
+// dotenv.config({ path: path.resolve(__dirname, "../http-backend/.env") });
 dotenv.config(); // Local fallback/overrides
 
 
