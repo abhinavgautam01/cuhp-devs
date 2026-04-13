@@ -1,20 +1,5 @@
-import SavedSnippets from "@repo/ui/community/SavedSnippets";
-import { serverApiFetch } from "../../../lib/server-api";
+import { CommunitySavedSnippetsClient } from "../../../components/CommunitySavedSnippetsClient";
 
-export const dynamic = "force-dynamic";
-
-export default async function CommunitySavedSnippetsPage() {
-    let snippetsData = {
-        snippets: [],
-        collections: [],
-        recentTags: [],
-    };
-
-    try {
-        snippetsData = await serverApiFetch("/user/community/snippets");
-    } catch (error) {
-        console.error("Failed to fetch community snippets:", error);
-    }
-
-    return <SavedSnippets data={snippetsData} />;
+export default function CommunitySavedSnippetsPage() {
+    return <CommunitySavedSnippetsClient />;
 }

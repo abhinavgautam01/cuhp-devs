@@ -65,9 +65,11 @@ export const signup = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       message: "User registered successfully",
+      token,
       user: {
         id: user._id.toString(),
         name: user.fullName,
+        fullName: user.fullName,
         email: user.email,
         studentId: user.studentId,
         onboardingCompleted: user.onboardingCompleted,
@@ -124,6 +126,7 @@ export const signin = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Signin successful",
+      token,
       user: {
         id: (user._id as any).toString().toString(),
         fullName: user.fullName,
