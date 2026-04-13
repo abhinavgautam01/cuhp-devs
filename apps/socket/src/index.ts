@@ -3,7 +3,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
+// import path from "path";
 import { connectDB } from "@repo/db";
 import { setupSocket } from "./socket";
 

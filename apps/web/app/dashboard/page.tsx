@@ -19,7 +19,7 @@ export default function DashboardPage() {
         name: storeUser?.fullName || "Developer",
         handle: storeUser?.handle,
         role: "Student",
-        avatar: storeUser?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Dev"
+        avatar: storeUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(storeUser?.fullName || 'Dev')}`
     };
 
     return (

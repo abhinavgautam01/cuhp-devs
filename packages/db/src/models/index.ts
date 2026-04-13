@@ -8,9 +8,7 @@ import "./chatroom.model";
 import "./message.model";
 import "./post.model";
 import "./testcase.model";
-import "./testcase.model";
-import "./chatroom.model";
-import "./message.model";
+import "./activity.model";
 
 // export..!
 export { User } from "./user.model";
@@ -22,3 +20,4 @@ export { ChatRoom } from "./chatroom.model";
 export { Message } from "./message.model";
 export { Post } from "./post.model";
 export { TestCase } from "./testcase.model";
+export { Activity } from "./activity.model";

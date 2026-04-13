@@ -8,10 +8,10 @@ export function middleware(request: NextRequest) {
     // Define public routes that should not be accessible to logged-in users
     const isAuthRoute = pathname === '/signin' || pathname === '/signup';
 
-    if (token && isAuthRoute) {
-        // If user is logged in and trying to access signin/signup, redirect to dashboard
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+    // Let client-side handle redirection from auth routes to avoid conflicts with onboarding flow
+    // if (token && isAuthRoute) {
+    //     return NextResponse.redirect(new URL('/dashboard', request.url));
+    // }
 
     // (Optional) Protect dashboard and other private routes
     // const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/community') || pathname.startsWith('/onboarding');

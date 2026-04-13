@@ -16,13 +16,17 @@ interface SignInFields {
 
 export function SignInClient() {
     const router = useRouter();
-    const { setUser, isAuthenticated } = useAuthStore();
+    const { setUser, isAuthenticated, user } = useAuthStore();
 
     useEffect(() => {
         if (isAuthenticated) {
-            router.push("/dashboard");
+            if (user?.onboardingCompleted) {
+                router.push("/dashboard");
+            } else {
+                router.push("/onboarding");
+            }
         }
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, user, router]);
 
     const handleSignIn = async (fields: SignInFields) => {
         try {
@@ -36,7 +40,11 @@ export function SignInClient() {
 
             setUser(response.user, response.token || null);
             toast.success("Signed in successfully.");
-            router.push("/dashboard");
+            if (response.user.onboardingCompleted) {
+                router.push("/dashboard");
+            } else {
+                router.push("/onboarding");
+            }
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Sign in failed.");
             throw error;

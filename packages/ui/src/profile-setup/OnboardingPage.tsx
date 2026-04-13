@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 export interface OnboardingStepOneData {
   program: string;
   semester: string;
+  handle: string;
 }
 
 interface OnboardingPageProps {
@@ -18,6 +19,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
   const [formData, setFormData] = useState({
     program: initialData?.program ?? "",
     semester: initialData?.semester ?? "",
+    handle: initialData?.handle ?? "",
   });
 
   // Programs
@@ -41,7 +43,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
     return Array.from({ length: count }, (_, i) => `Semester ${i + 1}`);
   };
 
-  const isFormComplete = formData.program && formData.semester;
+  const isFormComplete = formData.program && formData.semester && formData.handle;
 
   const handleNext = async () => {
     if (!isFormComplete) return;
@@ -106,6 +108,34 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Public Handle */}
+          <div className="space-y-4 md:col-span-2">
+            <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 ml-1">
+              Public Handle (Unique ID)
+            </label>
+
+            <div className="relative group rounded-xl border-2 border-white/10 bg-white/5 transition-all duration-300 focus-within:border-blue-600 focus-within:shadow-[0_0_15px_rgba(37,99,235,0.2)] overflow-hidden">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-focus-within:text-blue-500">
+                <span className="text-xl font-bold">@</span>
+              </div>
+
+              <input
+                type="text"
+                value={formData.handle}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    handle: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""),
+                  })
+                }
+                placeholder="johndoe_07"
+                className="w-full bg-transparent border-none py-5 pl-12 pr-10 focus:ring-0 font-medium text-lg text-white"
+              />
+            </div>
+            <p className="text-[10px] text-slate-500 ml-1">
+              Used for your profile URL and community mentions. Only lowercase letters, numbers, and underscores allowed.
+            </p>
+          </div>
 
           {/* Program Selection */}
           <div className="space-y-4">
@@ -123,6 +153,7 @@ export default function OnboardingPage({ initialData, onNext }: OnboardingPagePr
                 value={formData.program}
                 onChange={(e) =>
                   setFormData({
+                    ...formData,
                     program: e.target.value,
                     semester: "", // Reset semester
                   })

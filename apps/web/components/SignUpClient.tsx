@@ -18,13 +18,17 @@ interface SignUpFields {
 
 export function SignUpClient() {
     const router = useRouter();
-    const { isAuthenticated, setUser } = useAuthStore();
-
+    const { isAuthenticated, setUser, user } = useAuthStore();
+    
     useEffect(() => {
         if (isAuthenticated) {
-            router.push("/dashboard");
+            if (user?.onboardingCompleted) {
+                router.push("/dashboard");
+            } else {
+                router.push("/onboarding");
+            }
         }
-    }, [isAuthenticated, router]);
+    }, [isAuthenticated, user, router]);
 
     const handleSignUp = async (fields: SignUpFields) => {
         try {

@@ -261,13 +261,11 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                 <div className="flex gap-6 items-center">
                     <div className="relative">
                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl overflow-hidden border-4 border-card-border shadow-xl bg-background">
-                            {user.avatar ? (
-                                <img src={user.avatar} alt={user.fullName} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full bg-primary-custom/10 flex items-center justify-center text-primary-custom text-4xl font-bold">
-                                    {user.fullName.charAt(0)}
-                                </div>
-                            )}
+                            <img 
+                                src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.fullName || 'user')}`} 
+                                alt={user.fullName} 
+                                className="w-full h-full object-cover" 
+                            />
                         </div>
                         <div className="absolute -bottom-2 -right-2 bg-primary-custom text-white p-2 rounded-xl shadow-lg border-2 border-background">
                             <Trophy className="w-5 h-5" />
@@ -377,13 +375,11 @@ export default function ProfileOverview({ user, isOwnProfile, onSearch }: Profil
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-lg overflow-hidden border border-card-border">
-                                                            {result.avatar ? (
-                                                                <img src={result.avatar} alt={result.fullName} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full bg-primary-custom/10 flex items-center justify-center text-primary-custom font-bold">
-                                                                    {result.fullName.charAt(0)}
-                                                                </div>
-                                                            )}
+                                                            <img 
+                                                                src={result.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(result.fullName || 'user')}`} 
+                                                                alt={result.fullName} 
+                                                                className="w-full h-full object-cover" 
+                                                            />
                                                         </div>
                                                         <div className="text-left">
                                                             <p className="font-bold text-foreground group-hover:text-primary-custom transition-colors">{result.fullName}</p>

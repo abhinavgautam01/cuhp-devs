@@ -20,7 +20,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
             handle,
             avatar,
             theme,
-            onboardingCompleted: Boolean(program && semester),
+            onboardingCompleted: Boolean(program && semester && handle),
         };
 
         // Check if handle is already taken (case-insensitive)
@@ -243,7 +243,7 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
                     user: {
                         id: s.userId?._id?.toString() || s.userId?.toString(),
                         name: s.userId?.fullName || "Unknown User",
-                        avatar: s.userId?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                        avatar: s.userId?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(s.userId?.fullName || 'user')}`
                     },
                     problemName: s.problemId?.title || "Problem",
                     problemSlug: s.problemId?.slug || "",
@@ -261,7 +261,7 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
                     user: {
                         id: (p.author as any)?._id.toString(),
                         name: (p.author as any)?.fullName || "Unknown User",
-                        avatar: (p.author as any)?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=user"
+                        avatar: (p.author as any)?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((p.author as any)?.fullName || 'user')}`
                     },
                     content: p.type === "Win" 
                         ? `${(p.author as any)?.fullName || "User"} shared a new achievement!` 

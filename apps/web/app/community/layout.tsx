@@ -21,11 +21,28 @@ const DEFAULT_SIDEBAR_USER = {
   handle: "guest",
 };
 
+import { serverApiFetch } from "../../lib/server-api";
+
 export default async function CommunityLayout({ children }: LayoutProps) {
+  let currentUser = null;
+  try {
+    const profileResponse = await serverApiFetch("/user/profile");
+    currentUser = profileResponse;
+  } catch (error) {
+    // Guest or error
+  }
+
+  const sidebarUser = currentUser ? {
+    name: currentUser.fullName || currentUser.name || "User",
+    role: "Student",
+    avatar: currentUser.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.fullName || "user")}`,
+    handle: currentUser.handle
+  } : DEFAULT_SIDEBAR_USER;
+
   return (
     <div className="bg-background text-foreground h-screen flex font-sans overflow-hidden transition-colors duration-300">
       {/* Sidebar */}
-      <SidebarWrapper user={DEFAULT_SIDEBAR_USER} />
+      <SidebarWrapper user={sidebarUser} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">

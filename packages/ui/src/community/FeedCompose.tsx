@@ -6,9 +6,10 @@ import { Code, HelpCircle, Trophy } from "../icons";
 interface FeedComposeProps {
     onPost?: (data: { content: string; type: string }) => Promise<void>;
     userAvatar?: string;
+    userName?: string;
 }
 
-export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
+export function FeedCompose({ onPost, userAvatar, userName }: FeedComposeProps) {
     const [postText, setPostText] = useState("");
     const [selectedType, setSelectedType] = useState<string>("Snippet");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +40,7 @@ export function FeedCompose({ onPost, userAvatar }: FeedComposeProps) {
                     <img
                         alt="User avatar"
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-white/5"
-                        src={userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=User"}
+                        src={userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName || "User")}`}
                     />
                     <div className="flex-1 space-y-4">
                         <textarea

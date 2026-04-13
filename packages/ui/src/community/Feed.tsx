@@ -14,6 +14,7 @@ interface FeedProps {
   onLike?: (postId: string) => Promise<void>;
   onBookmark?: (postId: string) => Promise<void>;
   userAvatar?: string;
+  userName?: string;
   currentUserId?: string;
   savedPosts?: string[];
   activeTab: FeedTab;
@@ -26,6 +27,7 @@ export default function Feed({
   onLike,
   onBookmark,
   userAvatar,
+  userName,
   currentUserId,
   savedPosts,
   activeTab,
@@ -43,7 +45,7 @@ export default function Feed({
     <main className="flex-1 flex flex-col md:flex-row gap-8 p-4 md:p-8 overflow-y-auto w-full">
       {/* Feed Area */}
       <section className="flex-1 space-y-6 max-w-3xl">
-        <FeedCompose onPost={onPost} userAvatar={userAvatar} />
+        <FeedCompose onPost={onPost} userAvatar={userAvatar} userName={userName} />
         <FeedTabs activeTab={activeTab} onTabChange={onTabChange} />
 
         {/* Posts */}

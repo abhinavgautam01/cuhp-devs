@@ -3,6 +3,7 @@ import { create } from "zustand";
 export interface OnboardingStepOneData {
     program: string;
     semester: string;
+    handle: string;
 }
 
 export interface OnboardingStepTwoData {

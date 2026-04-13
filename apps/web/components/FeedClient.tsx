@@ -183,6 +183,7 @@ export default function FeedClient({ initialData }: FeedClientProps) {
             onLike={handleLike}
             onBookmark={handleBookmark}
             userAvatar={user?.avatar}
+            userName={user?.fullName}
             currentUserId={user?.id}
             savedPosts={user?.savedPosts}
             activeTab={activeTab}
