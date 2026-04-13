@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@repo/boilerplate-generator": "workspace:*",
-    "@repo/common": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/bcrypt": "^6.0.0",

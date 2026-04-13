@@ -1,7 +1,6 @@
 import express, { Request, Response, Application } from "express";
 import "dotenv/config";
 import { connectDB } from "@repo/db";
-import { validateEnv } from "@repo/common";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import cors from "cors";
@@ -14,7 +13,6 @@ import postRoutes from "./routes/post.routes";
 
 
 const app: Application = express();
-validateEnv();
 const isProduction = process.env.NODE_ENV === "production";
 const allowedOrigins = (
   process.env.BACKEND_CORS_ORIGINS ?? "http://localhost:3000"
