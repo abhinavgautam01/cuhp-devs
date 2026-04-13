@@ -1,6 +1,8 @@
 import ChatRooms from "@repo/ui/community/ChatRooms";
 import { serverApiFetch } from "../../../lib/server-api";
 
+export const dynamic = "force-dynamic";
+
 export default async function CommunityChatRoomsPage() {
     let roomsData = {
         trendingRooms: [],

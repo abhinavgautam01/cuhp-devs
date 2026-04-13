@@ -1,6 +1,8 @@
 import SavedSnippets from "@repo/ui/community/SavedSnippets";
 import { serverApiFetch } from "../../../lib/server-api";
 
+export const dynamic = "force-dynamic";
+
 export default async function CommunitySavedSnippetsPage() {
     let snippetsData = {
         snippets: [],

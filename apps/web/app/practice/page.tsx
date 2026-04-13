@@ -6,6 +6,8 @@ import { Metadata } from "next";
 import { Flame, SearchX, ChevronDown } from "../../lib/icons";
 import { PracticeHeader } from "../../components/practice/PracticeHeader";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
     title: "Practice: Coding Challenges",
     description: "Master algorithms and data structures with curated problems.",

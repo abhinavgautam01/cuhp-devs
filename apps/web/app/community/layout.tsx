@@ -4,6 +4,8 @@ import { ReactNode } from "react";
 import { MdDynamicFeed, MdGroups, MdBookmarks, MdSearch, MdNotifications } from "../../lib/icons";
 import { serverApiFetch } from "../../lib/server-api";
 
+export const dynamic = "force-dynamic";
+
 interface LayoutProps {
   children: ReactNode;
 }
