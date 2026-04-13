@@ -21,6 +21,12 @@ import {
     ChevronLeft
 } from "../lib/icons";
 
+const HTTP_API_URL = (
+    process.env.NEXT_PUBLIC_HTTP_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3001"
+).trim().replace(/\/+$/, "");
+
 interface Message {
     _id: string;
     content: string;
@@ -157,7 +163,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/community/rooms/${roomName}/members`, {
+                const response = await fetch(`${HTTP_API_URL}/user/community/rooms/${encodeURIComponent(roomName)}/members`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
