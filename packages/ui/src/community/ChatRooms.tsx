@@ -131,6 +131,10 @@ export default function ChatRooms({ data: initialData, token }: ChatRoomsProps) 
   const router = useRouter();
 
   useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
+  useEffect(() => {
     if (!socket || !isConnected) return;
 
     // Request initial global stats
