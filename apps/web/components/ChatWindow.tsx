@@ -114,7 +114,6 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     const router = useRouter();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { isConnected, joinRoom, leaveRoom, sendMessage, socket } = useSocket(token);
-    const hasValidUserId = typeof currentUser?.id === "string" && /^[a-f\d]{24}$/i.test(currentUser.id);
 
     useEffect(() => {
         setMounted(true);
@@ -133,10 +132,10 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     }, [messages, typingUsers, mounted]);
 
     useEffect(() => {
-        if (!isConnected || !hasValidUserId) return;
+        if (!isConnected) return;
         joinRoom(roomName);
         return () => leaveRoom(roomName);
-    }, [roomName, isConnected, hasValidUserId, joinRoom, leaveRoom]);
+    }, [roomName, isConnected, joinRoom, leaveRoom]);
 
     useEffect(() => {
         // ALWAYS update messages when initialMessages changes (e.g. on room switch)
@@ -306,7 +305,7 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
 
     const handleSend = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (!input.trim() || !hasValidUserId || !isConnected) return;
+        if (!input.trim() || !isConnected) return;
 
         const optimisticMsg: Message = {
             _id: `temp-${Date.now()}`,
@@ -568,8 +567,8 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={!input.trim() || !isConnected || !hasValidUserId}
-                                    className={`p-2.5 rounded-xl transition-all duration-500 shadow-lg ${input.trim() && isConnected && hasValidUserId
+                                    disabled={!input.trim() || !isConnected}
+                                    className={`p-2.5 rounded-xl transition-all duration-500 shadow-lg ${input.trim() && isConnected
                                         ? 'bg-primary-custom text-primary-foreground-custom shadow-primary-custom/20 hover:scale-105 hover:bg-primary-hover-custom'
                                         : 'bg-foreground/5 text-muted-custom/10'
                                         }`}

@@ -2,8 +2,27 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
+import { useAuthStore } from "../store/useAuthStore";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4001";
+const HTTP_URL = (
+    process.env.NEXT_PUBLIC_HTTP_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3001"
+).trim().replace(/\/+$/, "");
+
+const getPersistedAuthToken = (): string | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem("auth-storage");
+    if (!raw) return null;
+    try {
+        const parsed = JSON.parse(raw) as { state?: { token?: unknown } };
+        const token = parsed?.state?.token;
+        return typeof token === "string" && token.trim() ? token : null;
+    } catch {
+        return null;
+    }
+};
 
 export const useSocket = (token: string | null): {
     socket: Socket | null;
@@ -15,12 +34,64 @@ export const useSocket = (token: string | null): {
     const socketRef = useRef<Socket | null>(null);
     const hasLoggedConnectErrorRef = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
+    const [resolvedToken, setResolvedToken] = useState<string | null>(token || null);
+    const [isResolvingToken, setIsResolvingToken] = useState(false);
+    const setToken = useAuthStore((state) => state.setToken);
 
     useEffect(() => {
-        if (!token) return;
+        if (token) {
+            setResolvedToken(token);
+            return;
+        }
+
+        const persistedToken = getPersistedAuthToken();
+        if (persistedToken) {
+            setResolvedToken(persistedToken);
+            return;
+        }
+
+        let isMounted = true;
+        setIsResolvingToken(true);
+
+        const loadSocketToken = async () => {
+            try {
+                const response = await fetch(`${HTTP_URL}/auth/socket-token`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data = (await response.json()) as { token?: string };
+                if (!data.token || !isMounted) {
+                    return;
+                }
+
+                setResolvedToken(data.token);
+                setToken(data.token);
+            } catch {
+                // No-op: socket remains disconnected until auth token is available.
+            } finally {
+                if (isMounted) {
+                    setIsResolvingToken(false);
+                }
+            }
+        };
+
+        void loadSocketToken();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [token, setToken]);
+
+    useEffect(() => {
+        if (!resolvedToken || isResolvingToken) return;
 
         const socket = io(SOCKET_URL, {
-            auth: { token },
+            auth: { token: resolvedToken },
             transports: ["polling", "websocket"],
             timeout: 10000,
             reconnectionAttempts: 5,
@@ -51,14 +122,12 @@ export const useSocket = (token: string | null): {
             socket.disconnect();
             socketRef.current = null;
         };
-    }, [token]);
+    }, [resolvedToken, isResolvingToken]);
 
     const joinRoom = useCallback((roomName: string) => {
         if (socketRef.current) {
             console.log(`[useSocket] Joining room: ${roomName}`);
             socketRef.current.emit("join-room", { roomName });
-        } else {
-            console.warn("[useSocket] Cannot join room: socket is null");
         }
     }, []);
 
