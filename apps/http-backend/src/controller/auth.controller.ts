@@ -195,3 +195,23 @@ export const me = async (req: Request, res: Response) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+export const getSocketToken = async (req: Request, res: Response) => {
+  try {
+    let token = req.cookies["token"] as string | undefined;
+
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    verifyToken(token);
+
+    return res.status(200).json({ token });
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+};
