@@ -132,12 +132,6 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
     }, [messages, typingUsers, mounted]);
 
     useEffect(() => {
-        if (!isConnected) return;
-        joinRoom(roomName);
-        return () => leaveRoom(roomName);
-    }, [roomName, isConnected, joinRoom, leaveRoom]);
-
-    useEffect(() => {
         // ALWAYS update messages when initialMessages changes (e.g. on room switch)
         // This ensures the chat is cleared if the next room has no history.
         setMessages(initialMessages);
@@ -301,7 +295,26 @@ export function ChatWindow({ roomName, initialMessages, token, currentUser }: Ch
             socket.off("message-deleted", handleMessageDeleted);
             socket.off("room-members-online", handleOnlineMembers);
         };
-    }, [socket, currentUser]);
+    }, [socket, currentUser, roomName]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const joinCurrentRoom = () => {
+            joinRoom(roomName);
+        };
+
+        if (socket.connected) {
+            joinCurrentRoom();
+        }
+
+        socket.on("connect", joinCurrentRoom);
+
+        return () => {
+            socket.off("connect", joinCurrentRoom);
+            leaveRoom(roomName);
+        };
+    }, [socket, roomName, joinRoom, leaveRoom]);
 
     const handleSend = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
